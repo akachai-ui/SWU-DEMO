@@ -19,7 +19,7 @@ import {
 
 export default function LoginPage() {
   const router = useRouter();
-  const { user, loginWithGooglePopup, loginWithEmail, registerWithEmail, sendPasswordReset, logout } = useAuth();
+  const { user, loginWithEmail, registerWithEmail, sendPasswordReset, logout } = useAuth();
 
   const [mode, setMode] = useState<"login" | "register">("login");
   const [email, setEmail] = useState("");
@@ -55,7 +55,7 @@ export default function LoginPage() {
     }
   };
 
-  // 1. Email/Password Form Handler (Primary)
+  // Email & Password Form Handler
   const handleEmailFormSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setErrorMessage("");
@@ -97,31 +97,6 @@ export default function LoginPage() {
     } catch (err: any) {
       setIsVerifying(false);
       setErrorMessage(err.message || "เกิดข้อผิดพลาดในการทำรายการ");
-    }
-  };
-
-  // 2. Google Sign-In Handler (Secondary)
-  const handleGoogleSignIn = async () => {
-    setErrorMessage("");
-    setSuccessMessage("");
-    setIsVerifying(true);
-    setVerifyingText("กำลังเชื่อมต่อ Google และตรวจสอบสิทธิ์...");
-
-    try {
-      const res = await loginWithGooglePopup();
-      if (res.success) {
-        setVerifyingText("ยืนยันสิทธิ์สำเร็จ กำลังเข้าสู่ระบบ...");
-        setSuccessMessage("เข้าสู่ระบบด้วย Google สำเร็จ!");
-        setTimeout(() => {
-          router.push("/");
-        }, 600);
-      } else {
-        setIsVerifying(false);
-        setErrorMessage(res.message || "เกิดข้อผิดพลาดในการเข้าสู่ระบบด้วย Google");
-      }
-    } catch (err: any) {
-      setIsVerifying(false);
-      setErrorMessage(err.message || "เกิดข้อผิดพลาดในการเข้าสู่ระบบ");
     }
   };
 
@@ -369,62 +344,23 @@ export default function LoginPage() {
               <button
                 type="submit"
                 disabled={isVerifying}
-                className="w-full bg-[#DA2128] hover:bg-[#B81B22] active:bg-[#9B151B] text-white font-bold py-3.5 px-4 rounded-2xl shadow-lg shadow-red-500/20 active:scale-[0.99] transition-all flex items-center justify-center space-x-2 text-xs sm:text-sm cursor-pointer disabled:opacity-70 mt-2"
+                className="w-full bg-[#DA2128] hover:bg-[#B81B22] active:bg-[#9B151B] text-white font-bold py-3.5 px-4 rounded-2xl shadow-lg shadow-red-500/20 active:scale-[0.99] transition-all flex items-center justify-center space-x-2 text-xs sm:text-sm cursor-pointer disabled:opacity-70 mt-3"
               >
                 <span>{mode === "login" ? "เข้าสู่ระบบ (Sign In)" : "สร้างบัญชีผู้ใช้งานใหม่"}</span>
                 <ArrowRight className="w-4 h-4" />
               </button>
             </form>
 
-            {/* Divider */}
-            <div className="flex items-center my-3 space-x-3">
-              <div className="flex-1 h-px bg-slate-200"></div>
-              <span className="text-[11px] font-semibold text-slate-400 uppercase tracking-wider whitespace-nowrap px-1">
-                หรือ
-              </span>
-              <div className="flex-1 h-px bg-slate-200"></div>
-            </div>
-
-            {/* Secondary Option: Google Sign-In */}
-            <div>
-              <button
-                type="button"
-                onClick={handleGoogleSignIn}
-                disabled={isVerifying}
-                className="w-full bg-slate-50 hover:bg-slate-100 active:bg-slate-200 text-slate-700 font-semibold py-3 px-4 rounded-xl border border-slate-200 hover:border-slate-300 active:scale-[0.99] transition-all flex items-center justify-center space-x-2.5 text-xs cursor-pointer disabled:opacity-70"
-              >
-                <svg className="w-4 h-4 shrink-0" viewBox="0 0 24 24">
-                  <path
-                    fill="#EA4335"
-                    d="M12 5c1.6 0 3 .6 4.1 1.7l3.1-3.1C17.3 1.8 14.8 1 12 1 7.5 1 3.7 3.6 1.9 7.3l3.7 2.9C6.5 7.4 9 5 12 5z"
-                  />
-                  <path
-                    fill="#4285F4"
-                    d="M23.5 12.3c0-.8-.1-1.6-.2-2.3H12v4.6h6.5c-.3 1.5-1.1 2.8-2.4 3.7l3.7 2.9c2.2-2 3.7-5 3.7-8.9z"
-                  />
-                  <path
-                    fill="#FBBC05"
-                    d="M5.6 14.8c-.2-.7-.4-1.5-.4-2.3 0-.8.2-1.6.4-2.3L1.9 7.3C.7 9.7 0 12 0 14.5s.7 4.8 1.9 7.2l3.7-2.9z"
-                  />
-                  <path
-                    fill="#34A853"
-                    d="M12 23c3.2 0 6-1.1 8-3l-3.7-2.9c-1.1.7-2.5 1.2-4.3 1.2-3 0-5.5-2.4-6.4-5.2L1.9 16c1.8 3.7 5.6 7 10.1 7z"
-                  />
-                </svg>
-                <span>เข้าสู่ระบบด้วย Google (Sign-In)</span>
-              </button>
-            </div>
-
             {/* Quick Demo Credentials Tip */}
-            <div className="p-3 bg-slate-50 border border-slate-200/80 rounded-2xl text-[11px] text-slate-500 space-y-1">
+            <div className="p-3.5 bg-slate-50 border border-slate-200/80 rounded-2xl text-[11px] text-slate-500 space-y-1 mt-2">
               <div className="flex items-center justify-between font-semibold text-slate-700">
-                <span className="flex items-center space-x-1">
+                <span className="flex items-center space-x-1.5">
                   <Sparkles className="w-3.5 h-3.5 text-[#DA2128]" />
                   <span>คำแนะนำการใช้งาน:</span>
                 </span>
               </div>
               <p className="leading-relaxed text-slate-600">
-                สามารถกรอก <b>อีเมลและรหัสผ่าน</b> เพื่อเข้าสู่ระบบได้ทันที หากยังไม่มีบัญชีให้กดแท็บ <b>ลงทะเบียนใหม่</b> ด้านบน หรือหากเปิดในสมาร์ตโฟน (iOS/LINE) ก็ใช้งานได้ราบรื่น 100%
+                เข้าสู่ระบบด้วย <b>อีเมลและรหัสผ่าน</b> ได้ทันที หากยังไม่มีบัญชีให้กดแท็บ <b>ลงทะเบียนใหม่</b> ด้านบน หรือหากลืมรหัสผ่านสามารถกด <b>ลืมรหัสผ่าน</b> เพื่อรับลิงก์ตั้งรหัสผ่านใหม่ทางอีเมลได้ตลอดเวลาครับ
               </p>
             </div>
 
