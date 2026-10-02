@@ -1,0 +1,608 @@
+"use client";
+
+import React, { useState, useEffect } from "react";
+import { useAuth } from "@/lib/authContext";
+import {
+  RequisitionOrder,
+  subscribeToRequisitions,
+  signApproveRequisitionInFirestore,
+  signRejectRequisitionInFirestore,
+  signDispenseRequisitionInFirestore,
+  signReceiveRequisitionInFirestore
+} from "@/lib/consumablesService";
+import DigitalRequisitionDocument from "@/components/DigitalRequisitionDocument";
+import {
+  FileText,
+  Clock,
+  CheckCircle2,
+  XCircle,
+  PackageCheck,
+  Search,
+  Filter,
+  User,
+  Building,
+  Calendar,
+  Layers,
+  ChevronRight,
+  Eye,
+  Check,
+  X,
+  AlertCircle,
+  ShieldCheck,
+  ShoppingBag,
+  ExternalLink,
+  Package,
+  PenTool,
+  Award,
+  UserCheck
+} from "lucide-react";
+
+interface RequisitionManagementProps {
+  initialViewMode?: "my_requests" | "approvals";
+}
+
+export default function RequisitionManagement({
+  initialViewMode = "my_requests"
+}: RequisitionManagementProps) {
+  const { user } = useAuth();
+  const [orders, setOrders] = useState<RequisitionOrder[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [activeSubTab, setActiveSubTab] = useState<"my_requests" | "approvals">(initialViewMode);
+  const [statusFilter, setStatusFilter] = useState<string>("ทั้งหมด");
+  const [searchQuery, setSearchQuery] = useState("");
+  const [selectedOrder, setSelectedOrder] = useState<RequisitionOrder | null>(null);
+  const [isDigitalDocModalOpen, setIsDigitalDocModalOpen] = useState(false);
+  const [isRejectModalOpen, setIsRejectModalOpen] = useState(false);
+  const [rejectReason, setRejectReason] = useState("");
+  const [orderToReject, setOrderToReject] = useState<RequisitionOrder | null>(null);
+  const [isProcessing, setIsProcessing] = useState(false);
+  const [notification, setNotification] = useState<{ message: string; type: "success" | "error" } | null>(null);
+
+  const showToast = (message: string, type: "success" | "error" = "success") => {
+    setNotification({ message, type });
+    setTimeout(() => setNotification(null), 3500);
+  };
+
+  const canApprove = user?.permissions?.canApproveRequisitions || user?.role === "super_admin";
+
+  // Subscribe to realtime requisitions
+  useEffect(() => {
+    setIsLoading(true);
+    const unsubscribe = subscribeToRequisitions(
+      (data) => {
+        setOrders(data);
+        setIsLoading(false);
+      },
+      (err) => {
+        console.warn("Requisitions subscription error:", err);
+        setIsLoading(false);
+      }
+    );
+
+    return () => {
+      if (typeof unsubscribe === "function") unsubscribe();
+    };
+  }, []);
+
+  // Filter orders based on active tab and search
+  const displayedOrders = orders.filter((order) => {
+    // Tab filter
+    if (activeSubTab === "my_requests") {
+      const isMyEmail = user?.email && order.requesterEmail?.toLowerCase() === user.email.toLowerCase();
+      const isMyName = user?.name && order.requesterName?.toLowerCase().includes(user.name.toLowerCase());
+      if (!isMyEmail && !isMyName) return false;
+    }
+
+    // Status filter
+    if (statusFilter !== "ทั้งหมด" && order.status !== statusFilter) {
+      return false;
+    }
+
+    // Search query
+    if (searchQuery.trim()) {
+      const q = searchQuery.toLowerCase();
+      const matchReqNo = order.reqNo.toLowerCase().includes(q);
+      const matchName = order.requesterName.toLowerCase().includes(q);
+      const matchDept = order.department.toLowerCase().includes(q);
+      const matchItem = order.items.some((item) => item.name.toLowerCase().includes(q) || item.code.toLowerCase().includes(q));
+      if (!matchReqNo && !matchName && !matchDept && !matchItem) return false;
+    }
+
+    return true;
+  });
+
+  // Action: Quick Approve Order
+  const handleQuickApprove = async (order: RequisitionOrder) => {
+    if (!order.id) return;
+    setIsProcessing(true);
+    try {
+      await signApproveRequisitionInFirestore(order.id, {
+        name: user?.name || "ผู้อนุมัติ",
+        email: user?.email || "",
+        role: user?.role === "super_admin" ? "ผู้บริหาร / ผู้อนุมัติสูงสุด" : "หัวหน้าส่วนงาน"
+      });
+      showToast(`ลงนามอนุมัติดิจิทัลสำหรับใบขอเบิก ${order.reqNo} สำเร็จ!`);
+    } catch (err: any) {
+      showToast(`เกิดข้อผิดพลาด: ${err.message}`, "error");
+    } finally {
+      setIsProcessing(false);
+    }
+  };
+
+  // Action: Quick Dispense Order
+  const handleQuickDispense = async (order: RequisitionOrder) => {
+    if (!order.id) return;
+    setIsProcessing(true);
+    try {
+      await signDispenseRequisitionInFirestore(order.id, {
+        name: user?.name || "เจ้าหน้าที่คลังพัสดุ",
+        email: user?.email || ""
+      });
+      showToast(`ลงนามจ่ายพัสดุดิจิทัลสำหรับ ${order.reqNo} สำเร็จ!`);
+    } catch (err: any) {
+      showToast(`เกิดข้อผิดพลาด: ${err.message}`, "error");
+    } finally {
+      setIsProcessing(false);
+    }
+  };
+
+  // Action: Open Reject Modal
+  const handleOpenRejectModal = (order: RequisitionOrder) => {
+    setOrderToReject(order);
+    setRejectReason("");
+    setIsRejectModalOpen(true);
+  };
+
+  // Action: Submit Reject Order
+  const handleConfirmReject = async () => {
+    if (!orderToReject?.id) return;
+    if (!rejectReason.trim()) {
+      showToast("กรุณาระบุเหตุผลในการปฏิเสธคำขอ", "error");
+      return;
+    }
+
+    setIsProcessing(true);
+    try {
+      await signRejectRequisitionInFirestore(
+        orderToReject.id,
+        {
+          name: user?.name || "ผู้อนุมัติ",
+          email: user?.email || "",
+          role: "ผู้อนุมัติ"
+        },
+        rejectReason.trim()
+      );
+      showToast(`ปฏิเสธคำขอเบิก ${orderToReject.reqNo} แล้ว`);
+      setIsRejectModalOpen(false);
+      setOrderToReject(null);
+    } catch (err: any) {
+      showToast(`เกิดข้อผิดพลาด: ${err.message}`, "error");
+    } finally {
+      setIsProcessing(false);
+    }
+  };
+
+  // Helper: Status Badge Styling
+  const renderStatusBadge = (status: RequisitionOrder["status"]) => {
+    switch (status) {
+      case "รออนุมัติ":
+        return (
+          <span className="inline-flex items-center space-x-1 px-2.5 py-1 rounded-full text-xs font-bold bg-amber-50 text-amber-700 border border-amber-200">
+            <Clock className="w-3 h-3 text-amber-600 animate-pulse" />
+            <span>รออนุมัติ</span>
+          </span>
+        );
+      case "อนุมัติแล้ว":
+        return (
+          <span className="inline-flex items-center space-x-1 px-2.5 py-1 rounded-full text-xs font-bold bg-sky-50 text-sky-700 border border-sky-200">
+            <CheckCircle2 className="w-3 h-3 text-sky-600" />
+            <span>อนุมัติแล้ว (รอมารับของ)</span>
+          </span>
+        );
+      case "จ่ายพัสดุแล้ว":
+        return (
+          <span className="inline-flex items-center space-x-1 px-2.5 py-1 rounded-full text-xs font-bold bg-emerald-50 text-emerald-700 border border-emerald-200">
+            <PackageCheck className="w-3 h-3 text-emerald-600" />
+            <span>จ่ายพัสดุเรียบร้อย</span>
+          </span>
+        );
+      case "ปฏิเสธ":
+        return (
+          <span className="inline-flex items-center space-x-1 px-2.5 py-1 rounded-full text-xs font-bold bg-rose-50 text-rose-700 border border-rose-200">
+            <XCircle className="w-3 h-3 text-rose-600" />
+            <span>ปฏิเสธคำขอ</span>
+          </span>
+        );
+      default:
+        return <span className="px-2 py-0.5 rounded-full text-xs font-bold bg-slate-100 text-slate-700">{status}</span>;
+    }
+  };
+
+  // Helper: 4-Party E-Signature Summary Badge
+  const renderSignatureProgressBadge = (order: RequisitionOrder) => {
+    const hasRequester = !!(order.requesterSignature || order.createdAt);
+    const hasApprover = order.status === "อนุมัติแล้ว" || order.status === "จ่ายพัสดุแล้ว" || !!order.approverSignature;
+    const hasDispenser = !!order.dispenserSignature || order.status === "จ่ายพัสดุแล้ว";
+    const hasReceiver = !!order.receiverSignature;
+
+    const count = [hasRequester, hasApprover, hasDispenser, hasReceiver].filter(Boolean).length;
+
+    if (order.status === "ปฏิเสธ") {
+      return (
+        <span className="inline-flex items-center space-x-1 text-[11px] font-bold text-rose-600 bg-rose-50 px-2 py-0.5 rounded-lg border border-rose-200">
+          <XCircle className="w-3 h-3" />
+          <span>ยุติการลงนาม</span>
+        </span>
+      );
+    }
+
+    if (count === 4) {
+      return (
+        <span className="inline-flex items-center space-x-1 text-[11px] font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-lg border border-emerald-200">
+          <Award className="w-3 h-3 text-emerald-600" />
+          <span>ลงนามครบ 4 ฝ่าย (100% Paperless)</span>
+        </span>
+      );
+    }
+
+    return (
+      <span className="inline-flex items-center space-x-1 text-[11px] font-bold text-slate-600 bg-slate-100 px-2 py-0.5 rounded-lg border border-slate-200">
+        <PenTool className="w-3 h-3 text-[#DA2128]" />
+        <span>ลงนามแล้ว {count}/4 ฝ่าย</span>
+      </span>
+    );
+  };
+
+  const pendingCount = orders.filter((o) => o.status === "รออนุมัติ").length;
+  const myPendingCount = orders.filter((o) => {
+    const isMyEmail = user?.email && o.requesterEmail?.toLowerCase() === user.email.toLowerCase();
+    const isMyName = user?.name && o.requesterName?.toLowerCase().includes(user.name.toLowerCase());
+    return (isMyEmail || isMyName) && o.status === "รออนุมัติ";
+  }).length;
+
+  return (
+    <div className="space-y-6 animate-fadeIn pb-12 font-sans">
+      {/* Toast Notification */}
+      {notification && (
+        <div
+          className={`fixed top-5 right-5 z-50 flex items-center space-x-2 px-4 py-3 rounded-xl shadow-xl text-xs sm:text-sm font-semibold transition-all ${
+            notification.type === "success" ? "bg-emerald-600 text-white" : "bg-red-600 text-white"
+          }`}
+        >
+          {notification.type === "success" ? <CheckCircle2 className="w-5 h-5 flex-shrink-0" /> : <AlertCircle className="w-5 h-5 flex-shrink-0" />}
+          <span>{notification.message}</span>
+        </div>
+      )}
+
+      {/* Main Header & Tab Navigation */}
+      <div className="bg-white rounded-2xl p-5 sm:p-6 border border-slate-200 shadow-xs space-y-5">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <div className="space-y-1">
+            <div className="flex items-center space-x-2.5">
+              <span className="p-2.5 rounded-xl bg-red-50 text-[#DA2128]">
+                <FileText className="w-6 h-6" />
+              </span>
+              <div>
+                <h1 className="text-xl sm:text-2xl font-black text-slate-900 tracking-tight">
+                  ระบบติดตามและลงนามใบขอเบิกพัสดุดิจิทัล
+                </h1>
+                <p className="text-xs text-slate-500 font-medium">
+                  ส่วนพัฒนากายภาพ มหาวิทยาลัยศรีนครินทรวิโรฒ (Paperless 100% E-Requisition)
+                </p>
+              </div>
+            </div>
+          </div>
+
+          {/* Sub Tab Switcher: My Requests vs Approver Hub */}
+          <div className="flex items-center space-x-1.5 bg-slate-100 p-1 rounded-xl border border-slate-200 text-xs font-bold">
+            <button
+              onClick={() => {
+                setActiveSubTab("my_requests");
+                setStatusFilter("ทั้งหมด");
+              }}
+              className={`flex items-center space-x-2 px-3.5 py-2 rounded-lg transition-all cursor-pointer ${
+                activeSubTab === "my_requests"
+                  ? "bg-white text-[#DA2128] shadow-xs"
+                  : "text-slate-600 hover:text-slate-900"
+              }`}
+            >
+              <User className="w-3.5 h-3.5" />
+              <span>ประวัติการเบิกของฉัน</span>
+              {myPendingCount > 0 && (
+                <span className="w-5 h-5 rounded-full bg-amber-500 text-white text-[10px] flex items-center justify-center font-black">
+                  {myPendingCount}
+                </span>
+              )}
+            </button>
+
+            {canApprove && (
+              <button
+                onClick={() => {
+                  setActiveSubTab("approvals");
+                  setStatusFilter("ทั้งหมด");
+                }}
+                className={`flex items-center space-x-2 px-3.5 py-2 rounded-lg transition-all cursor-pointer ${
+                  activeSubTab === "approvals"
+                    ? "bg-white text-[#DA2128] shadow-xs"
+                    : "text-slate-600 hover:text-slate-900"
+                }`}
+              >
+                <ShieldCheck className="w-3.5 h-3.5" />
+                <span>ศูนย์อนุมัติและจ่ายพัสดุ</span>
+                {pendingCount > 0 && (
+                  <span className="w-5 h-5 rounded-full bg-[#DA2128] text-white text-[10px] flex items-center justify-center font-black animate-pulse">
+                    {pendingCount}
+                  </span>
+                )}
+              </button>
+            )}
+          </div>
+        </div>
+
+        {/* Filter & Search Bar */}
+        <div className="grid grid-cols-1 sm:grid-cols-12 gap-3 pt-2 border-t border-slate-100">
+          {/* Search */}
+          <div className="sm:col-span-7 relative">
+            <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
+            <input
+              type="text"
+              placeholder={activeSubTab === "my_requests" ? "ค้นหาเลขที่ใบเบิก, ชื่อวัสดุ..." : "ค้นหาเลขที่ใบเบิก, ชื่อผู้ขอเบิก, ส่วนงาน, รายการพัสดุ..."}
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="w-full pl-10 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs sm:text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none focus:border-[#DA2128]"
+            />
+          </div>
+
+          {/* Status Filter Buttons */}
+          <div className="sm:col-span-5 flex items-center space-x-1 overflow-x-auto pb-1 sm:pb-0 scrollbar-none text-xs font-semibold">
+            {["ทั้งหมด", "รออนุมัติ", "อนุมัติแล้ว", "จ่ายพัสดุแล้ว", "ปฏิเสธ"].map((st) => (
+              <button
+                key={st}
+                onClick={() => setStatusFilter(st)}
+                className={`px-3 py-2 rounded-xl transition-all whitespace-nowrap cursor-pointer ${
+                  statusFilter === st
+                    ? "bg-slate-900 text-white shadow-xs font-bold"
+                    : "bg-slate-50 text-slate-600 hover:bg-slate-100 border border-slate-200"
+                }`}
+              >
+                {st}
+              </button>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      {/* Orders List Table / Card Grid */}
+      {isLoading ? (
+        <div className="bg-white rounded-2xl p-12 border border-slate-200 text-center space-y-3">
+          <div className="w-8 h-8 rounded-full border-2 border-slate-200 border-t-[#DA2128] animate-spin mx-auto"></div>
+          <p className="text-xs text-slate-500 font-medium">กำลังโหลดรายการคำขอเบิกพัสดุ...</p>
+        </div>
+      ) : displayedOrders.length === 0 ? (
+        <div className="bg-white rounded-2xl p-12 border border-slate-200 text-center space-y-3">
+          <div className="w-14 h-14 rounded-full bg-slate-100 text-slate-400 flex items-center justify-center mx-auto">
+            <Package className="w-7 h-7" />
+          </div>
+          <h3 className="text-base font-bold text-slate-800">ไม่พบรายการขอเบิกพัสดุ</h3>
+          <p className="text-xs text-slate-500 max-w-sm mx-auto">
+            {activeSubTab === "my_requests"
+              ? "ท่านยังไม่มีประวัติการส่งใบขอเบิกพัสดุ หรือไม่ตรงกับเงื่อนไขการค้นหา"
+              : "ไม่มีรายการคำขอเบิกพัสดุที่รอการพิจารณาในขณะนี้"}
+          </p>
+        </div>
+      ) : (
+        <div className="space-y-3">
+          {displayedOrders.map((order) => (
+            <div
+              key={order.id || order.reqNo}
+              className="bg-white border border-slate-200 hover:border-slate-300 rounded-2xl p-4 sm:p-5 transition-all shadow-xs space-y-3"
+            >
+              {/* Row 1: Header (ReqNo, Status, Signature Progress, Date) */}
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-slate-100 pb-3">
+                <div className="flex flex-wrap items-center gap-2">
+                  <span className="font-mono text-xs sm:text-sm font-black text-[#DA2128] bg-red-50 border border-red-200/80 px-2.5 py-1 rounded-lg">
+                    {order.reqNo}
+                  </span>
+                  {renderStatusBadge(order.status)}
+                  {renderSignatureProgressBadge(order)}
+                </div>
+
+                <div className="flex items-center space-x-3 text-xs text-slate-400 font-medium">
+                  {order.createdAt && (
+                    <span className="flex items-center space-x-1">
+                      <Calendar className="w-3.5 h-3.5" />
+                      <span>
+                        {order.createdAt.seconds
+                          ? new Date(order.createdAt.seconds * 1000).toLocaleDateString("th-TH", {
+                              year: "numeric",
+                              month: "short",
+                              day: "numeric",
+                              hour: "2-digit",
+                              minute: "2-digit"
+                            })
+                          : "เมื่อสักครู่"}
+                      </span>
+                    </span>
+                  )}
+                </div>
+              </div>
+
+              {/* Row 2: Requester Info & Purpose */}
+              <div className="grid grid-cols-1 sm:grid-cols-12 gap-3 text-xs">
+                <div className="sm:col-span-4 space-y-1">
+                  <div className="flex items-center space-x-1.5 text-slate-900 font-bold">
+                    <User className="w-3.5 h-3.5 text-slate-400" />
+                    <span>{order.requesterName}</span>
+                  </div>
+                  <div className="flex items-center space-x-1.5 text-slate-500">
+                    <Building className="w-3.5 h-3.5 text-slate-400" />
+                    <span className="truncate">{order.department}</span>
+                  </div>
+                </div>
+
+                <div className="sm:col-span-5 space-y-1">
+                  <p className="text-slate-500 font-medium">วัตถุประสงค์การใช้งาน:</p>
+                  <p className="text-slate-800 line-clamp-2">{order.purpose || "-"}</p>
+                </div>
+
+                <div className="sm:col-span-3 text-left sm:text-right space-y-1">
+                  <p className="text-slate-500 font-medium">ยอดรวม {order.totalItems} ชิ้น ({order.items.length} รายการ)</p>
+                  <p className="text-sm font-black text-[#DA2128]">
+                    ฿{(order.totalAmount || 0).toLocaleString()} บาท
+                  </p>
+                </div>
+              </div>
+
+              {/* Row 3: Items Mini-Previews & Action Buttons */}
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pt-3 border-t border-slate-100">
+                {/* Items preview pills */}
+                <div className="flex items-center space-x-2 overflow-x-auto pb-1 sm:pb-0">
+                  {order.items.slice(0, 3).map((item, idx) => (
+                    <div
+                      key={idx}
+                      className="flex items-center space-x-1.5 bg-slate-50 border border-slate-200 px-2.5 py-1 rounded-xl text-[11px] text-slate-700 whitespace-nowrap"
+                    >
+                      {item.imageUrl && (
+                        /* eslint-disable-next-line @next/next/no-img-element */
+                        <img src={item.imageUrl} alt="" className="w-4 h-4 rounded-md object-cover" />
+                      )}
+                      <span className="font-medium truncate max-w-[120px]">{item.name}</span>
+                      <span className="font-bold text-[#DA2128]">x{item.quantity}</span>
+                    </div>
+                  ))}
+                  {order.items.length > 3 && (
+                    <span className="text-[10px] text-slate-400 font-bold px-1">
+                      +{order.items.length - 3} รายการ
+                    </span>
+                  )}
+                </div>
+
+                {/* Actions */}
+                <div className="flex items-center space-x-2 shrink-0">
+                  {/* Master Digital Voucher & Signature Button */}
+                  <button
+                    onClick={() => {
+                      setSelectedOrder(order);
+                      setIsDigitalDocModalOpen(true);
+                    }}
+                    className="px-3.5 py-1.5 rounded-xl bg-slate-900 hover:bg-black text-white text-xs font-bold flex items-center space-x-1.5 transition-colors cursor-pointer shadow-xs"
+                  >
+                    <PenTool className="w-3.5 h-3.5 text-amber-400" />
+                    <span>เปิดใบขอเบิกและลงนามดิจิทัล</span>
+                  </button>
+
+                  {/* Quick Approver Actions */}
+                  {canApprove && activeSubTab === "approvals" && order.status === "รออนุมัติ" && (
+                    <>
+                      <button
+                        onClick={() => handleQuickApprove(order)}
+                        disabled={isProcessing}
+                        className="px-3.5 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 active:bg-emerald-800 text-white text-xs font-bold flex items-center space-x-1 shadow-xs transition-colors cursor-pointer"
+                        title="ลงนามอนุมัติดิจิทัลทันที"
+                      >
+                        <Check className="w-3.5 h-3.5" />
+                        <span>อนุมัติ</span>
+                      </button>
+
+                      <button
+                        onClick={() => handleOpenRejectModal(order)}
+                        disabled={isProcessing}
+                        className="px-3 py-1.5 rounded-xl bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 text-xs font-bold flex items-center space-x-1 transition-colors cursor-pointer"
+                      >
+                        <X className="w-3.5 h-3.5" />
+                        <span>ปฏิเสธ</span>
+                      </button>
+                    </>
+                  )}
+
+                  {canApprove && activeSubTab === "approvals" && order.status === "อนุมัติแล้ว" && (
+                    <button
+                      onClick={() => handleQuickDispense(order)}
+                      disabled={isProcessing}
+                      className="px-3.5 py-1.5 rounded-xl bg-[#DA2128] hover:bg-[#B81B22] text-white text-xs font-bold flex items-center space-x-1 shadow-xs transition-colors cursor-pointer"
+                    >
+                      <PackageCheck className="w-3.5 h-3.5" />
+                      <span>ลงนามจ่ายพัสดุ</span>
+                    </button>
+                  )}
+                </div>
+              </div>
+
+              {/* Note / Approver Remarks */}
+              {order.status === "ปฏิเสธ" && order.rejectReason && (
+                <div className="p-2.5 bg-rose-50 border border-rose-200 rounded-xl text-xs text-rose-800 flex items-start space-x-2">
+                  <AlertCircle className="w-4 h-4 text-rose-600 shrink-0 mt-0.5" />
+                  <div>
+                    <span className="font-bold">เหตุผลที่ปฏิเสธ: </span>
+                    <span>{order.rejectReason}</span>
+                  </div>
+                </div>
+              )}
+            </div>
+          ))}
+        </div>
+      )}
+
+      {/* ========================================================================= */}
+      {/* 100% PAPERLESS MASTER DIGITAL REQUISITION VOUCHER & SIGNATURE MODAL */}
+      {/* ========================================================================= */}
+      {isDigitalDocModalOpen && selectedOrder && (
+        <DigitalRequisitionDocument
+          order={selectedOrder}
+          isOpen={isDigitalDocModalOpen}
+          onClose={() => {
+            setIsDigitalDocModalOpen(false);
+            setSelectedOrder(null);
+          }}
+          onOrderUpdated={(updated) => {
+            setSelectedOrder(updated);
+            showToast("อัปเดตสถานะและบันทึกการลงนามดิจิทัลสำเร็จ!");
+          }}
+        />
+      )}
+
+      {/* ========================================================================= */}
+      {/* MODAL: REJECT REASON */}
+      {/* ========================================================================= */}
+      {isRejectModalOpen && orderToReject && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs">
+          <div className="bg-white rounded-3xl max-w-md w-full p-6 space-y-4 shadow-2xl border border-slate-200 animate-scaleUp">
+            <div className="w-12 h-12 rounded-full bg-rose-100 text-rose-600 flex items-center justify-center mx-auto">
+              <XCircle className="w-6 h-6" />
+            </div>
+
+            <div className="text-center space-y-1">
+              <h3 className="text-base font-bold text-slate-900">ปฏิเสธใบขอเบิก {orderToReject.reqNo}</h3>
+              <p className="text-xs text-slate-500">กรุณาระบุเหตุผลเพื่อให้ผู้ขอเบิกทราบ</p>
+            </div>
+
+            <textarea
+              rows={3}
+              required
+              placeholder="เช่น พัสดุชนิดนี้จัดสรรสำหรับงานส่วนกลางเท่านั้น หรือข้อมูลไม่ครบถ้วน"
+              value={rejectReason}
+              onChange={(e) => setRejectReason(e.target.value)}
+              className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-900 focus:outline-none focus:border-[#DA2128]"
+            />
+
+            <div className="flex items-center space-x-2 pt-2">
+              <button
+                onClick={() => setIsRejectModalOpen(false)}
+                className="flex-1 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold rounded-xl transition-colors cursor-pointer"
+              >
+                ยกเลิก
+              </button>
+              <button
+                onClick={handleConfirmReject}
+                disabled={isProcessing || !rejectReason.trim()}
+                className="flex-1 py-2.5 bg-rose-600 hover:bg-rose-700 text-white text-xs font-bold rounded-xl transition-colors disabled:opacity-50 cursor-pointer"
+              >
+                ยืนยันปฏิเสธ
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
