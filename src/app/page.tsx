@@ -25,8 +25,34 @@ export default function RealPortalPage() {
   const { user, logout } = useAuth();
   const [activeMainTab, setActiveMainTab] = useState<"shop" | "my_requests" | "approvals" | "assets" | "users">("shop");
 
-  const canApprove = user?.permissions?.canApproveRequisitions || user?.role === "super_admin";
-  const canManageUsers = user?.permissions?.canManageUsers || user?.role === "super_admin";
+  // Specific Permission Flags
+  const canViewShop = user?.permissions?.canViewConsumables !== false || user?.role === "super_admin";
+  const canViewMyRequests = user?.permissions?.canRequestConsumables !== false || user?.permissions?.canViewConsumables !== false || user?.role === "super_admin";
+  const canApprove = Boolean(user?.permissions?.canApproveRequisitions || user?.role === "super_admin");
+  const canViewAssets = Boolean(user?.permissions?.canViewAssets || user?.role === "super_admin");
+  const canManageUsers = Boolean(user?.permissions?.canManageUsers || user?.role === "super_admin");
+  const canAccessDev = Boolean(user?.permissions?.canAccessDevPortal || user?.role === "super_admin");
+
+  // Auto-switch to first allowed tab if current activeMainTab is restricted
+  React.useEffect(() => {
+    if (!user) return;
+    const isTabPermitted = (tab: "shop" | "my_requests" | "approvals" | "assets" | "users") => {
+      if (tab === "shop") return canViewShop;
+      if (tab === "my_requests") return canViewMyRequests;
+      if (tab === "approvals") return canApprove;
+      if (tab === "assets") return canViewAssets;
+      if (tab === "users") return canManageUsers;
+      return false;
+    };
+
+    if (!isTabPermitted(activeMainTab)) {
+      if (canViewShop) setActiveMainTab("shop");
+      else if (canViewMyRequests) setActiveMainTab("my_requests");
+      else if (canApprove) setActiveMainTab("approvals");
+      else if (canViewAssets) setActiveMainTab("assets");
+      else if (canManageUsers) setActiveMainTab("users");
+    }
+  }, [user, activeMainTab, canViewShop, canViewMyRequests, canApprove, canViewAssets, canManageUsers]);
 
   return (
     <ProtectedRoute>
@@ -108,13 +134,15 @@ export default function RealPortalPage() {
                   </div>
                 )}
 
-                <Link
-                  href="/dev"
-                  className="hidden sm:inline-flex items-center space-x-1.5 text-xs font-bold text-slate-700 hover:text-[#DA2128] bg-slate-100 hover:bg-red-50 border border-slate-200 hover:border-red-200 px-3 py-1.5 rounded-full transition-all shadow-xs shrink-0"
-                >
-                  <BookOpen className="w-3.5 h-3.5 text-[#DA2128]" />
-                  <span>คู่มือ</span>
-                </Link>
+                {canAccessDev && (
+                  <Link
+                    href="/dev"
+                    className="hidden sm:inline-flex items-center space-x-1.5 text-xs font-bold text-slate-700 hover:text-[#DA2128] bg-slate-100 hover:bg-red-50 border border-slate-200 hover:border-red-200 px-3 py-1.5 rounded-full transition-all shadow-xs shrink-0"
+                  >
+                    <BookOpen className="w-3.5 h-3.5 text-[#DA2128]" />
+                    <span>คู่มือ (/dev)</span>
+                  </Link>
+                )}
               </div>
 
             </div>
@@ -122,29 +150,33 @@ export default function RealPortalPage() {
             {/* Bottom Row: Desktop Navigation Tabs (Segmented Controller with Full Space) */}
             <div className="hidden sm:flex py-2.5 items-center overflow-x-auto scrollbar-none">
               <div className="flex items-center space-x-1.5 p-1 bg-slate-100/90 rounded-2xl border border-slate-200/80 text-xs font-bold min-w-full sm:min-w-0">
-                <button
-                  onClick={() => setActiveMainTab("shop")}
-                  className={`flex items-center justify-center space-x-2 py-2 px-4 rounded-xl transition-all whitespace-nowrap flex-1 sm:flex-none ${
-                    activeMainTab === "shop"
-                      ? "bg-white text-[#DA2128] shadow-sm font-black scale-100"
-                      : "text-slate-600 hover:text-slate-900 hover:bg-white/50"
-                  }`}
-                >
-                  <ShoppingBag className="w-4 h-4" />
-                  <span>ร้านเบิกจ่ายวัสดุ</span>
-                </button>
+                {canViewShop && (
+                  <button
+                    onClick={() => setActiveMainTab("shop")}
+                    className={`flex items-center justify-center space-x-2 py-2 px-4 rounded-xl transition-all whitespace-nowrap flex-1 sm:flex-none ${
+                      activeMainTab === "shop"
+                        ? "bg-white text-[#DA2128] shadow-sm font-black scale-100"
+                        : "text-slate-600 hover:text-slate-900 hover:bg-white/50"
+                    }`}
+                  >
+                    <ShoppingBag className="w-4 h-4" />
+                    <span>ร้านเบิกจ่ายวัสดุ</span>
+                  </button>
+                )}
 
-                <button
-                  onClick={() => setActiveMainTab("my_requests")}
-                  className={`flex items-center justify-center space-x-2 py-2 px-4 rounded-xl transition-all whitespace-nowrap flex-1 sm:flex-none ${
-                    activeMainTab === "my_requests"
-                      ? "bg-white text-[#DA2128] shadow-sm font-black scale-100"
-                      : "text-slate-600 hover:text-slate-900 hover:bg-white/50"
-                  }`}
-                >
-                  <FileText className="w-4 h-4" />
-                  <span>ประวัติการเบิกของฉัน</span>
-                </button>
+                {canViewMyRequests && (
+                  <button
+                    onClick={() => setActiveMainTab("my_requests")}
+                    className={`flex items-center justify-center space-x-2 py-2 px-4 rounded-xl transition-all whitespace-nowrap flex-1 sm:flex-none ${
+                      activeMainTab === "my_requests"
+                        ? "bg-white text-[#DA2128] shadow-sm font-black scale-100"
+                        : "text-slate-600 hover:text-slate-900 hover:bg-white/50"
+                    }`}
+                  >
+                    <FileText className="w-4 h-4" />
+                    <span>ประวัติการเบิกของฉัน</span>
+                  </button>
+                )}
 
                 {canApprove && (
                   <button
@@ -160,17 +192,19 @@ export default function RealPortalPage() {
                   </button>
                 )}
 
-                <button
-                  onClick={() => setActiveMainTab("assets")}
-                  className={`flex items-center justify-center space-x-2 py-2 px-4 rounded-xl transition-all whitespace-nowrap flex-1 sm:flex-none ${
-                    activeMainTab === "assets"
-                      ? "bg-white text-[#DA2128] shadow-sm font-black scale-100"
-                      : "text-slate-600 hover:text-slate-900 hover:bg-white/50"
-                  }`}
-                >
-                  <FileSpreadsheet className="w-4 h-4" />
-                  <span>ทะเบียนครุภัณฑ์ (12,396 รายการ)</span>
-                </button>
+                {canViewAssets && (
+                  <button
+                    onClick={() => setActiveMainTab("assets")}
+                    className={`flex items-center justify-center space-x-2 py-2 px-4 rounded-xl transition-all whitespace-nowrap flex-1 sm:flex-none ${
+                      activeMainTab === "assets"
+                        ? "bg-white text-[#DA2128] shadow-sm font-black scale-100"
+                        : "text-slate-600 hover:text-slate-900 hover:bg-white/50"
+                    }`}
+                  >
+                    <FileSpreadsheet className="w-4 h-4" />
+                    <span>ทะเบียนครุภัณฑ์ (12,396 รายการ)</span>
+                  </button>
+                )}
 
                 {canManageUsers && (
                   <button
@@ -193,43 +227,47 @@ export default function RealPortalPage() {
 
         {/* Main Operational Body */}
         <main className="flex-1 max-w-7xl w-full mx-auto px-3.5 sm:px-6 lg:px-8 py-4 sm:py-7 pb-28 sm:pb-8">
-          {activeMainTab === "shop" && <MaterialShop />}
-          {activeMainTab === "my_requests" && <RequisitionManagement initialViewMode="my_requests" />}
-          {activeMainTab === "approvals" && <RequisitionManagement initialViewMode="approvals" />}
-          {activeMainTab === "assets" && <DataExplorerTab />}
-          {activeMainTab === "users" && <PermissionManager />}
+          {activeMainTab === "shop" && canViewShop && <MaterialShop />}
+          {activeMainTab === "my_requests" && canViewMyRequests && <RequisitionManagement initialViewMode="my_requests" />}
+          {activeMainTab === "approvals" && canApprove && <RequisitionManagement initialViewMode="approvals" />}
+          {activeMainTab === "assets" && canViewAssets && <DataExplorerTab />}
+          {activeMainTab === "users" && canManageUsers && <PermissionManager />}
         </main>
 
         {/* Native Smartphone App Bottom Navigation Bar (1-Thumb Navigation) */}
         <nav className="sm:hidden fixed bottom-0 left-0 right-0 z-50 bg-white/95 backdrop-blur-xl border-t border-slate-200/90 shadow-[0_-4px_25px_rgba(0,0,0,0.08)] pb-[max(env(safe-area-inset-bottom),8px)] pt-1.5 px-2 print:hidden">
           <div className="flex items-center justify-around max-w-lg mx-auto">
-            <button
-              onClick={() => setActiveMainTab("shop")}
-              className={`flex flex-col items-center justify-center py-1 px-2 rounded-2xl transition-all active:scale-95 flex-1 ${
-                activeMainTab === "shop"
-                  ? "text-[#DA2128] font-black"
-                  : "text-slate-400 hover:text-slate-700 font-medium"
-              }`}
-            >
-              <div className={`p-1.5 rounded-xl transition-all ${activeMainTab === "shop" ? "bg-red-50 text-[#DA2128] scale-105" : ""}`}>
-                <ShoppingBag className="w-5 h-5" />
-              </div>
-              <span className="text-[10px] mt-0.5 leading-tight font-bold">ร้านเบิก</span>
-            </button>
+            {canViewShop && (
+              <button
+                onClick={() => setActiveMainTab("shop")}
+                className={`flex flex-col items-center justify-center py-1 px-2 rounded-2xl transition-all active:scale-95 flex-1 ${
+                  activeMainTab === "shop"
+                    ? "text-[#DA2128] font-black"
+                    : "text-slate-400 hover:text-slate-700 font-medium"
+                }`}
+              >
+                <div className={`p-1.5 rounded-xl transition-all ${activeMainTab === "shop" ? "bg-red-50 text-[#DA2128] scale-105" : ""}`}>
+                  <ShoppingBag className="w-5 h-5" />
+                </div>
+                <span className="text-[10px] mt-0.5 leading-tight font-bold">ร้านเบิก</span>
+              </button>
+            )}
 
-            <button
-              onClick={() => setActiveMainTab("my_requests")}
-              className={`flex flex-col items-center justify-center py-1 px-2 rounded-2xl transition-all active:scale-95 flex-1 ${
-                activeMainTab === "my_requests"
-                  ? "text-[#DA2128] font-black"
-                  : "text-slate-400 hover:text-slate-700 font-medium"
-              }`}
-            >
-              <div className={`p-1.5 rounded-xl transition-all ${activeMainTab === "my_requests" ? "bg-red-50 text-[#DA2128] scale-105" : ""}`}>
-                <FileText className="w-5 h-5" />
-              </div>
-              <span className="text-[10px] mt-0.5 leading-tight font-bold">ประวัติฉัน</span>
-            </button>
+            {canViewMyRequests && (
+              <button
+                onClick={() => setActiveMainTab("my_requests")}
+                className={`flex flex-col items-center justify-center py-1 px-2 rounded-2xl transition-all active:scale-95 flex-1 ${
+                  activeMainTab === "my_requests"
+                    ? "text-[#DA2128] font-black"
+                    : "text-slate-400 hover:text-slate-700 font-medium"
+                }`}
+              >
+                <div className={`p-1.5 rounded-xl transition-all ${activeMainTab === "my_requests" ? "bg-red-50 text-[#DA2128] scale-105" : ""}`}>
+                  <FileText className="w-5 h-5" />
+                </div>
+                <span className="text-[10px] mt-0.5 leading-tight font-bold">ประวัติฉัน</span>
+              </button>
+            )}
 
             {canApprove && (
               <button
@@ -247,19 +285,21 @@ export default function RealPortalPage() {
               </button>
             )}
 
-            <button
-              onClick={() => setActiveMainTab("assets")}
-              className={`flex flex-col items-center justify-center py-1 px-2 rounded-2xl transition-all active:scale-95 flex-1 ${
-                activeMainTab === "assets"
-                  ? "text-[#DA2128] font-black"
-                  : "text-slate-400 hover:text-slate-700 font-medium"
-              }`}
-            >
-              <div className={`p-1.5 rounded-xl transition-all ${activeMainTab === "assets" ? "bg-red-50 text-[#DA2128] scale-105" : ""}`}>
-                <FileSpreadsheet className="w-5 h-5" />
-              </div>
-              <span className="text-[10px] mt-0.5 leading-tight font-bold">ครุภัณฑ์</span>
-            </button>
+            {canViewAssets && (
+              <button
+                onClick={() => setActiveMainTab("assets")}
+                className={`flex flex-col items-center justify-center py-1 px-2 rounded-2xl transition-all active:scale-95 flex-1 ${
+                  activeMainTab === "assets"
+                    ? "text-[#DA2128] font-black"
+                    : "text-slate-400 hover:text-slate-700 font-medium"
+                }`}
+              >
+                <div className={`p-1.5 rounded-xl transition-all ${activeMainTab === "assets" ? "bg-red-50 text-[#DA2128] scale-105" : ""}`}>
+                  <FileSpreadsheet className="w-5 h-5" />
+                </div>
+                <span className="text-[10px] mt-0.5 leading-tight font-bold">ครุภัณฑ์</span>
+              </button>
+            )}
 
             {canManageUsers && (
               <button
