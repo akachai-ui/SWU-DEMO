@@ -6,6 +6,7 @@ import {
   GoogleAuthProvider,
   signInWithEmailAndPassword,
   createUserWithEmailAndPassword,
+  sendPasswordResetEmail,
   signOut,
   onAuthStateChanged,
   setPersistence,
@@ -46,6 +47,7 @@ interface AuthContextType {
   loginWithGooglePopup: () => Promise<{ success: boolean; message?: string }>;
   loginWithEmail: (email: string, password: string) => Promise<{ success: boolean; message?: string }>;
   registerWithEmail: (email: string, password: string, name: string) => Promise<{ success: boolean; message?: string }>;
+  sendPasswordReset: (email: string) => Promise<{ success: boolean; message?: string }>;
   logout: () => Promise<void>;
 }
 
@@ -335,7 +337,31 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
-  // 4. Sign Out
+  // 4. Send Password Reset Email (To set/reset password for Google account)
+  const sendPasswordReset = async (email: string) => {
+    try {
+      const cleanEmail = email.trim().toLowerCase();
+      if (!cleanEmail) {
+        return { success: false, message: "กรุณาระบุอีเมล" };
+      }
+      await sendPasswordResetEmail(auth, cleanEmail);
+      return {
+        success: true,
+        message: `ระบบได้ส่งลิงก์สำหรับตั้งรหัสผ่านไปยัง ${cleanEmail} แล้ว โปรดตรวจสอบในกล่องจดหมาย/สแปม`
+      };
+    } catch (error: any) {
+      console.error("Password reset error:", error);
+      let message = "ไม่สามารถส่งอีเมลตั้งรหัสผ่านได้";
+      if (error.code === "auth/user-not-found") {
+        message = "ไม่พบบัญชีอีเมลนี้ในระบบ";
+      } else if (error.code === "auth/invalid-email") {
+        message = "รูปแบบอีเมลไม่ถูกต้อง";
+      }
+      return { success: false, message };
+    }
+  };
+
+  // 5. Sign Out
   const logout = async () => {
     try {
       await signOut(auth);
@@ -356,6 +382,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         loginWithGooglePopup,
         loginWithEmail,
         registerWithEmail,
+        sendPasswordReset,
         logout
       }}
     >

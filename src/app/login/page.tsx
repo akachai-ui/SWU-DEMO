@@ -17,7 +17,7 @@ import {
 
 export default function LoginPage() {
   const router = useRouter();
-  const { user, loginWithGooglePopup, loginWithEmail, registerWithEmail, logout } = useAuth();
+  const { user, loginWithGooglePopup, loginWithEmail, registerWithEmail, sendPasswordReset, logout } = useAuth();
 
   const [mode, setMode] = useState<"login" | "register">("login");
   const [email, setEmail] = useState("");
@@ -27,6 +27,30 @@ export default function LoginPage() {
   const [successMessage, setSuccessMessage] = useState("");
   const [isVerifying, setIsVerifying] = useState(false);
   const [verifyingText, setVerifyingText] = useState("กำลังตรวจสอบสิทธิ์ กรุณารอสักครู่...");
+
+  // Handler for Forgot / Set Password email
+  const handleForgotPassword = async () => {
+    if (!email.trim()) {
+      setErrorMessage("กรุณากรอกอีเมลในช่องด้านล่างก่อนกดขอลิงก์ตั้งรหัสผ่าน");
+      return;
+    }
+    setErrorMessage("");
+    setSuccessMessage("");
+    setIsVerifying(true);
+    setVerifyingText("กำลังส่งลิงก์สำหรับตั้งรหัสผ่านไปยังอีเมลของคุณ...");
+    try {
+      const res = await sendPasswordReset(email);
+      setIsVerifying(false);
+      if (res.success) {
+        setSuccessMessage(res.message || "ส่งลิงก์ตั้งรหัสผ่านเรียบร้อยแล้ว");
+      } else {
+        setErrorMessage(res.message || "ไม่สามารถส่งอีเมลได้");
+      }
+    } catch (err: any) {
+      setIsVerifying(false);
+      setErrorMessage(err.message || "เกิดข้อผิดพลาดในการส่งอีเมล");
+    }
+  };
 
   // 1. Google Sign-In Handler
   const handleGoogleSignIn = async () => {
@@ -351,7 +375,18 @@ export default function LoginPage() {
               </div>
 
               <div className="space-y-1">
-                <label className="text-slate-700 font-bold block text-xs">รหัสผ่าน (Password) *</label>
+                <div className="flex items-center justify-between">
+                  <label className="text-slate-700 font-bold block text-xs">รหัสผ่าน (Password) *</label>
+                  {mode === "login" && (
+                    <button
+                      type="button"
+                      onClick={handleForgotPassword}
+                      className="text-[11px] font-semibold text-[#DA2128] hover:underline cursor-pointer"
+                    >
+                      ลืมรหัสผ่าน / ขอลิงก์ตั้งรหัส
+                    </button>
+                  )}
+                </div>
                 <div className="relative">
                   <Key className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none" />
                   <input
