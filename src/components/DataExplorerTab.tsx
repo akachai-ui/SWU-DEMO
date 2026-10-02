@@ -618,109 +618,184 @@ export default function DataExplorerTab() {
             <p className="text-xs text-slate-500">ลองปรับคำค้นหา หรือเลือกหมวดหมู่อื่น</p>
           </div>
         ) : (
-          <div className="overflow-x-auto">
-            <table className="w-full text-left text-xs border-collapse">
-              <thead>
-                <tr className="bg-slate-100/90 text-slate-700 border-b border-slate-200 text-[11px] font-bold uppercase tracking-wider">
-                  <th className="py-3.5 px-3.5 w-14 text-center whitespace-nowrap">ลำดับ</th>
-                  <th className="py-3.5 px-4 min-w-[220px] whitespace-nowrap">รายการครุภัณฑ์</th>
-                  <th className="py-3.5 px-4 min-w-[150px] whitespace-nowrap">Inventory No. / รหัสพัสดุ</th>
-                  <th className="py-3.5 px-4 min-w-[180px] whitespace-nowrap">หมวดหมู่</th>
-                  <th className="py-3.5 px-4 min-w-[160px] whitespace-nowrap">ฝ่ายงานผู้รับผิดชอบ</th>
-                  <th className="py-3.5 px-4 min-w-[180px] whitespace-nowrap">สถานที่ตั้ง / ผู้ถือครอง</th>
-                  <th className="py-3.5 px-4 text-right min-w-[120px] whitespace-nowrap">มูลค่า (บาท)</th>
-                  <th className="py-3.5 px-4 text-center min-w-[130px] whitespace-nowrap">สถานะ</th>
-                  <th className="py-3.5 px-3.5 text-center w-24 whitespace-nowrap">ดูสเปก</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-slate-100/80">
-                {assetsData.map((item, idx) => (
-                  <tr
-                    key={`${item.inventoryNo}-${idx}`}
-                    className="hover:bg-red-50/40 transition-colors group cursor-pointer"
+          <>
+            {/* Mobile Responsive Cards Feed (< md) */}
+            <div className="md:hidden divide-y divide-slate-200/60 bg-white/40">
+              {assetsData.map((item, idx) => {
+                const itemIndex = (pagination.page - 1) * pagination.limit + idx + 1;
+                return (
+                  <div
+                    key={`mob-${item.inventoryNo}-${idx}`}
                     onClick={() => setSelectedItemForModal(item)}
+                    className="p-4 space-y-3 hover:bg-red-50/40 active:bg-red-50/60 transition-colors cursor-pointer"
                   >
-                    {/* Index */}
-                    <td className="py-3.5 px-3.5 text-center">
-                      <span className="font-mono text-xs font-semibold text-slate-500 bg-slate-100/80 px-2 py-0.5 rounded-md">
-                        {(pagination.page - 1) * pagination.limit + idx + 1}
-                      </span>
-                    </td>
+                    {/* Top Row: Index, Category, Status */}
+                    <div className="flex items-center justify-between gap-2">
+                      <div className="flex items-center space-x-2 min-w-0 flex-1">
+                        <span className="font-mono text-xs font-black text-[#DA2128] bg-red-50/90 border border-red-200/80 px-2 py-0.5 rounded-lg shadow-2xs shrink-0">
+                          #{itemIndex}
+                        </span>
+                        <span className="text-[11px] font-medium text-slate-600 bg-slate-100/90 border border-slate-200/70 px-2.5 py-0.5 rounded-lg truncate max-w-[170px]" title={item.category}>
+                          {item.category}
+                        </span>
+                      </div>
+                      <div className="shrink-0">
+                        {renderStatusBadge(item.statusName)}
+                      </div>
+                    </div>
 
-                    {/* Asset Name */}
-                    <td className="py-3.5 px-4">
-                      <p className="font-bold text-slate-900 group-hover:text-[#DA2128] transition-colors leading-snug line-clamp-1">
+                    {/* Asset Name & Codes */}
+                    <div>
+                      <h4 className="font-black text-sm text-slate-900 leading-snug">
                         {item.name}
-                      </p>
-                      <p className="text-[10px] text-slate-400 mt-0.5">
-                        ได้มาเมื่อ: {item.acquisitionDate || "ไม่ระบุ"}
-                      </p>
-                    </td>
+                      </h4>
+                      <div className="flex flex-wrap items-center gap-x-2 gap-y-0.5 text-[11px] text-slate-400 font-mono mt-1">
+                        <span className="text-slate-600 font-bold">{item.inventoryNo}</span>
+                        {item.acquisitionDate && (
+                          <span>• ได้มาเมื่อ: {item.acquisitionDate}</span>
+                        )}
+                      </div>
+                    </div>
 
-                    {/* Inventory No */}
-                    <td className="py-3.5 px-4 font-mono">
-                      <p className="text-slate-900 font-bold tracking-tight">{item.inventoryNo}</p>
-                      <p className="text-[10px] text-slate-400 mt-0.5">หลัก: {item.mainAssetCode}</p>
-                    </td>
+                    {/* Details Grid (Cost, Location & Division) */}
+                    <div className="grid grid-cols-2 gap-2 text-xs pt-0.5">
+                      <div className="p-2.5 rounded-xl bg-slate-50/90 border border-slate-200/70 space-y-0.5">
+                        <span className="text-[10px] text-slate-400 font-medium block">มูลค่าต้นทุน</span>
+                        <p className="font-mono font-black text-[#DA2128] text-xs sm:text-sm">
+                          ฿{item.amountNumeric ? item.amountNumeric.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : item.amountPosted}
+                        </p>
+                      </div>
 
-                    {/* Category */}
-                    <td className="py-3.5 px-4">
-                      <span className="inline-block px-2.5 py-1 rounded-lg text-[11px] font-medium bg-slate-100/90 text-slate-700 border border-slate-200/80 max-w-[200px] truncate" title={item.category}>
-                        {item.category}
-                      </span>
-                    </td>
+                      <div className="p-2.5 rounded-xl bg-slate-50/90 border border-slate-200/70 space-y-0.5 min-w-0">
+                        <span className="text-[10px] text-slate-400 font-medium block">สถานที่ / ผู้รับผิดชอบ</span>
+                        <p className="text-slate-800 font-bold truncate text-xs" title={item.locationName || item.divisionLabel}>
+                          {item.locationName || item.divisionLabel}
+                        </p>
+                      </div>
+                    </div>
 
-                    {/* Division */}
-                    <td className="py-3.5 px-4">
-                      <span className="text-[11px] font-medium text-slate-700">
-                        {item.divisionLabel}
-                      </span>
-                    </td>
+                    {/* Action Button */}
+                    <button
+                      type="button"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setSelectedItemForModal(item);
+                      }}
+                      className="w-full py-2.5 px-3 rounded-xl glass-button-secondary text-slate-700 hover:text-[#DA2128] text-xs font-bold flex items-center justify-center space-x-1.5 shadow-2xs border border-slate-200/80 transition-all cursor-pointer active:scale-98"
+                    >
+                      <Eye className="w-3.5 h-3.5 text-[#DA2128]" />
+                      <span>ดูสเปก & ข้อมูลละเอียด</span>
+                    </button>
+                  </div>
+                );
+              })}
+            </div>
 
-                    {/* Location & Holder */}
-                    <td className="py-3.5 px-4">
-                      <p className="text-slate-900 font-medium line-clamp-1 max-w-[200px]" title={item.locationName || "ส่วนพัฒนากายภาพ"}>
-                        {item.locationName || "ส่วนพัฒนากายภาพ"}
-                      </p>
-                      <p className="text-[10px] text-slate-400 truncate max-w-[200px]" title={item.holderName}>
-                        {item.holderName || "-"}
-                      </p>
-                    </td>
-
-                    {/* Valuation */}
-                    <td className="py-3.5 px-4 text-right font-mono font-black text-[#DA2128] text-xs sm:text-sm whitespace-nowrap">
-                      ฿{item.amountNumeric ? item.amountNumeric.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : item.amountPosted}
-                    </td>
-
-                    {/* Status */}
-                    <td className="py-3.5 px-4 text-center whitespace-nowrap">
-                      {renderStatusBadge(item.statusName)}
-                    </td>
-
-                    {/* Spec Button */}
-                    <td className="py-3.5 px-3.5 text-center whitespace-nowrap">
-                      <button
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          setSelectedItemForModal(item);
-                        }}
-                        className="inline-flex items-center space-x-1 py-1 px-2.5 rounded-lg glass-pill hover:bg-[#DA2128] text-slate-700 hover:text-white transition-all text-[11px] font-bold cursor-pointer shadow-2xs border border-slate-200"
-                        title="ดูข้อมูลละเอียด"
-                      >
-                        <Eye className="w-3.5 h-3.5" />
-                        <span>ดูสเปก</span>
-                      </button>
-                    </td>
+            {/* Desktop Table View (>= md) */}
+            <div className="hidden md:block overflow-x-auto">
+              <table className="w-full text-left text-xs border-collapse">
+                <thead>
+                  <tr className="bg-slate-100/90 text-slate-700 border-b border-slate-200 text-[11px] font-bold uppercase tracking-wider">
+                    <th className="py-3.5 px-3.5 w-14 text-center whitespace-nowrap">ลำดับ</th>
+                    <th className="py-3.5 px-4 min-w-[220px] whitespace-nowrap">รายการครุภัณฑ์</th>
+                    <th className="py-3.5 px-4 min-w-[150px] whitespace-nowrap">Inventory No. / รหัสพัสดุ</th>
+                    <th className="py-3.5 px-4 min-w-[180px] whitespace-nowrap">หมวดหมู่</th>
+                    <th className="py-3.5 px-4 min-w-[160px] whitespace-nowrap">ฝ่ายงานผู้รับผิดชอบ</th>
+                    <th className="py-3.5 px-4 min-w-[180px] whitespace-nowrap">สถานที่ตั้ง / ผู้ถือครอง</th>
+                    <th className="py-3.5 px-4 text-right min-w-[120px] whitespace-nowrap">มูลค่า (บาท)</th>
+                    <th className="py-3.5 px-4 text-center min-w-[130px] whitespace-nowrap">สถานะ</th>
+                    <th className="py-3.5 px-3.5 text-center w-24 whitespace-nowrap">ดูสเปก</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+                </thead>
+                <tbody className="divide-y divide-slate-100/80">
+                  {assetsData.map((item, idx) => (
+                    <tr
+                      key={`${item.inventoryNo}-${idx}`}
+                      className="hover:bg-red-50/40 transition-colors group cursor-pointer"
+                      onClick={() => setSelectedItemForModal(item)}
+                    >
+                      {/* Index */}
+                      <td className="py-3.5 px-3.5 text-center">
+                        <span className="font-mono text-xs font-semibold text-slate-500 bg-slate-100/80 px-2 py-0.5 rounded-md">
+                          {(pagination.page - 1) * pagination.limit + idx + 1}
+                        </span>
+                      </td>
+
+                      {/* Asset Name */}
+                      <td className="py-3.5 px-4">
+                        <p className="font-bold text-slate-900 group-hover:text-[#DA2128] transition-colors leading-snug line-clamp-1">
+                          {item.name}
+                        </p>
+                        <p className="text-[10px] text-slate-400 mt-0.5">
+                          ได้มาเมื่อ: {item.acquisitionDate || "ไม่ระบุ"}
+                        </p>
+                      </td>
+
+                      {/* Inventory No */}
+                      <td className="py-3.5 px-4 font-mono">
+                        <p className="text-slate-900 font-bold tracking-tight">{item.inventoryNo}</p>
+                        <p className="text-[10px] text-slate-400 mt-0.5">หลัก: {item.mainAssetCode}</p>
+                      </td>
+
+                      {/* Category */}
+                      <td className="py-3.5 px-4">
+                        <span className="inline-block px-2.5 py-1 rounded-lg text-[11px] font-medium bg-slate-100/90 text-slate-700 border border-slate-200/80 max-w-[200px] truncate" title={item.category}>
+                          {item.category}
+                        </span>
+                      </td>
+
+                      {/* Division */}
+                      <td className="py-3.5 px-4">
+                        <span className="text-[11px] font-medium text-slate-700">
+                          {item.divisionLabel}
+                        </span>
+                      </td>
+
+                      {/* Location & Holder */}
+                      <td className="py-3.5 px-4">
+                        <p className="text-slate-900 font-medium line-clamp-1 max-w-[200px]" title={item.locationName || "ส่วนพัฒนากายภาพ"}>
+                          {item.locationName || "ส่วนพัฒนากายภาพ"}
+                        </p>
+                        <p className="text-[10px] text-slate-400 truncate max-w-[200px]" title={item.holderName}>
+                          {item.holderName || "-"}
+                        </p>
+                      </td>
+
+                      {/* Valuation */}
+                      <td className="py-3.5 px-4 text-right font-mono font-black text-[#DA2128] text-xs sm:text-sm whitespace-nowrap">
+                        ฿{item.amountNumeric ? item.amountNumeric.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : item.amountPosted}
+                      </td>
+
+                      {/* Status */}
+                      <td className="py-3.5 px-4 text-center whitespace-nowrap">
+                        {renderStatusBadge(item.statusName)}
+                      </td>
+
+                      {/* Spec Button */}
+                      <td className="py-3.5 px-3.5 text-center whitespace-nowrap">
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setSelectedItemForModal(item);
+                          }}
+                          className="inline-flex items-center space-x-1 py-1 px-2.5 rounded-lg glass-pill hover:bg-[#DA2128] text-slate-700 hover:text-white transition-all text-[11px] font-bold cursor-pointer shadow-2xs border border-slate-200"
+                          title="ดูข้อมูลละเอียด"
+                        >
+                          <Eye className="w-3.5 h-3.5" />
+                          <span>ดูสเปก</span>
+                        </button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </>
         )}
 
         {/* Pagination Controls */}
-        <div className="p-4 border-t border-slate-200/60 bg-white/70 backdrop-blur-md flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-slate-500">
-          <div>
+        <div className="p-3.5 sm:p-4 border-t border-slate-200/60 bg-white/70 backdrop-blur-md flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-slate-500">
+          <div className="text-center sm:text-left text-[11px] sm:text-xs">
             <span>กำลังแสดงแถวที่ </span>
             <span className="font-bold text-slate-900">
               {Math.min((pagination.page - 1) * pagination.limit + 1, pagination.totalFiltered)} -{" "}
@@ -731,24 +806,24 @@ export default function DataExplorerTab() {
             <span> รายการ</span>
           </div>
 
-          <div className="flex items-center space-x-2">
+          <div className="flex items-center space-x-2 w-full sm:w-auto justify-between sm:justify-end">
             <button
               onClick={() => setPage(Math.max(1, page - 1))}
               disabled={page <= 1}
-              className="px-3 py-1.5 rounded-xl glass-button-secondary text-slate-700 disabled:opacity-40 disabled:cursor-not-allowed flex items-center space-x-1 cursor-pointer"
+              className="flex-1 sm:flex-initial px-3.5 py-2 rounded-xl glass-button-secondary text-slate-700 disabled:opacity-40 disabled:cursor-not-allowed flex items-center justify-center space-x-1 cursor-pointer text-xs font-semibold"
             >
               <ChevronLeft className="w-3.5 h-3.5" />
               <span>ก่อนหน้า</span>
             </button>
 
-            <span className="px-3 py-1 font-bold text-slate-900">
+            <span className="px-3 py-1 font-bold text-slate-900 text-xs shrink-0">
               {page} / {pagination.totalPages}
             </span>
 
             <button
               onClick={() => setPage(Math.min(pagination.totalPages, page + 1))}
               disabled={page >= pagination.totalPages}
-              className="px-3 py-1.5 rounded-xl glass-button-secondary text-slate-700 disabled:opacity-40 disabled:cursor-not-allowed flex items-center space-x-1 cursor-pointer"
+              className="flex-1 sm:flex-initial px-3.5 py-2 rounded-xl glass-button-secondary text-slate-700 disabled:opacity-40 disabled:cursor-not-allowed flex items-center justify-center space-x-1 cursor-pointer text-xs font-semibold"
             >
               <span>ถัดไป</span>
               <ChevronRight className="w-3.5 h-3.5" />

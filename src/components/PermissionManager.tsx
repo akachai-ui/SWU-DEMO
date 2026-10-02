@@ -490,7 +490,118 @@ export default function PermissionManager() {
         </div>
       ) : (
         <div className="glass-panel rounded-2xl sm:rounded-3xl shadow-xl overflow-hidden">
-          <div className="overflow-x-auto">
+          {/* Mobile Card View (< md) */}
+          <div className="md:hidden divide-y divide-slate-200/60 bg-white/40">
+            {filteredUsers.map((u) => {
+              const rolePreset = ROLE_PRESETS[u.role] || ROLE_PRESETS.staff;
+              const activePermCount = Object.values(u.permissions || {}).filter(Boolean).length;
+
+              return (
+                <div key={`mob-${u.id || u.uid}`} className="p-4 space-y-3 hover:bg-red-50/30 transition-colors">
+                  {/* Top: Avatar, Name, Email, Status */}
+                  <div className="flex items-start justify-between gap-2">
+                    <div className="flex items-center space-x-2.5 min-w-0 flex-1">
+                      <div className="w-9 h-9 rounded-full bg-red-50 text-[#DA2128] font-black flex items-center justify-center text-xs shrink-0 border border-red-200 shadow-2xs">
+                        {u.name.slice(0, 2)}
+                      </div>
+                      <div className="min-w-0">
+                        <p className="font-bold text-slate-900 text-sm truncate">{u.name}</p>
+                        <p className="text-[11px] text-slate-400 font-mono truncate">{u.email}</p>
+                      </div>
+                    </div>
+
+                    <button
+                      onClick={() => handleToggleStatus(u)}
+                      className={`px-2.5 py-1 rounded-full text-[10px] font-bold transition-all cursor-pointer shrink-0 shadow-2xs ${
+                        u.status === "active"
+                          ? "bg-emerald-50/90 text-emerald-700 border border-emerald-200"
+                          : "bg-slate-100/90 text-slate-500 border border-slate-200"
+                      }`}
+                      title="คลิกเพื่อสลับสถานะ"
+                    >
+                      {u.status === "active" ? "🟢 เปิดใช้งาน" : "⚪ ปิดใช้งาน"}
+                    </button>
+                  </div>
+
+                  {/* Role & Department */}
+                  <div className="flex flex-wrap items-center gap-1.5 pt-0.5">
+                    <span
+                      className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-bold shadow-2xs ${
+                        u.role === "super_admin"
+                          ? "bg-red-50/90 text-red-700 border border-red-200"
+                          : u.role === "approver"
+                          ? "bg-purple-50/90 text-purple-700 border border-purple-200"
+                          : u.role === "inventory_officer"
+                          ? "bg-amber-50/90 text-amber-800 border border-amber-200"
+                          : u.role === "technician"
+                          ? "bg-blue-50/90 text-blue-700 border border-blue-200"
+                          : "bg-emerald-50/90 text-emerald-700 border border-emerald-200"
+                      }`}
+                    >
+                      {u.roleNameTh || rolePreset.roleNameTh}
+                    </span>
+                    <span className="text-xs text-slate-600 font-medium">
+                      {u.department} {u.position ? `(${u.position})` : ""}
+                    </span>
+                  </div>
+
+                  {/* Permissions & Actions */}
+                  <div className="flex items-center justify-between gap-2 pt-1 border-t border-slate-200/60">
+                    <div className="flex flex-wrap gap-1">
+                      {u.permissions?.canViewAssets && (
+                        <span className="px-1.5 py-0.5 rounded-md glass-pill text-slate-700 text-[10px] font-semibold border-slate-200">
+                          ครุภัณฑ์
+                        </span>
+                      )}
+                      {u.permissions?.canRequestConsumables && (
+                        <span className="px-1.5 py-0.5 rounded-md glass-pill text-slate-700 text-[10px] font-semibold border-slate-200">
+                          ขอเบิก
+                        </span>
+                      )}
+                      {u.permissions?.canAddConsumables && (
+                        <span className="px-1.5 py-0.5 rounded-md bg-amber-50 text-amber-800 text-[10px] font-bold border border-amber-200">
+                          คุมสต็อก
+                        </span>
+                      )}
+                      {u.permissions?.canApproveRequisitions && (
+                        <span className="px-1.5 py-0.5 rounded-md bg-purple-50 text-purple-700 text-[10px] font-bold border border-purple-200">
+                          อนุมัติ
+                        </span>
+                      )}
+                      {u.permissions?.canManageUsers && (
+                        <span className="px-1.5 py-0.5 rounded-md bg-red-50 text-red-700 text-[10px] font-bold border border-red-200">
+                          จัดการสิทธิ์
+                        </span>
+                      )}
+                      <span className="text-[10px] text-slate-400 self-center">
+                        ({activePermCount}/9)
+                      </span>
+                    </div>
+
+                    <div className="flex items-center space-x-1 shrink-0">
+                      <button
+                        onClick={() => handleOpenEditModal(u)}
+                        className="p-1.5 rounded-lg glass-button-secondary text-slate-600 hover:text-[#DA2128] transition-colors cursor-pointer"
+                        title="แก้ไขสิทธิ์"
+                      >
+                        <Edit className="w-4 h-4" />
+                      </button>
+                      <button
+                        onClick={() => handleDeleteUser(u)}
+                        className="p-1.5 rounded-lg glass-button-secondary text-slate-400 hover:text-red-600 transition-colors cursor-pointer"
+                        title="ลบผู้ใช้"
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+
+          {/* Desktop Table View (>= md) */}
+          <div className="hidden md:block overflow-x-auto">
             <table className="w-full text-left text-xs border-collapse">
               <thead>
                 <tr className="bg-slate-100/80 text-slate-600 border-b border-slate-200 font-bold">
