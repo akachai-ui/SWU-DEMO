@@ -293,10 +293,10 @@ export default function RealPortalPage() {
   return (
     <ProtectedRoute>
       <div className="min-h-dvh bg-transparent text-slate-800 flex flex-col justify-between selection:bg-[#DA2128] selection:text-white font-sans relative overflow-x-hidden">
-        {/* Ambient Subtle Glow Elements */}
-        <div className="fixed -top-40 -left-40 w-96 h-96 bg-[#DA2128]/8 rounded-full blur-3xl pointer-events-none -z-10 animate-pulse"></div>
-        <div className="fixed top-1/2 -right-40 w-96 h-96 bg-red-400/8 rounded-full blur-3xl pointer-events-none -z-10"></div>
-        <div className="fixed -bottom-40 left-1/3 w-96 h-96 bg-slate-300/20 rounded-full blur-3xl pointer-events-none -z-10"></div>
+        {/* Ambient Subtle Calm Glow Elements (Comfortable eye-care lighting) */}
+        <div className="fixed -top-40 -left-40 w-96 h-96 bg-slate-300/20 rounded-full blur-3xl pointer-events-none -z-10"></div>
+        <div className="fixed top-1/2 -right-40 w-96 h-96 bg-red-200/15 rounded-full blur-3xl pointer-events-none -z-10"></div>
+        <div className="fixed -bottom-40 left-1/3 w-96 h-96 bg-slate-200/40 rounded-full blur-3xl pointer-events-none -z-10"></div>
 
         {/* Top Accent Gradient Bar */}
         <div className="h-1.5 w-full bg-gradient-to-r from-[#DA2128] via-[#FF3B44] to-[#DA2128] sticky top-0 z-50"></div>
