@@ -1075,9 +1075,9 @@ export default function DevDocsPage() {
       {/* Footer */}
       <footer className="border-t border-[#2D2F33] bg-[#161718] py-6 text-center text-xs text-[#9E9FA3]">
         <div className="max-w-7xl mx-auto px-4 space-y-1">
-          <p className="font-medium text-gray-300">© 2026 SWU Inventory & Government Asset Management System (มศว สีเทา-แดง)</p>
-          <p className="text-[#636466]">
-            ระบบบริหารจัดการพัสดุและครุภัณฑ์ภาครัฐ พัฒนาตามแนวทางระเบียบกระทรวงการคลังฯ พ.ศ. 2560
+          <p className="font-semibold text-gray-200">© 2026 Srinakharinwirot University (SWU). All Rights Reserved.</p>
+          <p className="text-gray-400">
+            Physical Development Division • Government Asset & Inventory Management System (มศว สีเทา-แดง)
           </p>
         </div>
       </footer>

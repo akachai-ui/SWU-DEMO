@@ -307,8 +307,14 @@ export default function LoginPage() {
       </main>
 
       {/* Footer */}
-      <footer className="py-4 text-center text-[11px] text-slate-400 px-4 relative z-10">
-        <p>© 2567 ส่วนพัฒนากายภาพ มหาวิทยาลัยศรีนครินทรวิโรฒ (SWU)</p>
+      <footer className="py-6 text-center text-xs text-slate-600 font-medium px-4 relative z-10">
+        <div className="inline-flex flex-col sm:flex-row items-center justify-center gap-1 sm:gap-2 px-4 py-2 rounded-full glass-pill border border-white/80 shadow-xs">
+          <span className="font-bold text-slate-800">© 2026 Srinakharinwirot University</span>
+          <span className="hidden sm:inline text-slate-300">•</span>
+          <span className="text-slate-600">Physical Development Division</span>
+          <span className="hidden sm:inline text-slate-300">•</span>
+          <span className="text-slate-500">All Rights Reserved.</span>
+        </div>
       </footer>
     </div>
   );

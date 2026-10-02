@@ -700,16 +700,18 @@ export default function RealPortalPage() {
         </nav>
 
         {/* Official Modern Footer */}
-        <footer className="glass-nav border-t border-slate-200/60 pt-5 pb-24 sm:pb-5 text-center text-xs text-slate-500 print:hidden relative z-10">
+        <footer className="glass-nav border-t border-slate-200/80 pt-5 pb-28 sm:pb-5 text-center text-xs text-slate-600 print:hidden relative z-10">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row items-center justify-between gap-3">
-            <div className="flex items-center space-x-2 text-slate-600">
-              <span className="font-bold text-slate-800">มหาวิทยาลัยศรีนครินทรวิโรฒ</span>
-              <span>•</span>
-              <span>ส่วนพัฒนากายภาพ</span>
+            <div className="flex flex-wrap items-center justify-center sm:justify-start gap-1.5 sm:gap-2 text-slate-700">
+              <span className="font-bold text-slate-900">© 2026 Srinakharinwirot University (SWU)</span>
+              <span className="text-slate-300">•</span>
+              <span className="text-slate-600">Physical Development Division</span>
+              <span className="hidden md:inline text-slate-300">•</span>
+              <span className="hidden md:inline text-slate-500">All Rights Reserved.</span>
             </div>
-            <div className="flex items-center space-x-4 text-xs font-medium">
+            <div className="flex items-center space-x-4 text-xs font-semibold">
               <Link href="/dev" className="text-slate-600 hover:text-[#DA2128] transition-colors">
-                พิมพ์เขียวระบบและคู่มือ (/dev)
+                System Blueprint (/dev)
               </Link>
               <span className="text-slate-300">|</span>
               <button
@@ -717,7 +719,7 @@ export default function RealPortalPage() {
                 onClick={() => setIsLogoutConfirmOpen(true)}
                 className="text-slate-600 hover:text-[#DA2128] transition-colors cursor-pointer"
               >
-                ออกจากระบบ
+                Sign Out
               </button>
             </div>
           </div>
