@@ -9,7 +9,9 @@ import {
   subscribeToUsers,
   saveUserPermissionToFirestore,
   updateUserPermissionInFirestore,
-  deleteUserPermissionFromFirestore
+  deleteUserPermissionFromFirestore,
+  createUserWithInitialPassword,
+  sendUserPasswordReset
 } from "@/lib/permissionService";
 import {
   ShieldCheck,
@@ -36,7 +38,12 @@ import {
   FileSpreadsheet,
   Package,
   Sparkles,
-  ChevronDown
+  ChevronDown,
+  Eye,
+  EyeOff,
+  Copy,
+  CheckCheck,
+  Dices
 } from "lucide-react";
 
 const PERMISSION_DEFINITIONS: { key: keyof UserPermissions; label: string; desc: string; category: string }[] = [
@@ -110,6 +117,12 @@ export default function PermissionManager() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [notification, setNotification] = useState<{ message: string; type: "success" | "error" } | null>(null);
 
+  // Password Provisioning States
+  const [initialPassword, setInitialPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
+  const [passwordCopied, setPasswordCopied] = useState(false);
+  const [isSendingReset, setIsSendingReset] = useState(false);
+
   // Form State
   const [formData, setFormData] = useState<UserAccount>({
     uid: "",
@@ -125,7 +138,38 @@ export default function PermissionManager() {
 
   const showToast = (message: string, type: "success" | "error" = "success") => {
     setNotification({ message, type });
-    setTimeout(() => setNotification(null), 3500);
+    setTimeout(() => setNotification(null), 4000);
+  };
+
+  // Helper: Generate clean temporary password
+  const generateRandomPassword = () => {
+    const randomDigits = Math.floor(100000 + Math.random() * 900000);
+    const pass = `swu@${randomDigits}`;
+    setInitialPassword(pass);
+    setPasswordCopied(false);
+  };
+
+  // Helper: Copy password to clipboard
+  const handleCopyPassword = () => {
+    if (!initialPassword) return;
+    navigator.clipboard.writeText(initialPassword);
+    setPasswordCopied(true);
+    setTimeout(() => setPasswordCopied(false), 2000);
+    showToast(`คัดลอกรหัสผ่าน "${initialPassword}" เรียบร้อยแล้ว!`);
+  };
+
+  // Helper: Send password reset email from Edit Modal
+  const handleSendResetLink = async (targetEmail: string) => {
+    if (!targetEmail) return;
+    setIsSendingReset(true);
+    try {
+      await sendUserPasswordReset(targetEmail);
+      showToast(`ส่งลิงก์ตั้งรหัสผ่านไปยัง ${targetEmail} เรียบร้อยแล้ว!`);
+    } catch (err: any) {
+      showToast(`ไม่สามารถส่งอีเมลได้: ${err.message}`, "error");
+    } finally {
+      setIsSendingReset(false);
+    }
   };
 
   // Subscribe to Cloud Firestore collection: users_permissions
@@ -167,6 +211,10 @@ export default function PermissionManager() {
   const handleOpenAddModal = () => {
     setEditingId(null);
     const defaultRole: UserRole = "staff";
+    const randomDigits = Math.floor(100000 + Math.random() * 900000);
+    setInitialPassword(`swu@${randomDigits}`);
+    setPasswordCopied(false);
+    setShowPassword(false);
     setFormData({
       uid: `usr_${Date.now()}`,
       name: "",
@@ -184,6 +232,9 @@ export default function PermissionManager() {
   // Open Edit Modal
   const handleOpenEditModal = (user: UserAccount) => {
     setEditingId(user.id || user.uid);
+    setInitialPassword("");
+    setPasswordCopied(false);
+    setShowPassword(false);
     setFormData({
       ...user,
       permissions: { ...user.permissions }
@@ -213,7 +264,7 @@ export default function PermissionManager() {
     }));
   };
 
-  // Submit User Permission to Firestore
+  // Submit User Permission to Firestore and Firebase Auth
   const handleFormSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!formData.name.trim() || !formData.email.trim()) {
@@ -223,12 +274,17 @@ export default function PermissionManager() {
 
     setIsSubmitting(true);
     try {
-      await saveUserPermissionToFirestore(formData);
-      showToast(
-        editingId
-          ? `อัปเดตสิทธิ์ของ "${formData.name}" บน Cloud Firestore สำเร็จ!`
-          : `บันทึกผู้ใช้ "${formData.name}" เข้าสู่ฐานข้อมูล Firestore สำเร็จ!`
-      );
+      if (editingId) {
+        await saveUserPermissionToFirestore(formData);
+        showToast(`อัปเดตสิทธิ์ของ "${formData.name}" บน Cloud Firestore สำเร็จ!`);
+      } else {
+        const result = await createUserWithInitialPassword(formData, initialPassword);
+        if (result.createdInAuth) {
+          showToast(`สร้างผู้ใช้ "${formData.name}" พร้อมรหัสผ่าน "${initialPassword}" สำเร็จ!`);
+        } else {
+          showToast(`บันทึกสิทธิ์ผู้ใช้ "${formData.name}" บน Cloud Firestore สำเร็จ!`);
+        }
+      }
       setIsModalOpen(false);
     } catch (err: any) {
       console.error("Save permission error:", err);
@@ -600,7 +656,7 @@ export default function PermissionManager() {
 
                 <div>
                   <label className="block text-xs font-bold text-slate-700 mb-1.5">
-                    อีเมลองค์กร (@g.swu.ac.th) *
+                    อีเมลองค์กร (@g.swu.ac.th หรืออีเมลผู้ใช้) *
                   </label>
                   <input
                     type="email"
@@ -614,10 +670,98 @@ export default function PermissionManager() {
                       })
                     }
                     placeholder="somsak@g.swu.ac.th"
-                    className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs sm:text-sm text-slate-900 focus:outline-none focus:border-[#DA2128]"
+                    className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs sm:text-sm text-slate-900 focus:outline-none focus:border-[#DA2128] font-mono"
                   />
                 </div>
               </div>
+
+              {/* Password Section */}
+              {!editingId ? (
+                <div className="p-4 bg-gradient-to-br from-red-50/70 via-slate-50 to-red-50/30 rounded-2xl border border-red-200/80 space-y-2.5">
+                  <div className="flex items-center justify-between">
+                    <label className="text-xs font-bold text-slate-900 flex items-center space-x-1.5">
+                      <Key className="w-4 h-4 text-[#DA2128]" />
+                      <span>รหัสผ่านเริ่มต้นสำหรับเข้าสู่ระบบ (Initial Password) *</span>
+                    </label>
+                    <div className="flex items-center space-x-1.5">
+                      <button
+                        type="button"
+                        onClick={generateRandomPassword}
+                        className="text-[11px] font-bold text-[#DA2128] hover:bg-red-100/60 px-2 py-1 rounded-lg transition-colors flex items-center space-x-1 cursor-pointer"
+                        title="สุ่มรหัสผ่านใหม่"
+                      >
+                        <Dices className="w-3.5 h-3.5" />
+                        <span>สุ่มรหัส</span>
+                      </button>
+                      <button
+                        type="button"
+                        onClick={handleCopyPassword}
+                        className={`text-[11px] font-bold px-2 py-1 rounded-lg transition-colors flex items-center space-x-1 cursor-pointer ${
+                          passwordCopied ? "bg-emerald-100 text-emerald-700" : "bg-white text-slate-700 hover:bg-slate-100 border border-slate-200"
+                        }`}
+                        title="คัดลอกรหัสผ่าน"
+                      >
+                        {passwordCopied ? <CheckCheck className="w-3.5 h-3.5 text-emerald-600" /> : <Copy className="w-3.5 h-3.5" />}
+                        <span>{passwordCopied ? "คัดลอกแล้ว!" : "คัดลอก"}</span>
+                      </button>
+                    </div>
+                  </div>
+
+                  <div className="relative">
+                    <Lock className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none" />
+                    <input
+                      type={showPassword ? "text" : "password"}
+                      required
+                      minLength={6}
+                      value={initialPassword}
+                      onChange={(e) => setInitialPassword(e.target.value)}
+                      placeholder="กำหนดรหัสผ่าน (อย่างน้อย 6 ตัวอักษร)"
+                      className="w-full pl-10 pr-10 py-2.5 bg-white border border-red-200 rounded-xl text-xs sm:text-sm text-slate-900 focus:outline-none focus:border-[#DA2128] font-mono"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowPassword(!showPassword)}
+                      className="absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 focus:outline-none cursor-pointer"
+                    >
+                      {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                    </button>
+                  </div>
+
+                  <p className="text-[11px] text-slate-500 flex items-center space-x-1">
+                    <span>💡 Admin สามารถคัดลอกรหัสผ่านนี้ส่งให้บุคลากรนำไปใช้ล็อกอินเข้าสู่ระบบได้ทันที</span>
+                  </p>
+                </div>
+              ) : (
+                <div className="p-3.5 bg-slate-50 border border-slate-200 rounded-2xl flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs">
+                  <div className="space-y-0.5">
+                    <p className="font-bold text-slate-800 flex items-center space-x-1.5">
+                      <Key className="w-4 h-4 text-[#DA2128]" />
+                      <span>การจัดการรหัสผ่านผู้ใช้งาน</span>
+                    </p>
+                    <p className="text-[11px] text-slate-500">
+                      หากผู้ใช้งานลืมรหัสผ่าน สามารถส่งลิงก์ตั้งรหัสผ่านใหม่ไปยังอีเมลได้
+                    </p>
+                  </div>
+                  <button
+                    type="button"
+                    disabled={isSendingReset}
+                    onClick={() => handleSendResetLink(formData.email)}
+                    className="shrink-0 px-3.5 py-2 rounded-xl bg-white hover:bg-slate-100 active:bg-slate-200 border border-slate-200 text-[#DA2128] text-xs font-bold transition-all shadow-2xs flex items-center justify-center space-x-1.5 cursor-pointer disabled:opacity-60"
+                  >
+                    {isSendingReset ? (
+                      <>
+                        <RefreshCw className="w-3.5 h-3.5 animate-spin" />
+                        <span>กำลังส่งอีเมล...</span>
+                      </>
+                    ) : (
+                      <>
+                        <Mail className="w-3.5 h-3.5" />
+                        <span>ส่งลิงก์รีเซ็ตรหัสผ่าน</span>
+                      </>
+                    )}
+                  </button>
+                </div>
+              )}
 
               {/* Row 2: Department & Position */}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">

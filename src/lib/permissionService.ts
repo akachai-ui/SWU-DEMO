@@ -11,7 +11,9 @@ import {
   orderBy,
   onSnapshot
 } from "firebase/firestore";
-import { db } from "./firebase";
+import { initializeApp, getApps, getApp } from "firebase/app";
+import { getAuth, createUserWithEmailAndPassword, signOut as secondarySignOut, sendPasswordResetEmail } from "firebase/auth";
+import { db, auth } from "./firebase";
 
 export interface UserPermissions {
   canViewAssets: boolean;          // ดูทะเบียนครุภัณฑ์
@@ -270,3 +272,58 @@ export async function deleteUserPermissionFromFirestore(docId: string): Promise<
     throw error;
   }
 }
+
+/**
+ * Create a new user account in Firebase Auth with initial password (without logging out current admin)
+ * and save permission record into Cloud Firestore
+ */
+export async function createUserWithInitialPassword(
+  user: UserAccount,
+  initialPassword?: string
+): Promise<{ docId: string; createdInAuth: boolean; message?: string }> {
+  const cleanEmail = user.email.trim().toLowerCase();
+  let createdInAuth = false;
+  let authUid = user.uid || cleanEmail.replace(/[@.]/g, "_");
+
+  if (initialPassword && initialPassword.trim().length >= 6) {
+    try {
+      let secondaryApp;
+      if (getApps().some((app) => app.name === "SecondaryAdminApp")) {
+        secondaryApp = getApp("SecondaryAdminApp");
+      } else {
+        secondaryApp = initializeApp(auth.app.options, "SecondaryAdminApp");
+      }
+      const secondaryAuth = getAuth(secondaryApp);
+      const userCred = await createUserWithEmailAndPassword(secondaryAuth, cleanEmail, initialPassword.trim());
+      if (userCred.user) {
+        authUid = userCred.user.uid;
+        createdInAuth = true;
+      }
+      await secondarySignOut(secondaryAuth);
+    } catch (authErr: any) {
+      console.warn("Secondary auth user creation notice:", authErr);
+      if (authErr.code === "auth/email-already-in-use") {
+        // Email already exists in Auth, proceed to save/update permission in Firestore
+      } else {
+        throw new Error(authErr.message || "ไม่สามารถสร้างบัญชี Authentication ได้");
+      }
+    }
+  }
+
+  const docId = await saveUserPermissionToFirestore({
+    ...user,
+    email: cleanEmail,
+    uid: authUid
+  });
+
+  return { docId, createdInAuth };
+}
+
+/**
+ * Send password reset email to user
+ */
+export async function sendUserPasswordReset(email: string): Promise<void> {
+  const cleanEmail = email.trim().toLowerCase();
+  await sendPasswordResetEmail(auth, cleanEmail);
+}
+
