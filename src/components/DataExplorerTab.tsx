@@ -340,30 +340,30 @@ export default function DataExplorerTab() {
   const renderStatusBadge = (status: string) => {
     if (status.includes("ใช้งานอยู่") || status.includes("ปกติ")) {
       return (
-        <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200 shadow-2xs">
-          <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 mr-1.5"></span>
-          {status}
+        <span className="inline-flex items-center px-2.5 py-1 rounded-full text-[10px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200 shadow-2xs whitespace-nowrap">
+          <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 mr-1.5 shrink-0"></span>
+          <span>{status}</span>
         </span>
       );
     }
     if (status.includes("ชำรุด") || status.includes("เสื่อมสภาพ")) {
       return (
-        <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-50 text-amber-700 border border-amber-200 shadow-2xs">
-          <span className="w-1.5 h-1.5 rounded-full bg-amber-500 mr-1.5"></span>
-          {status}
+        <span className="inline-flex items-center px-2.5 py-1 rounded-full text-[10px] font-bold bg-amber-50 text-amber-700 border border-amber-200 shadow-2xs whitespace-nowrap">
+          <span className="w-1.5 h-1.5 rounded-full bg-amber-500 mr-1.5 shrink-0"></span>
+          <span>{status}</span>
         </span>
       );
     }
     if (status.includes("จำหน่าย") || status.includes("สูญหาย")) {
       return (
-        <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold bg-rose-50 text-rose-700 border border-rose-200 shadow-2xs">
-          <span className="w-1.5 h-1.5 rounded-full bg-rose-500 mr-1.5"></span>
-          {status}
+        <span className="inline-flex items-center px-2.5 py-1 rounded-full text-[10px] font-bold bg-rose-50 text-rose-700 border border-rose-200 shadow-2xs whitespace-nowrap">
+          <span className="w-1.5 h-1.5 rounded-full bg-rose-500 mr-1.5 shrink-0"></span>
+          <span>{status}</span>
         </span>
       );
     }
     return (
-      <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-[11px] font-semibold glass-pill text-slate-700 border-slate-200">
+      <span className="inline-flex items-center px-2.5 py-1 rounded-full text-[10px] font-semibold glass-pill text-slate-700 border-slate-200 whitespace-nowrap">
         {status || "ไม่ระบุ"}
       </span>
     );
@@ -621,76 +621,94 @@ export default function DataExplorerTab() {
           <div className="overflow-x-auto">
             <table className="w-full text-left text-xs border-collapse">
               <thead>
-                <tr className="bg-slate-100/80 text-slate-600 border-b border-slate-200 font-bold">
-                  <th className="py-3.5 px-4 w-16">ลำดับ</th>
-                  <th className="py-3.5 px-4">รายการครุภัณฑ์</th>
-                  <th className="py-3.5 px-4">Inventory No. / รหัสพัสดุ</th>
-                  <th className="py-3.5 px-4">หมวดหมู่</th>
-                  <th className="py-3.5 px-4">ฝ่ายงานผู้รับผิดชอบ</th>
-                  <th className="py-3.5 px-4">สถานที่ตั้ง / ผู้ถือครอง</th>
-                  <th className="py-3.5 px-4 text-right">มูลค่า (บาท)</th>
-                  <th className="py-3.5 px-4 text-center">สถานะ</th>
-                  <th className="py-3.5 px-4 text-center">ดูสเปก</th>
+                <tr className="bg-slate-100/90 text-slate-700 border-b border-slate-200 text-[11px] font-bold uppercase tracking-wider">
+                  <th className="py-3.5 px-3.5 w-14 text-center whitespace-nowrap">ลำดับ</th>
+                  <th className="py-3.5 px-4 min-w-[220px] whitespace-nowrap">รายการครุภัณฑ์</th>
+                  <th className="py-3.5 px-4 min-w-[150px] whitespace-nowrap">Inventory No. / รหัสพัสดุ</th>
+                  <th className="py-3.5 px-4 min-w-[180px] whitespace-nowrap">หมวดหมู่</th>
+                  <th className="py-3.5 px-4 min-w-[160px] whitespace-nowrap">ฝ่ายงานผู้รับผิดชอบ</th>
+                  <th className="py-3.5 px-4 min-w-[180px] whitespace-nowrap">สถานที่ตั้ง / ผู้ถือครอง</th>
+                  <th className="py-3.5 px-4 text-right min-w-[120px] whitespace-nowrap">มูลค่า (บาท)</th>
+                  <th className="py-3.5 px-4 text-center min-w-[130px] whitespace-nowrap">สถานะ</th>
+                  <th className="py-3.5 px-3.5 text-center w-24 whitespace-nowrap">ดูสเปก</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-slate-100">
+              <tbody className="divide-y divide-slate-100/80">
                 {assetsData.map((item, idx) => (
                   <tr
                     key={`${item.inventoryNo}-${idx}`}
                     className="hover:bg-red-50/40 transition-colors group cursor-pointer"
                     onClick={() => setSelectedItemForModal(item)}
                   >
-                    <td className="py-3.5 px-4 text-slate-400 font-mono">
-                      {(pagination.page - 1) * pagination.limit + idx + 1}
+                    {/* Index */}
+                    <td className="py-3.5 px-3.5 text-center">
+                      <span className="font-mono text-xs font-semibold text-slate-500 bg-slate-100/80 px-2 py-0.5 rounded-md">
+                        {(pagination.page - 1) * pagination.limit + idx + 1}
+                      </span>
                     </td>
 
+                    {/* Asset Name */}
                     <td className="py-3.5 px-4">
-                      <p className="font-bold text-slate-900 group-hover:text-[#DA2128] transition-colors line-clamp-1">
+                      <p className="font-bold text-slate-900 group-hover:text-[#DA2128] transition-colors leading-snug line-clamp-1">
                         {item.name}
                       </p>
-                      <p className="text-[10px] text-slate-400">ได้มาเมื่อ: {item.acquisitionDate || "ไม่ระบุ"}</p>
+                      <p className="text-[10px] text-slate-400 mt-0.5">
+                        ได้มาเมื่อ: {item.acquisitionDate || "ไม่ระบุ"}
+                      </p>
                     </td>
 
+                    {/* Inventory No */}
                     <td className="py-3.5 px-4 font-mono">
-                      <p className="text-slate-800 font-bold">{item.inventoryNo}</p>
-                      <p className="text-[10px] text-slate-400">หลัก: {item.mainAssetCode}</p>
+                      <p className="text-slate-900 font-bold tracking-tight">{item.inventoryNo}</p>
+                      <p className="text-[10px] text-slate-400 mt-0.5">หลัก: {item.mainAssetCode}</p>
                     </td>
 
-                    <td className="py-3.5 px-4 text-slate-700">
-                      <span className="px-2 py-0.5 rounded-md glass-pill text-slate-700 text-[10px] border border-slate-200">
+                    {/* Category */}
+                    <td className="py-3.5 px-4">
+                      <span className="inline-block px-2.5 py-1 rounded-lg text-[11px] font-medium bg-slate-100/90 text-slate-700 border border-slate-200/80 max-w-[200px] truncate" title={item.category}>
                         {item.category}
                       </span>
                     </td>
 
+                    {/* Division */}
                     <td className="py-3.5 px-4">
                       <span className="text-[11px] font-medium text-slate-700">
                         {item.divisionLabel}
                       </span>
                     </td>
 
-                    <td className="py-3.5 px-4 text-slate-700">
-                      <p className="line-clamp-1 text-slate-900 font-medium">{item.locationName || "ส่วนพัฒนากายภาพ"}</p>
-                      <p className="text-[10px] text-slate-400">{item.holderName}</p>
+                    {/* Location & Holder */}
+                    <td className="py-3.5 px-4">
+                      <p className="text-slate-900 font-medium line-clamp-1 max-w-[200px]" title={item.locationName || "ส่วนพัฒนากายภาพ"}>
+                        {item.locationName || "ส่วนพัฒนากายภาพ"}
+                      </p>
+                      <p className="text-[10px] text-slate-400 truncate max-w-[200px]" title={item.holderName}>
+                        {item.holderName || "-"}
+                      </p>
                     </td>
 
-                    <td className="py-3.5 px-4 text-right font-mono font-bold text-[#DA2128]">
-                      ฿{item.amountNumeric ? item.amountNumeric.toLocaleString(undefined, { minimumFractionDigits: 2 }) : item.amountPosted}
+                    {/* Valuation */}
+                    <td className="py-3.5 px-4 text-right font-mono font-black text-[#DA2128] text-xs sm:text-sm whitespace-nowrap">
+                      ฿{item.amountNumeric ? item.amountNumeric.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : item.amountPosted}
                     </td>
 
-                    <td className="py-3.5 px-4 text-center">
+                    {/* Status */}
+                    <td className="py-3.5 px-4 text-center whitespace-nowrap">
                       {renderStatusBadge(item.statusName)}
                     </td>
 
-                    <td className="py-3.5 px-4 text-center">
+                    {/* Spec Button */}
+                    <td className="py-3.5 px-3.5 text-center whitespace-nowrap">
                       <button
                         onClick={(e) => {
                           e.stopPropagation();
                           setSelectedItemForModal(item);
                         }}
-                        className="p-1.5 rounded-lg glass-pill hover:bg-[#DA2128] text-slate-600 hover:text-white transition-colors cursor-pointer"
+                        className="inline-flex items-center space-x-1 py-1 px-2.5 rounded-lg glass-pill hover:bg-[#DA2128] text-slate-700 hover:text-white transition-all text-[11px] font-bold cursor-pointer shadow-2xs border border-slate-200"
                         title="ดูข้อมูลละเอียด"
                       >
                         <Eye className="w-3.5 h-3.5" />
+                        <span>ดูสเปก</span>
                       </button>
                     </td>
                   </tr>
