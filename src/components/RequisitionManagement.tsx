@@ -353,24 +353,59 @@ export default function RequisitionManagement({
             />
           </div>
 
-          {/* Status Filter Buttons */}
+        {/* Status Filter Buttons */}
           <div className="sm:col-span-5 flex items-center space-x-1 overflow-x-auto pb-1 sm:pb-0 scrollbar-none text-xs font-semibold">
             {["ทั้งหมด", "รออนุมัติ", "อนุมัติแล้ว", "จ่ายพัสดุแล้ว", "ปฏิเสธ"].map((st) => (
               <button
                 key={st}
                 onClick={() => setStatusFilter(st)}
-                className={`px-3 py-2 rounded-xl transition-all whitespace-nowrap cursor-pointer ${
+                className={`px-3 py-2 rounded-xl transition-all whitespace-nowrap cursor-pointer flex items-center space-x-1.5 ${
                   statusFilter === st
                     ? "bg-slate-900 text-white shadow-xs font-bold"
                     : "bg-slate-50 text-slate-600 hover:bg-slate-100 border border-slate-200"
                 }`}
               >
-                {st}
+                <span>{st}</span>
+                {st === "รออนุมัติ" && pendingCount > 0 && (
+                  <span className={`px-1.5 py-0.2 rounded-full text-[10px] font-black ${statusFilter === st ? "bg-[#DA2128] text-white" : "bg-amber-100 text-amber-800"}`}>
+                    {pendingCount}
+                  </span>
+                )}
               </button>
             ))}
           </div>
         </div>
       </div>
+
+      {/* Urgent Pending Approval Notification Banner for Approvers */}
+      {activeSubTab === "approvals" && pendingCount > 0 && (
+        <div className="p-4 bg-gradient-to-r from-amber-50 via-red-50/50 to-orange-50 border border-amber-200 rounded-2xl flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 shadow-xs animate-fadeIn">
+          <div className="flex items-center space-x-3">
+            <div className="w-9 h-9 rounded-xl bg-amber-500 text-white flex items-center justify-center text-base shrink-0 shadow-xs animate-pulse">
+              🔔
+            </div>
+            <div>
+              <h4 className="text-xs sm:text-sm font-black text-slate-900 flex items-center space-x-1.5">
+                <span>มีคำขอเบิกพัสดุรอการพิจารณาอนุมัติ</span>
+                <span className="px-2 py-0.5 rounded-full text-[11px] font-black bg-[#DA2128] text-white">
+                  {pendingCount} รายการ
+                </span>
+              </h4>
+              <p className="text-[11px] text-slate-600">
+                โปรดตรวจสอบรายการพัสดุและลงนามอนุมัติดิจิทัลเพื่อดำเนินการตัดสต็อกและจ่ายของ
+              </p>
+            </div>
+          </div>
+          {statusFilter !== "รออนุมัติ" && (
+            <button
+              onClick={() => setStatusFilter("รออนุมัติ")}
+              className="px-3.5 py-2 bg-[#DA2128] hover:bg-[#B81B22] text-white text-xs font-bold rounded-xl shadow-xs transition-all flex items-center space-x-1.5 shrink-0 active:scale-95 cursor-pointer"
+            >
+              <span>กรองเฉพาะรายการรออนุมัติ ({pendingCount})</span>
+            </button>
+          )}
+        </div>
+      )}
 
       {/* Orders List Table / Card Grid */}
       {isLoading ? (
@@ -395,7 +430,11 @@ export default function RequisitionManagement({
           {displayedOrders.map((order) => (
             <div
               key={order.id || order.reqNo}
-              className="bg-white border border-slate-200 hover:border-slate-300 rounded-2xl p-4 sm:p-5 transition-all shadow-xs space-y-3"
+              className={`bg-white border rounded-2xl p-4 sm:p-5 transition-all shadow-xs space-y-3 ${
+                order.status === "รออนุมัติ"
+                  ? "border-amber-300 ring-1 ring-amber-200/50 hover:border-amber-400"
+                  : "border-slate-200 hover:border-slate-300"
+              }`}
             >
               {/* Row 1: Header (ReqNo, Status, Signature Progress, Date) */}
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-slate-100 pb-3">

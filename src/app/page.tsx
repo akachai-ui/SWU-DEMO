@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import SWULogo from "@/components/SWULogo";
 import ProtectedRoute from "@/components/ProtectedRoute";
@@ -10,6 +10,10 @@ import RequisitionManagement from "@/components/RequisitionManagement";
 import PermissionManager from "@/components/PermissionManager";
 import { useAuth } from "@/lib/authContext";
 import {
+  subscribeToRequisitions,
+  RequisitionOrder
+} from "@/lib/consumablesService";
+import {
   Package,
   BookOpen,
   LogOut,
@@ -18,12 +22,23 @@ import {
   FileSpreadsheet,
   ShoppingBag,
   FileText,
-  Users
+  Users,
+  Bell,
+  BellRing,
+  X,
+  ChevronRight,
+  Sparkles
 } from "lucide-react";
 
 export default function RealPortalPage() {
   const { user, logout } = useAuth();
   const [activeMainTab, setActiveMainTab] = useState<"shop" | "my_requests" | "approvals" | "assets" | "users">("shop");
+
+  // Requisitions & Real-time Alert States
+  const [pendingApprovalCount, setPendingApprovalCount] = useState(0);
+  const [newRequisitionAlert, setNewRequisitionAlert] = useState<RequisitionOrder | null>(null);
+  const isInitialLoadRef = useRef(true);
+  const prevPendingCountRef = useRef(0);
 
   // Specific Permission Flags
   const canViewShop = user?.permissions?.canViewConsumables !== false || user?.role === "super_admin";
@@ -33,8 +48,60 @@ export default function RealPortalPage() {
   const canManageUsers = Boolean(user?.permissions?.canManageUsers || user?.role === "super_admin");
   const canAccessDev = Boolean(user?.permissions?.canAccessDevPortal || user?.role === "super_admin");
 
+  // Play pleasant chime synthesizer on new incoming requisition
+  const playNotificationChime = () => {
+    try {
+      const AudioContextClass = window.AudioContext || (window as any).webkitAudioContext;
+      if (!AudioContextClass) return;
+      const audioCtx = new AudioContextClass();
+      const osc = audioCtx.createOscillator();
+      const gain = audioCtx.createGain();
+      osc.connect(gain);
+      gain.connect(audioCtx.destination);
+      osc.type = "sine";
+      osc.frequency.setValueAtTime(587.33, audioCtx.currentTime); // D5
+      osc.frequency.setValueAtTime(880, audioCtx.currentTime + 0.12); // A5
+      gain.gain.setValueAtTime(0.2, audioCtx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.6);
+      osc.start(audioCtx.currentTime);
+      osc.stop(audioCtx.currentTime + 0.6);
+    } catch (e) {
+      // audio autoplay policy catch
+    }
+  };
+
+  // Realtime subscription to requisitions to update pending badges & fire pop-ups
+  useEffect(() => {
+    const unsubscribe = subscribeToRequisitions(
+      (orders) => {
+        const pending = orders.filter((o) => o.status === "รออนุมัติ");
+        const currentCount = pending.length;
+        setPendingApprovalCount(currentCount);
+
+        if (!isInitialLoadRef.current) {
+          // If pending count increased and current user has approval privileges
+          if (currentCount > prevPendingCountRef.current && pending.length > 0) {
+            const latest = pending[0];
+            setNewRequisitionAlert(latest);
+            playNotificationChime();
+          }
+        } else {
+          isInitialLoadRef.current = false;
+        }
+        prevPendingCountRef.current = currentCount;
+      },
+      (err) => {
+        console.warn("Requisition alert subscription error:", err);
+      }
+    );
+
+    return () => {
+      if (typeof unsubscribe === "function") unsubscribe();
+    };
+  }, []);
+
   // Auto-switch to first allowed tab if current activeMainTab is restricted
-  React.useEffect(() => {
+  useEffect(() => {
     if (!user) return;
     const isTabPermitted = (tab: "shop" | "my_requests" | "approvals" | "assets" | "users") => {
       if (tab === "shop") return canViewShop;
@@ -56,9 +123,67 @@ export default function RealPortalPage() {
 
   return (
     <ProtectedRoute>
-      <div className="min-h-dvh bg-[#F8FAFC] text-slate-800 flex flex-col justify-between selection:bg-[#DA2128] selection:text-white font-sans">
+      <div className="min-h-dvh bg-[#F8FAFC] text-slate-800 flex flex-col justify-between selection:bg-[#DA2128] selection:text-white font-sans relative">
         {/* Top Accent Gradient Bar */}
         <div className="h-1.5 w-full bg-gradient-to-r from-[#DA2128] via-[#FF3B44] to-[#DA2128]"></div>
+
+        {/* Realtime Floating Pop-up Notification for Approvers */}
+        {newRequisitionAlert && canApprove && (
+          <div className="fixed top-4 right-4 sm:top-6 sm:right-6 z-50 max-w-sm sm:max-w-md w-full animate-bounceIn shadow-2xl rounded-3xl bg-white border-2 border-red-500/90 p-4 sm:p-5 overflow-hidden">
+            <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-[#DA2128] via-[#FF3B44] to-[#DA2128]"></div>
+            
+            <div className="flex items-start space-x-3.5">
+              <div className="relative p-2.5 rounded-2xl bg-red-50 border border-red-200 text-[#DA2128] shrink-0">
+                <BellRing className="w-6 h-6 animate-pulse" />
+                <span className="absolute -top-1 -right-1 w-3 h-3 bg-[#DA2128] rounded-full animate-ping"></span>
+              </div>
+              
+              <div className="flex-1 min-w-0 space-y-1">
+                <div className="flex items-center justify-between">
+                  <span className="inline-flex items-center space-x-1 px-2.5 py-0.5 rounded-full text-[10px] font-black bg-red-100 text-[#DA2128] border border-red-300">
+                    <span className="w-1.5 h-1.5 rounded-full bg-[#DA2128] animate-pulse"></span>
+                    <span>คำขอเบิกใหม่รออนุมัติ!</span>
+                  </span>
+                  <button
+                    onClick={() => setNewRequisitionAlert(null)}
+                    className="text-slate-400 hover:text-slate-600 p-1 rounded-lg hover:bg-slate-100 transition-colors"
+                  >
+                    <X className="w-4 h-4" />
+                  </button>
+                </div>
+                
+                <h4 className="text-sm font-black text-slate-900 truncate">
+                  เลขที่: {newRequisitionAlert.reqNo}
+                </h4>
+                <p className="text-xs text-slate-700 font-bold">
+                  ผู้ขอ: <span className="text-[#DA2128]">{newRequisitionAlert.requesterName}</span>
+                </p>
+                <p className="text-[11px] text-slate-500 truncate">
+                  {newRequisitionAlert.department} • {newRequisitionAlert.totalItems} รายการ (฿{newRequisitionAlert.totalAmount?.toLocaleString()})
+                </p>
+                
+                <div className="pt-2 flex items-center space-x-2">
+                  <button
+                    onClick={() => {
+                      setActiveMainTab("approvals");
+                      setNewRequisitionAlert(null);
+                    }}
+                    className="flex-1 py-2 px-3.5 bg-[#DA2128] hover:bg-[#B81B22] text-white text-xs font-bold rounded-xl shadow-md shadow-red-500/20 transition-all flex items-center justify-center space-x-1.5 active:scale-95 cursor-pointer"
+                  >
+                    <ShieldCheck className="w-4 h-4" />
+                    <span>ดูคำขอและอนุมัติทันที</span>
+                  </button>
+                  <button
+                    onClick={() => setNewRequisitionAlert(null)}
+                    className="py-2 px-3 bg-slate-100 hover:bg-slate-200 text-slate-600 text-xs font-semibold rounded-xl transition-all cursor-pointer"
+                  >
+                    ปิด
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
 
         {/* Unified Premium Navbar with Structured Hierarchy */}
         <header className="border-b border-slate-200/80 bg-white/95 backdrop-blur-md sticky top-0 z-40 shadow-xs print:hidden">
@@ -120,7 +245,7 @@ export default function RealPortalPage() {
                         {user.name}
                       </span>
                       <span className="hidden lg:inline-block text-[9px] font-bold px-1.5 py-0.5 rounded-full bg-slate-200 text-slate-700 leading-none">
-                        {user.role === "super_admin" ? "Admin" : user.role === "technician" ? "ช่าง" : "Staff"}
+                        {user.role === "super_admin" ? "Admin" : user.role === "approver" ? "ผู้อนุมัติ" : user.role === "technician" ? "ช่าง" : "Staff"}
                       </span>
                     </div>
 
@@ -147,7 +272,7 @@ export default function RealPortalPage() {
 
             </div>
 
-            {/* Bottom Row: Desktop Navigation Tabs (Segmented Controller with Full Space) */}
+            {/* Bottom Row: Desktop Navigation Tabs (Segmented Controller with Full Space & Badges) */}
             <div className="hidden sm:flex py-2.5 items-center overflow-x-auto scrollbar-none">
               <div className="flex items-center space-x-1.5 p-1 bg-slate-100/90 rounded-2xl border border-slate-200/80 text-xs font-bold min-w-full sm:min-w-0">
                 {canViewShop && (
@@ -181,7 +306,7 @@ export default function RealPortalPage() {
                 {canApprove && (
                   <button
                     onClick={() => setActiveMainTab("approvals")}
-                    className={`flex items-center justify-center space-x-2 py-2 px-4 rounded-xl transition-all whitespace-nowrap flex-1 sm:flex-none ${
+                    className={`flex items-center justify-center space-x-2 py-2 px-4 rounded-xl transition-all whitespace-nowrap flex-1 sm:flex-none relative ${
                       activeMainTab === "approvals"
                         ? "bg-white text-[#DA2128] shadow-sm font-black scale-100"
                         : "text-slate-600 hover:text-slate-900 hover:bg-white/50"
@@ -189,6 +314,12 @@ export default function RealPortalPage() {
                   >
                     <ShieldCheck className="w-4 h-4" />
                     <span>ศูนย์อนุมัติคำขอเบิก</span>
+                    {pendingApprovalCount > 0 && (
+                      <span className="inline-flex items-center space-x-1 px-2 py-0.5 rounded-full text-[10px] font-black bg-[#DA2128] text-white animate-pulse shadow-xs border border-white">
+                        <span className="w-1.5 h-1.5 rounded-full bg-white animate-ping"></span>
+                        <span>{pendingApprovalCount} รออนุมัติ</span>
+                      </span>
+                    )}
                   </button>
                 )}
 
@@ -234,7 +365,7 @@ export default function RealPortalPage() {
           {activeMainTab === "users" && canManageUsers && <PermissionManager />}
         </main>
 
-        {/* Native Smartphone App Bottom Navigation Bar (1-Thumb Navigation) */}
+        {/* Native Smartphone App Bottom Navigation Bar (1-Thumb Navigation with Approval Badge) */}
         <nav className="sm:hidden fixed bottom-0 left-0 right-0 z-50 bg-white/95 backdrop-blur-xl border-t border-slate-200/90 shadow-[0_-4px_25px_rgba(0,0,0,0.08)] pb-[max(env(safe-area-inset-bottom),8px)] pt-1.5 px-2 print:hidden">
           <div className="flex items-center justify-around max-w-lg mx-auto">
             {canViewShop && (
@@ -272,14 +403,19 @@ export default function RealPortalPage() {
             {canApprove && (
               <button
                 onClick={() => setActiveMainTab("approvals")}
-                className={`flex flex-col items-center justify-center py-1 px-2 rounded-2xl transition-all active:scale-95 flex-1 ${
+                className={`flex flex-col items-center justify-center py-1 px-2 rounded-2xl transition-all active:scale-95 flex-1 relative ${
                   activeMainTab === "approvals"
                     ? "text-[#DA2128] font-black"
                     : "text-slate-400 hover:text-slate-700 font-medium"
                 }`}
               >
-                <div className={`p-1.5 rounded-xl transition-all ${activeMainTab === "approvals" ? "bg-red-50 text-[#DA2128] scale-105" : ""}`}>
+                <div className={`relative p-1.5 rounded-xl transition-all ${activeMainTab === "approvals" ? "bg-red-50 text-[#DA2128] scale-105" : ""}`}>
                   <ShieldCheck className="w-5 h-5" />
+                  {pendingApprovalCount > 0 && (
+                    <span className="absolute -top-1 -right-1.5 min-w-[18px] h-[18px] px-1 rounded-full bg-[#DA2128] text-white text-[9px] font-black flex items-center justify-center animate-pulse border-2 border-white shadow-xs">
+                      {pendingApprovalCount}
+                    </span>
+                  )}
                 </div>
                 <span className="text-[10px] mt-0.5 leading-tight font-bold">อนุมัติ</span>
               </button>
