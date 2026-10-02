@@ -294,7 +294,7 @@ export default function RealPortalPage() {
     <ProtectedRoute>
       <div className="min-h-dvh bg-transparent text-slate-800 flex flex-col justify-between selection:bg-[#DA2128] selection:text-white font-sans relative">
         {/* Top Accent Gradient Bar */}
-        <div className="h-1.5 w-full bg-gradient-to-r from-[#DA2128] via-[#FF3B44] to-[#DA2128] sticky top-0 z-50"></div>
+        <div className="h-1.5 w-full bg-gradient-to-r from-[#DA2128] via-[#FF3B44] to-[#DA2128] sticky top-0 z-30"></div>
 
         {/* Realtime Welcome Toast Notification on Login */}
         {welcomeToast && (
@@ -402,7 +402,7 @@ export default function RealPortalPage() {
         )}
 
         {/* Unified Premium Navbar with Glassmorphism */}
-        <header className="glass-nav sticky top-1.5 z-40 print:hidden transition-all">
+        <header className="glass-nav sticky top-1.5 z-30 print:hidden transition-all">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             
             {/* Top Row: Brand Identity (Left) & User Profile + Tools (Right) */}

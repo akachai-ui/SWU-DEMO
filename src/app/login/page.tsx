@@ -88,7 +88,7 @@ export default function LoginPage() {
 
       {/* Modern Global Verification Overlay Modal */}
       {isVerifying && (
-        <div className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-md flex items-center justify-center p-4 animate-fadeIn">
+        <div className="fixed inset-0 z-[100] bg-slate-900/60 backdrop-blur-md flex items-center justify-center p-4 animate-fadeIn">
           <div className="glass-modal rounded-3xl p-7 sm:p-9 max-w-sm w-full flex flex-col items-center text-center space-y-5 animate-scaleUp relative overflow-hidden shadow-2xl">
             <SWULogo size="lg" />
 

@@ -497,7 +497,7 @@ export default function DigitalRequisitionDocument({
   };
 
   return (
-    <div className="fixed inset-0 z-[70] flex items-center justify-center p-2.5 sm:p-6 pb-6 sm:pb-6 bg-slate-900/60 backdrop-blur-md overflow-y-auto print:p-0 print:bg-white print:static print:overflow-visible animate-fadeIn">
+    <div className="fixed inset-0 z-[100] flex items-center justify-center p-2.5 sm:p-6 pb-6 sm:pb-6 bg-slate-900/60 backdrop-blur-md overflow-y-auto print:p-0 print:bg-white print:static print:overflow-visible animate-fadeIn">
       {/* Dynamic Print CSS to guarantee ONLY the single document prints & fits 1-Page A4 */}
       <style dangerouslySetInnerHTML={{ __html: `
         @page {
@@ -542,7 +542,7 @@ export default function DigitalRequisitionDocument({
       {/* Toast Inside Modal */}
       {modalToast && (
         <div
-          className={`fixed top-6 right-6 z-[100] flex items-center space-x-2 px-4 py-3 rounded-2xl shadow-2xl text-xs sm:text-sm font-semibold transition-all print:hidden ${
+          className={`fixed top-6 right-6 z-[120] flex items-center space-x-2 px-4 py-3 rounded-2xl shadow-2xl text-xs sm:text-sm font-semibold transition-all print:hidden ${
             modalToast.type === "success" ? "bg-emerald-600/95 text-white border border-emerald-400/40" : "bg-red-600/95 text-white border border-red-400/40"
           }`}
         >
@@ -1158,7 +1158,7 @@ export default function DigitalRequisitionDocument({
       {/* SUB-MODAL: DRAWING CANVAS SIGNATURE PAD (TOUCH & PEN) */}
       {/* ========================================================================= */}
       {isSignCanvasOpen && (
-        <div className="fixed inset-0 z-[90] flex items-center justify-center p-4 bg-black/80 backdrop-blur-md print:hidden">
+        <div className="fixed inset-0 z-[110] flex items-center justify-center p-4 bg-black/80 backdrop-blur-md print:hidden">
           <div className="bg-white rounded-3xl max-w-md w-full p-6 space-y-4 shadow-2xl border border-slate-200 animate-scaleUp">
             <div className="flex items-center justify-between border-b border-slate-100 pb-3">
               <div className="flex items-center space-x-2">
@@ -1252,7 +1252,7 @@ export default function DigitalRequisitionDocument({
       {/* SUB-MODAL: REJECT REASON */}
       {/* ========================================================================= */}
       {isRejectModalOpen && (
-        <div className="fixed inset-0 z-[90] flex items-center justify-center p-4 bg-black/80 backdrop-blur-md print:hidden">
+        <div className="fixed inset-0 z-[110] flex items-center justify-center p-4 bg-black/80 backdrop-blur-md print:hidden">
           <div className="bg-white rounded-3xl max-w-md w-full p-6 space-y-4 shadow-2xl border border-slate-200 animate-scaleUp">
             <div className="w-12 h-12 rounded-full bg-rose-100 text-rose-600 flex items-center justify-center mx-auto">
               <XCircle className="w-6 h-6" />

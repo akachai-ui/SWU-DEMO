@@ -266,7 +266,7 @@ export default function RequisitionManagement({
       {/* Toast Notification */}
       {notification && (
         <div
-          className={`fixed top-5 right-5 z-50 flex items-center space-x-2 px-4 py-3 rounded-2xl shadow-2xl text-xs sm:text-sm font-semibold backdrop-blur-xl transition-all ${
+          className={`fixed top-5 right-5 z-[80] flex items-center space-x-2 px-4 py-3 rounded-2xl shadow-2xl text-xs sm:text-sm font-semibold backdrop-blur-xl transition-all ${
             notification.type === "success" ? "bg-emerald-600/95 text-white border border-emerald-400/40" : "bg-red-600/95 text-white border border-red-400/40"
           }`}
         >
@@ -605,7 +605,7 @@ export default function RequisitionManagement({
       {/* MODAL: REJECT REASON */}
       {/* ========================================================================= */}
       {isRejectModalOpen && orderToReject && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-md">
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-md">
           <div className="glass-modal rounded-3xl max-w-md w-full p-6 space-y-4 shadow-2xl border border-white/90 animate-scaleUp">
             <div className="w-12 h-12 rounded-2xl bg-rose-100/90 text-rose-600 flex items-center justify-center mx-auto shadow-xs border border-rose-200">
               <XCircle className="w-6 h-6" />

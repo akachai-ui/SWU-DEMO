@@ -339,7 +339,7 @@ export default function PermissionManager() {
       {/* Toast Notification */}
       {notification && (
         <div
-          className={`fixed top-5 right-5 z-50 flex items-center space-x-2 px-4 py-3 rounded-2xl shadow-2xl text-xs sm:text-sm font-semibold backdrop-blur-xl transition-all ${
+          className={`fixed top-5 right-5 z-[80] flex items-center space-x-2 px-4 py-3 rounded-2xl shadow-2xl text-xs sm:text-sm font-semibold backdrop-blur-xl transition-all ${
             notification.type === "success"
               ? "bg-emerald-600/95 text-white border border-emerald-400/40"
               : "bg-red-600/95 text-white border border-red-400/40"
@@ -628,7 +628,7 @@ export default function PermissionManager() {
       {/* MODAL: ADD / EDIT USER PERMISSIONS FORM */}
       {/* ========================================================================= */}
       {isModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-md overflow-y-auto">
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-md overflow-y-auto">
           <div className="glass-modal rounded-3xl max-w-2xl w-full max-h-[92vh] overflow-y-auto shadow-2xl border border-white/90">
             {/* Header */}
             <div className="sticky top-0 bg-white/95 backdrop-blur-md px-6 py-4 border-b border-slate-200/60 flex items-center justify-between z-10">
