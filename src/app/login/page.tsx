@@ -82,21 +82,26 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-dvh bg-gradient-to-b from-slate-50 via-white to-slate-100 text-slate-800 flex flex-col justify-between selection:bg-[#DA2128] selection:text-white font-sans relative">
+    <div className="min-h-dvh bg-gradient-to-br from-slate-50 via-slate-100/70 to-red-50/40 text-slate-800 flex flex-col justify-between selection:bg-[#DA2128] selection:text-white font-sans relative overflow-hidden">
+      {/* Ambient Glassmorphic Background Orbs */}
+      <div className="absolute -top-32 -left-32 w-96 h-96 bg-[#DA2128]/10 rounded-full blur-3xl pointer-events-none animate-pulse"></div>
+      <div className="absolute top-1/3 -right-32 w-96 h-96 bg-red-400/10 rounded-full blur-3xl pointer-events-none"></div>
+      <div className="absolute -bottom-32 left-1/3 w-96 h-96 bg-slate-300/20 rounded-full blur-3xl pointer-events-none"></div>
+
       {/* Top Accent Line */}
-      <div className="h-1.5 w-full bg-gradient-to-r from-[#DA2128] via-[#FF3B44] to-[#DA2128]"></div>
+      <div className="h-1.5 w-full bg-gradient-to-r from-[#DA2128] via-[#FF3B44] to-[#DA2128] relative z-20"></div>
 
       {/* Modern Global Verification Overlay Modal */}
       {isVerifying && (
         <div className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-md flex items-center justify-center p-4 animate-fadeIn">
-          <div className="bg-white border border-slate-200/90 shadow-2xl rounded-3xl p-7 sm:p-9 max-w-sm w-full flex flex-col items-center text-center space-y-5 animate-scaleUp relative overflow-hidden">
-            <div className="absolute -top-12 -right-12 w-36 h-36 bg-[#DA2128]/10 rounded-full blur-2xl pointer-events-none"></div>
+          <div className="glass-modal rounded-3xl p-7 sm:p-9 max-w-sm w-full flex flex-col items-center text-center space-y-5 animate-scaleUp relative overflow-hidden shadow-2xl">
+            <div className="absolute -top-12 -right-12 w-36 h-36 bg-[#DA2128]/15 rounded-full blur-2xl pointer-events-none"></div>
 
             <SWULogo size="lg" />
 
             <div className="space-y-3 flex flex-col items-center">
               <div className="relative flex items-center justify-center">
-                <div className="w-14 h-14 rounded-full border-3 border-slate-100 border-t-[#DA2128] animate-spin"></div>
+                <div className="w-14 h-14 rounded-full border-3 border-slate-200/80 border-t-[#DA2128] animate-spin"></div>
                 <ShieldCheck className="w-6 h-6 text-[#DA2128] absolute" />
               </div>
 
@@ -104,13 +109,13 @@ export default function LoginPage() {
                 <h3 className="text-base font-bold text-slate-900 tracking-tight">
                   {verifyingText}
                 </h3>
-                <p className="text-xs text-slate-400 font-medium">
+                <p className="text-xs text-slate-500 font-medium">
                   SWU Physical Asset Management System
                 </p>
               </div>
             </div>
 
-            <div className="w-full bg-slate-100 h-1.5 rounded-full overflow-hidden">
+            <div className="w-full bg-slate-200/60 h-1.5 rounded-full overflow-hidden">
               <div className="h-full bg-gradient-to-r from-[#DA2128] via-[#FF3B44] to-[#DA2128] rounded-full animate-pulse w-4/5 mx-auto"></div>
             </div>
           </div>
@@ -118,17 +123,18 @@ export default function LoginPage() {
       )}
 
       {/* Main Container - Optimized for Smartphone & Desktop */}
-      <main className="flex-1 flex items-center justify-center p-4 sm:p-6 md:p-8">
+      <main className="flex-1 flex items-center justify-center p-4 sm:p-6 md:p-8 relative z-10">
         <div className="w-full max-w-md">
           
-          {/* Card Container */}
-          <div className="bg-white/95 backdrop-blur-sm border border-slate-200 rounded-3xl p-6 sm:p-8 space-y-5 sm:space-y-6 shadow-xl relative overflow-hidden">
-            <div className="absolute -right-12 -top-12 w-48 h-48 bg-[#DA2128]/5 rounded-full blur-2xl pointer-events-none"></div>
+          {/* Frosted Glass Card Container */}
+          <div className="glass-modal rounded-3xl p-6 sm:p-8 space-y-5 sm:space-y-6 shadow-[0_20px_60px_-15px_rgba(218,33,40,0.12)] relative overflow-hidden border border-white/90">
+            <div className="absolute -right-12 -top-12 w-48 h-48 bg-[#DA2128]/10 rounded-full blur-2xl pointer-events-none"></div>
+            <div className="absolute -left-12 -bottom-12 w-48 h-48 bg-slate-200/40 rounded-full blur-2xl pointer-events-none"></div>
 
             {/* Header Text & Logo */}
             <div className="text-center space-y-3 relative z-10 flex flex-col items-center">
               <div className="flex items-center justify-center py-1">
-                <SWULogo size="xl" className="mx-auto" />
+                <SWULogo size="xl" className="mx-auto drop-shadow-sm" />
               </div>
               
               <div className="space-y-1">
@@ -141,7 +147,7 @@ export default function LoginPage() {
               </div>
 
               <div className="pt-1">
-                <span className="inline-flex items-center px-3 py-1 rounded-full text-[11px] font-bold bg-red-50 text-[#DA2128] border border-red-200/80">
+                <span className="inline-flex items-center px-3 py-1 rounded-full text-[11px] font-bold bg-red-50/80 text-[#DA2128] border border-red-200/80 backdrop-blur-xs shadow-xs">
                   🔒 ระบบเข้าใช้งานสำหรับบุคลากรภายใน
                 </span>
               </div>
@@ -149,7 +155,7 @@ export default function LoginPage() {
 
             {/* If Already Logged In */}
             {user && (
-              <div className="p-4 bg-slate-50 border border-slate-200 rounded-2xl space-y-3 text-xs">
+              <div className="p-4 glass-pill rounded-2xl space-y-3 text-xs border border-white/80">
                 <div className="flex items-center space-x-3">
                   {user.avatarUrl ? (
                     /* eslint-disable-next-line @next/next/no-img-element */
@@ -167,19 +173,19 @@ export default function LoginPage() {
                   ) : null}
                   <div
                     style={{ display: user.avatarUrl ? "none" : "flex" }}
-                    className="w-10 h-10 rounded-full bg-red-50 text-[#DA2128] font-black items-center justify-center text-sm border border-red-200 shrink-0"
+                    className="w-10 h-10 rounded-full bg-red-50 text-[#DA2128] font-black items-center justify-center text-sm border border-red-200 shrink-0 shadow-xs"
                   >
                     {user.name ? user.name.slice(0, 2).toUpperCase() : "SW"}
                   </div>
                   <div className="min-w-0 flex-1">
                     <p className="font-bold text-slate-900 truncate">{user.name}</p>
                     <p className="text-slate-500 font-mono text-[11px] truncate">{user.email}</p>
-                    <span className="inline-block mt-0.5 px-2 py-0.2 rounded-full text-[10px] font-bold bg-red-50 text-[#DA2128] border border-red-200">
+                    <span className="inline-block mt-0.5 px-2 py-0.2 rounded-full text-[10px] font-bold bg-red-50/90 text-[#DA2128] border border-red-200">
                       {user.roleNameTh}
                     </span>
                   </div>
                 </div>
-                <div className="flex items-center space-x-2 pt-1 border-t border-slate-200">
+                <div className="flex items-center space-x-2 pt-1 border-t border-slate-200/70">
                   <button
                     onClick={() => {
                       if (typeof window !== "undefined") {
@@ -187,13 +193,13 @@ export default function LoginPage() {
                       }
                       router.push("/");
                     }}
-                    className="flex-1 py-2.5 bg-[#DA2128] active:bg-[#B81B22] text-white font-bold rounded-xl text-center transition-colors text-xs active:scale-[0.99] cursor-pointer"
+                    className="flex-1 py-2.5 glass-button-primary text-white font-bold rounded-xl text-center text-xs active:scale-[0.99] cursor-pointer"
                   >
                     เข้าสู่หน้าหลัก
                   </button>
                   <button
                     onClick={logout}
-                    className="py-2.5 px-3.5 bg-slate-200 active:bg-slate-300 text-slate-700 font-semibold rounded-xl transition-colors text-xs"
+                    className="py-2.5 px-3.5 glass-button-secondary text-slate-700 font-semibold rounded-xl text-xs cursor-pointer"
                   >
                     ออกจากระบบ
                   </button>
@@ -203,7 +209,7 @@ export default function LoginPage() {
 
             {/* Error Message */}
             {errorMessage && (
-              <div className="bg-red-50 border border-red-200 p-3.5 rounded-2xl flex flex-col space-y-2 text-xs text-red-700 animate-fadeIn">
+              <div className="bg-red-50/90 backdrop-blur-sm border border-red-200 p-3.5 rounded-2xl flex flex-col space-y-2 text-xs text-red-700 animate-fadeIn shadow-xs">
                 <div className="flex items-start space-x-2.5">
                   <AlertCircle className="w-4 h-4 text-[#DA2128] shrink-0 mt-0.5" />
                   <span className="leading-relaxed font-medium">{errorMessage}</span>
@@ -213,7 +219,7 @@ export default function LoginPage() {
 
             {/* Success Message */}
             {successMessage && (
-              <div className="bg-emerald-50 border border-emerald-200 p-3.5 rounded-2xl flex items-start space-x-2.5 text-xs text-emerald-700 font-semibold animate-fadeIn">
+              <div className="bg-emerald-50/90 backdrop-blur-sm border border-emerald-200 p-3.5 rounded-2xl flex items-start space-x-2.5 text-xs text-emerald-700 font-semibold animate-fadeIn shadow-xs">
                 <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />
                 <span className="leading-relaxed">{successMessage}</span>
               </div>
@@ -234,7 +240,7 @@ export default function LoginPage() {
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     disabled={isVerifying}
-                    className="w-full pl-10 pr-3.5 py-3 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-900 focus:outline-none focus:border-[#DA2128] focus:bg-white transition-colors font-mono"
+                    className="w-full pl-10 pr-3.5 py-3 glass-input rounded-xl text-xs text-slate-900 font-mono"
                   />
                 </div>
               </div>
@@ -262,7 +268,7 @@ export default function LoginPage() {
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     disabled={isVerifying}
-                    className="w-full pl-10 pr-10 py-3 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-900 focus:outline-none focus:border-[#DA2128] focus:bg-white transition-colors font-mono"
+                    className="w-full pl-10 pr-10 py-3 glass-input rounded-xl text-xs text-slate-900 font-mono"
                   />
                   <button
                     type="button"
@@ -278,7 +284,7 @@ export default function LoginPage() {
               <button
                 type="submit"
                 disabled={isVerifying}
-                className="w-full bg-[#DA2128] hover:bg-[#B81B22] active:bg-[#9B151B] text-white font-bold py-3.5 px-4 rounded-2xl shadow-lg shadow-red-500/20 active:scale-[0.99] transition-all flex items-center justify-center space-x-2 text-xs sm:text-sm cursor-pointer disabled:opacity-70 mt-3"
+                className="w-full glass-button-primary text-white font-bold py-3.5 px-4 rounded-2xl active:scale-[0.99] flex items-center justify-center space-x-2 text-xs sm:text-sm cursor-pointer disabled:opacity-70 mt-3"
               >
                 <span>เข้าสู่ระบบ (Sign In)</span>
                 <ArrowRight className="w-4 h-4" />
@@ -286,7 +292,7 @@ export default function LoginPage() {
             </form>
 
             {/* Internal System Admin Notice */}
-            <div className="p-3.5 bg-slate-50 border border-slate-200/80 rounded-2xl text-[11px] text-slate-500 space-y-1.5 mt-2">
+            <div className="p-3.5 glass-pill border border-slate-200/70 rounded-2xl text-[11px] text-slate-500 space-y-1.5 mt-2">
               <div className="flex items-center space-x-1.5 font-semibold text-slate-700">
                 <ShieldAlert className="w-4 h-4 text-[#DA2128] shrink-0" />
                 <span>สำหรับบุคลากรใหม่:</span>
@@ -301,7 +307,7 @@ export default function LoginPage() {
       </main>
 
       {/* Footer */}
-      <footer className="py-4 text-center text-[11px] text-slate-400 px-4">
+      <footer className="py-4 text-center text-[11px] text-slate-400 px-4 relative z-10">
         <p>© 2567 ส่วนพัฒนากายภาพ มหาวิทยาลัยศรีนครินทรวิโรฒ (SWU)</p>
       </footer>
     </div>

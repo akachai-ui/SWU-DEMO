@@ -339,10 +339,10 @@ export default function PermissionManager() {
       {/* Toast Notification */}
       {notification && (
         <div
-          className={`fixed top-5 right-5 z-50 flex items-center space-x-2 px-4 py-3 rounded-xl shadow-xl text-xs sm:text-sm font-semibold transition-all ${
+          className={`fixed top-5 right-5 z-50 flex items-center space-x-2 px-4 py-3 rounded-2xl shadow-2xl text-xs sm:text-sm font-semibold backdrop-blur-xl transition-all ${
             notification.type === "success"
-              ? "bg-emerald-600 text-white"
-              : "bg-red-600 text-white"
+              ? "bg-emerald-600/95 text-white border border-emerald-400/40"
+              : "bg-red-600/95 text-white border border-red-400/40"
           }`}
         >
           {notification.type === "success" ? (
@@ -355,11 +355,11 @@ export default function PermissionManager() {
       )}
 
       {/* Top Header Card */}
-      <div className="bg-white rounded-2xl p-5 sm:p-6 border border-slate-200 shadow-xs space-y-5">
+      <div className="glass-panel rounded-2xl sm:rounded-3xl p-5 sm:p-6 space-y-5">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div className="space-y-1">
             <div className="flex items-center space-x-2.5">
-              <span className="p-2.5 rounded-xl bg-red-50 text-[#DA2128]">
+              <span className="p-2.5 rounded-2xl bg-red-50/90 text-[#DA2128] border border-red-200/60 shadow-xs">
                 <ShieldCheck className="w-6 h-6" />
               </span>
               <div>
@@ -376,7 +376,7 @@ export default function PermissionManager() {
           <div className="flex items-center space-x-2 sm:space-x-3 flex-wrap sm:flex-nowrap">
             <button
               onClick={handleOpenAddModal}
-              className="px-4 py-2.5 text-xs font-bold text-white bg-[#DA2128] hover:bg-[#B81B22] rounded-xl transition-all shadow-md shadow-red-500/20 flex items-center space-x-1.5 active:scale-[0.99]"
+              className="px-4 py-2.5 text-xs font-bold text-white glass-button-primary rounded-xl flex items-center space-x-1.5 active:scale-95 cursor-pointer"
             >
               <Plus className="w-4 h-4" />
               <span>เพิ่มผู้ใช้และกำหนดสิทธิ์</span>
@@ -385,7 +385,7 @@ export default function PermissionManager() {
         </div>
 
         {/* Role Matrix Guide (6 Roles Overview) */}
-        <div className="pt-2 border-t border-slate-100">
+        <div className="pt-2 border-t border-slate-200/60">
           <p className="text-xs font-bold text-slate-700 mb-2.5 flex items-center space-x-1.5">
             <Key className="w-3.5 h-3.5 text-[#DA2128]" />
             <span>มาตรฐานระดับสิทธิ์และบทบาทในระบบ (Role Presets):</span>
@@ -397,7 +397,7 @@ export default function PermissionManager() {
               return (
                 <div
                   key={rKey}
-                  className="p-2.5 rounded-xl border border-slate-200 bg-slate-50/60 hover:bg-white hover:border-red-200 transition-all space-y-1"
+                  className="p-2.5 rounded-2xl glass-card border border-white/90 space-y-1 hover:border-red-200"
                 >
                   <span className="text-[11px] font-bold text-slate-900 block truncate">
                     {r.roleNameTh.split(" (")[0]}
@@ -412,7 +412,7 @@ export default function PermissionManager() {
         </div>
 
         {/* Search & Filters */}
-        <div className="grid grid-cols-1 sm:grid-cols-12 gap-3 pt-2 border-t border-slate-100">
+        <div className="grid grid-cols-1 sm:grid-cols-12 gap-3 pt-2 border-t border-slate-200/60">
           <div className="sm:col-span-6 relative">
             <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
             <input
@@ -420,12 +420,12 @@ export default function PermissionManager() {
               placeholder="ค้นหาชื่อผู้ใช้, อีเมล @g.swu.ac.th, หน่วยงาน, ตำแหน่ง..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full pl-10 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs sm:text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-[#DA2128]/20 focus:border-[#DA2128] transition-all"
+              className="w-full pl-10 pr-8 py-2.5 glass-input rounded-xl text-xs sm:text-sm text-slate-900 placeholder:text-slate-400"
             />
             {searchQuery && (
               <button
                 onClick={() => setSearchQuery("")}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 text-xs"
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 text-xs p-1 cursor-pointer"
               >
                 ✕
               </button>
@@ -436,7 +436,7 @@ export default function PermissionManager() {
             <select
               value={selectedRoleFilter}
               onChange={(e) => setSelectedRoleFilter(e.target.value)}
-              className="w-full px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-700 focus:outline-none focus:border-[#DA2128]"
+              className="w-full px-3 py-2.5 glass-input rounded-xl text-xs text-slate-700"
             >
               <option value="ALL">บทบาททั้งหมด ({users.length})</option>
               {(Object.keys(ROLE_PRESETS) as UserRole[]).map((rKey) => (
@@ -451,7 +451,7 @@ export default function PermissionManager() {
             <select
               value={selectedStatusFilter}
               onChange={(e) => setSelectedStatusFilter(e.target.value)}
-              className="w-full px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-700 focus:outline-none focus:border-[#DA2128]"
+              className="w-full px-3 py-2.5 glass-input rounded-xl text-xs text-slate-700"
             >
               <option value="ALL">สถานะทั้งหมด</option>
               <option value="active">เปิดใช้งาน (Active)</option>
@@ -463,13 +463,13 @@ export default function PermissionManager() {
 
       {/* Users Table / List */}
       {isLoading ? (
-        <div className="bg-white rounded-2xl border border-slate-200 p-16 text-center space-y-3">
+        <div className="glass-panel rounded-3xl p-16 text-center space-y-3">
           <RefreshCw className="w-8 h-8 text-[#DA2128] animate-spin mx-auto" />
           <p className="text-sm font-bold text-slate-700">กำลังเชื่อมต่อฐานข้อมูลสิทธิ์ผู้ใช้งาน Cloud Firestore...</p>
         </div>
       ) : users.length === 0 ? (
-        <div className="bg-white rounded-2xl border-2 border-dashed border-slate-200 p-12 sm:p-16 text-center space-y-5 shadow-xs">
-          <div className="w-20 h-20 bg-red-50 text-[#DA2128] rounded-2xl flex items-center justify-center mx-auto shadow-xs">
+        <div className="glass-panel rounded-3xl border-2 border-dashed border-slate-300 p-12 sm:p-16 text-center space-y-5 shadow-xs">
+          <div className="w-20 h-20 bg-red-50 text-[#DA2128] rounded-2xl flex items-center justify-center mx-auto shadow-xs border border-red-200/60">
             <Users className="w-10 h-10" />
           </div>
           <div className="space-y-1.5 max-w-md mx-auto">
@@ -482,18 +482,18 @@ export default function PermissionManager() {
           </div>
           <button
             onClick={handleOpenAddModal}
-            className="px-6 py-3 bg-[#DA2128] hover:bg-[#B81B22] text-white text-xs sm:text-sm font-bold rounded-xl shadow-lg shadow-red-500/20 inline-flex items-center space-x-2 transition-all"
+            className="px-6 py-3 glass-button-primary text-white text-xs sm:text-sm font-bold rounded-2xl inline-flex items-center space-x-2 transition-all cursor-pointer"
           >
             <Plus className="w-4 h-4" />
             <span>➕ เพิ่มผู้ใช้งานและกำหนดสิทธิ์คนแรก</span>
           </button>
         </div>
       ) : (
-        <div className="bg-white rounded-2xl border border-slate-200 shadow-xs overflow-hidden">
+        <div className="glass-panel rounded-2xl sm:rounded-3xl shadow-xl overflow-hidden">
           <div className="overflow-x-auto">
             <table className="w-full text-left text-xs border-collapse">
               <thead>
-                <tr className="bg-slate-50 text-slate-600 border-b border-slate-200 font-bold">
+                <tr className="bg-slate-100/80 text-slate-600 border-b border-slate-200 font-bold">
                   <th className="py-3.5 px-4">ผู้ใช้งาน / อีเมล</th>
                   <th className="py-3.5 px-4">สังกัด / หน่วยงาน</th>
                   <th className="py-3.5 px-4">บทบาท (Role)</th>
@@ -508,11 +508,11 @@ export default function PermissionManager() {
                   const activePermCount = Object.values(u.permissions || {}).filter(Boolean).length;
 
                   return (
-                    <tr key={u.id || u.uid} className="hover:bg-slate-50/80 transition-colors">
+                    <tr key={u.id || u.uid} className="hover:bg-red-50/40 transition-colors">
                       {/* Name & Email */}
                       <td className="py-3.5 px-4">
                         <div className="flex items-center space-x-3">
-                          <div className="w-8 h-8 rounded-full bg-red-50 text-[#DA2128] font-bold flex items-center justify-center text-xs flex-shrink-0 border border-red-200">
+                          <div className="w-8 h-8 rounded-full bg-red-50 text-[#DA2128] font-bold flex items-center justify-center text-xs flex-shrink-0 border border-red-200 shadow-2xs">
                             {u.name.slice(0, 2)}
                           </div>
                           <div>
@@ -531,16 +531,16 @@ export default function PermissionManager() {
                       {/* Role Badge */}
                       <td className="py-3.5 px-4">
                         <span
-                          className={`inline-flex items-center px-2.5 py-1 rounded-full text-[10px] font-bold ${
+                          className={`inline-flex items-center px-2.5 py-1 rounded-full text-[10px] font-bold shadow-2xs ${
                             u.role === "super_admin"
-                              ? "bg-red-50 text-red-700 border border-red-200"
+                              ? "bg-red-50/90 text-red-700 border border-red-200"
                               : u.role === "approver"
-                              ? "bg-purple-50 text-purple-700 border border-purple-200"
+                              ? "bg-purple-50/90 text-purple-700 border border-purple-200"
                               : u.role === "inventory_officer"
-                              ? "bg-amber-50 text-amber-800 border border-amber-200"
+                              ? "bg-amber-50/90 text-amber-800 border border-amber-200"
                               : u.role === "technician"
-                              ? "bg-blue-50 text-blue-700 border border-blue-200"
-                              : "bg-emerald-50 text-emerald-700 border border-emerald-200"
+                              ? "bg-blue-50/90 text-blue-700 border border-blue-200"
+                              : "bg-emerald-50/90 text-emerald-700 border border-emerald-200"
                           }`}
                         >
                           {u.roleNameTh || rolePreset.roleNameTh}
@@ -551,27 +551,27 @@ export default function PermissionManager() {
                       <td className="py-3.5 px-4">
                         <div className="flex flex-wrap gap-1 max-w-xs">
                           {u.permissions?.canViewAssets && (
-                            <span className="px-1.5 py-0.5 rounded bg-slate-100 text-slate-700 text-[10px] font-semibold">
+                            <span className="px-1.5 py-0.5 rounded-md glass-pill text-slate-700 text-[10px] font-semibold border-slate-200">
                               ครุภัณฑ์
                             </span>
                           )}
                           {u.permissions?.canRequestConsumables && (
-                            <span className="px-1.5 py-0.5 rounded bg-slate-100 text-slate-700 text-[10px] font-semibold">
+                            <span className="px-1.5 py-0.5 rounded-md glass-pill text-slate-700 text-[10px] font-semibold border-slate-200">
                               ขอเบิก
                             </span>
                           )}
                           {u.permissions?.canAddConsumables && (
-                            <span className="px-1.5 py-0.5 rounded bg-amber-50 text-amber-800 text-[10px] font-bold">
+                            <span className="px-1.5 py-0.5 rounded-md bg-amber-50 text-amber-800 text-[10px] font-bold border border-amber-200">
                               คุมสต็อก
                             </span>
                           )}
                           {u.permissions?.canApproveRequisitions && (
-                            <span className="px-1.5 py-0.5 rounded bg-purple-50 text-purple-700 text-[10px] font-bold">
+                            <span className="px-1.5 py-0.5 rounded-md bg-purple-50 text-purple-700 text-[10px] font-bold border border-purple-200">
                               อนุมัติ
                             </span>
                           )}
                           {u.permissions?.canManageUsers && (
-                            <span className="px-1.5 py-0.5 rounded bg-red-50 text-red-700 text-[10px] font-bold">
+                            <span className="px-1.5 py-0.5 rounded-md bg-red-50 text-red-700 text-[10px] font-bold border border-red-200">
                               จัดการสิทธิ์
                             </span>
                           )}
@@ -585,10 +585,10 @@ export default function PermissionManager() {
                       <td className="py-3.5 px-4 text-center">
                         <button
                           onClick={() => handleToggleStatus(u)}
-                          className={`px-2.5 py-1 rounded-full text-[10px] font-bold transition-all ${
+                          className={`px-2.5 py-1 rounded-full text-[10px] font-bold transition-all cursor-pointer shadow-2xs ${
                             u.status === "active"
-                              ? "bg-emerald-50 text-emerald-700 border border-emerald-200 hover:bg-emerald-100"
-                              : "bg-slate-100 text-slate-500 border border-slate-200 hover:bg-slate-200"
+                              ? "bg-emerald-50/90 text-emerald-700 border border-emerald-200 hover:bg-emerald-100"
+                              : "bg-slate-100/90 text-slate-500 border border-slate-200 hover:bg-slate-200"
                           }`}
                           title="คลิกเพื่อสลับสถานะ"
                         >
@@ -601,14 +601,14 @@ export default function PermissionManager() {
                         <div className="flex items-center justify-end space-x-1.5">
                           <button
                             onClick={() => handleOpenEditModal(u)}
-                            className="p-1.5 rounded-lg text-slate-600 hover:text-[#DA2128] hover:bg-slate-100 transition-colors"
+                            className="p-1.5 rounded-lg glass-pill text-slate-600 hover:text-[#DA2128] hover:bg-white transition-colors cursor-pointer"
                             title="แก้ไขสิทธิ์"
                           >
                             <Edit className="w-4 h-4" />
                           </button>
                           <button
                             onClick={() => handleDeleteUser(u)}
-                            className="p-1.5 rounded-lg text-slate-400 hover:text-red-600 hover:bg-slate-100 transition-colors"
+                            className="p-1.5 rounded-lg glass-pill text-slate-400 hover:text-red-600 hover:bg-white transition-colors cursor-pointer"
                             title="ลบผู้ใช้"
                           >
                             <Trash2 className="w-4 h-4" />
@@ -628,12 +628,12 @@ export default function PermissionManager() {
       {/* MODAL: ADD / EDIT USER PERMISSIONS FORM */}
       {/* ========================================================================= */}
       {isModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs overflow-y-auto">
-          <div className="bg-white rounded-2xl max-w-2xl w-full max-h-[92vh] overflow-y-auto shadow-2xl border border-slate-200">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-md overflow-y-auto">
+          <div className="glass-modal rounded-3xl max-w-2xl w-full max-h-[92vh] overflow-y-auto shadow-2xl border border-white/90">
             {/* Header */}
-            <div className="sticky top-0 bg-white px-6 py-4 border-b border-slate-200 flex items-center justify-between z-10">
+            <div className="sticky top-0 bg-white/95 backdrop-blur-md px-6 py-4 border-b border-slate-200/60 flex items-center justify-between z-10">
               <div className="flex items-center space-x-2.5">
-                <div className="p-2 rounded-xl bg-red-50 text-[#DA2128]">
+                <div className="p-2 rounded-xl bg-red-50 text-[#DA2128] border border-red-200/60 shadow-2xs">
                   <ShieldCheck className="w-5 h-5" />
                 </div>
                 <div>
@@ -647,7 +647,7 @@ export default function PermissionManager() {
               </div>
               <button
                 onClick={() => setIsModalOpen(false)}
-                className="p-2 text-slate-400 hover:text-slate-600 rounded-xl hover:bg-slate-100"
+                className="p-2 text-slate-400 hover:text-slate-600 rounded-xl hover:bg-slate-100 cursor-pointer"
               >
                 <X className="w-5 h-5" />
               </button>
@@ -667,7 +667,7 @@ export default function PermissionManager() {
                     value={formData.name}
                     onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                     placeholder="เช่น นายสมศักดิ์ สายตรวจ"
-                    className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs sm:text-sm text-slate-900 focus:outline-none focus:border-[#DA2128]"
+                    className="w-full px-3.5 py-2.5 glass-input rounded-xl text-xs sm:text-sm text-slate-900"
                   />
                 </div>
 
@@ -687,14 +687,14 @@ export default function PermissionManager() {
                       })
                     }
                     placeholder="somsak@g.swu.ac.th"
-                    className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs sm:text-sm text-slate-900 focus:outline-none focus:border-[#DA2128] font-mono"
+                    className="w-full px-3.5 py-2.5 glass-input rounded-xl text-xs sm:text-sm text-slate-900 font-mono"
                   />
                 </div>
               </div>
 
               {/* Password Section */}
               {!editingId ? (
-                <div className="p-4 bg-gradient-to-br from-red-50/70 via-slate-50 to-red-50/30 rounded-2xl border border-red-200/80 space-y-2.5">
+                <div className="p-4 bg-gradient-to-br from-red-50/70 via-white/80 to-red-50/30 rounded-2xl border border-red-200/80 space-y-2.5 shadow-xs">
                   <div className="flex items-center justify-between">
                     <label className="text-xs font-bold text-slate-900 flex items-center space-x-1.5">
                       <Key className="w-4 h-4 text-[#DA2128]" />
@@ -704,7 +704,7 @@ export default function PermissionManager() {
                       <button
                         type="button"
                         onClick={generateRandomPassword}
-                        className="text-[11px] font-bold text-[#DA2128] hover:bg-red-100/60 px-2 py-1 rounded-lg transition-colors flex items-center space-x-1 cursor-pointer"
+                        className="text-[11px] font-bold text-[#DA2128] glass-pill hover:bg-red-50 px-2 py-1 rounded-lg transition-colors flex items-center space-x-1 cursor-pointer"
                         title="สุ่มรหัสผ่านใหม่"
                       >
                         <Dices className="w-3.5 h-3.5" />
@@ -714,7 +714,7 @@ export default function PermissionManager() {
                         type="button"
                         onClick={handleCopyPassword}
                         className={`text-[11px] font-bold px-2 py-1 rounded-lg transition-colors flex items-center space-x-1 cursor-pointer ${
-                          passwordCopied ? "bg-emerald-100 text-emerald-700" : "bg-white text-slate-700 hover:bg-slate-100 border border-slate-200"
+                          passwordCopied ? "bg-emerald-100 text-emerald-700" : "glass-pill text-slate-700 hover:bg-slate-100"
                         }`}
                         title="คัดลอกรหัสผ่าน"
                       >
@@ -733,7 +733,7 @@ export default function PermissionManager() {
                       value={initialPassword}
                       onChange={(e) => setInitialPassword(e.target.value)}
                       placeholder="กำหนดรหัสผ่าน (อย่างน้อย 6 ตัวอักษร)"
-                      className="w-full pl-10 pr-10 py-2.5 bg-white border border-red-200 rounded-xl text-xs sm:text-sm text-slate-900 focus:outline-none focus:border-[#DA2128] font-mono"
+                      className="w-full pl-10 pr-10 py-2.5 glass-input rounded-xl text-xs sm:text-sm text-slate-900 font-mono"
                     />
                     <button
                       type="button"
@@ -749,7 +749,7 @@ export default function PermissionManager() {
                   </p>
                 </div>
               ) : (
-                <div className="p-3.5 bg-slate-50 border border-slate-200 rounded-2xl flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs">
+                <div className="p-3.5 glass-pill rounded-2xl flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs border border-slate-200/80">
                   <div className="space-y-0.5">
                     <p className="font-bold text-slate-800 flex items-center space-x-1.5">
                       <Key className="w-4 h-4 text-[#DA2128]" />
@@ -763,7 +763,7 @@ export default function PermissionManager() {
                     type="button"
                     disabled={isSendingReset}
                     onClick={() => handleSendResetLink(formData.email)}
-                    className="shrink-0 px-3.5 py-2 rounded-xl bg-white hover:bg-slate-100 active:bg-slate-200 border border-slate-200 text-[#DA2128] text-xs font-bold transition-all shadow-2xs flex items-center justify-center space-x-1.5 cursor-pointer disabled:opacity-60"
+                    className="shrink-0 px-3.5 py-2 rounded-xl glass-button-secondary text-[#DA2128] text-xs font-bold transition-all shadow-2xs flex items-center justify-center space-x-1.5 cursor-pointer disabled:opacity-60"
                   >
                     {isSendingReset ? (
                       <>
@@ -791,7 +791,7 @@ export default function PermissionManager() {
                     value={formData.department}
                     onChange={(e) => setFormData({ ...formData, department: e.target.value })}
                     placeholder="เช่น ฝ่ายงานพัฒนาและบำรุงรักษา ส่วนพัฒนากายภาพ"
-                    className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs sm:text-sm text-slate-900 focus:outline-none focus:border-[#DA2128]"
+                    className="w-full px-3.5 py-2.5 glass-input rounded-xl text-xs sm:text-sm text-slate-900"
                   />
                 </div>
 
@@ -804,7 +804,7 @@ export default function PermissionManager() {
                     value={formData.position || ""}
                     onChange={(e) => setFormData({ ...formData, position: e.target.value })}
                     placeholder="เช่น ช่างไฟฟ้าชำนาญการ, เจ้าหน้าที่บริหารงานทั่วไป"
-                    className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs sm:text-sm text-slate-900 focus:outline-none focus:border-[#DA2128]"
+                    className="w-full px-3.5 py-2.5 glass-input rounded-xl text-xs sm:text-sm text-slate-900"
                   />
                 </div>
               </div>
@@ -823,10 +823,10 @@ export default function PermissionManager() {
                         key={rKey}
                         type="button"
                         onClick={() => handleRoleChange(rKey)}
-                        className={`p-2.5 rounded-xl border text-left transition-all ${
+                        className={`p-2.5 rounded-2xl text-left transition-all cursor-pointer ${
                           isSelected
-                            ? "bg-red-50 border-[#DA2128] text-slate-900 shadow-2xs font-bold"
-                            : "bg-slate-50 border-slate-200 text-slate-600 hover:bg-slate-100"
+                            ? "bg-red-50/90 border-2 border-[#DA2128] text-slate-900 shadow-2xs font-bold"
+                            : "glass-pill text-slate-600 hover:bg-white/80 border-slate-200"
                         }`}
                       >
                         <p className={`text-xs ${isSelected ? "text-[#DA2128]" : ""}`}>{r.roleNameTh.split(" (")[0]}</p>
@@ -838,7 +838,7 @@ export default function PermissionManager() {
               </div>
 
               {/* Row 4: Detailed Permissions Checkboxes */}
-              <div className="bg-slate-50 p-4 rounded-xl border border-slate-200 space-y-3">
+              <div className="glass-pill p-4 rounded-2xl border border-slate-200/80 space-y-3">
                 <div className="flex items-center justify-between">
                   <label className="text-xs font-bold text-slate-800 flex items-center space-x-1.5">
                     <SlidersHorizontal className="w-3.5 h-3.5 text-[#DA2128]" />
@@ -856,8 +856,8 @@ export default function PermissionManager() {
                         onClick={() => handleTogglePermission(perm.key)}
                         className={`p-2.5 rounded-xl border cursor-pointer transition-all flex items-start space-x-2.5 ${
                           isChecked
-                            ? "bg-white border-red-200 shadow-2xs"
-                            : "bg-white/60 border-slate-200 opacity-60 hover:opacity-100"
+                            ? "bg-white/95 border-red-200 shadow-2xs"
+                            : "bg-white/50 border-slate-200/70 opacity-60 hover:opacity-100"
                         }`}
                       >
                         <input
@@ -885,10 +885,10 @@ export default function PermissionManager() {
                   <button
                     type="button"
                     onClick={() => setFormData({ ...formData, status: "active" })}
-                    className={`px-3 py-1.5 rounded-xl text-xs font-semibold border transition-all ${
+                    className={`px-3 py-1.5 rounded-xl text-xs font-semibold border transition-all cursor-pointer ${
                       formData.status === "active"
-                        ? "bg-emerald-600 text-white border-emerald-600 font-bold"
-                        : "bg-slate-50 text-slate-600 border-slate-200"
+                        ? "bg-emerald-600 text-white border-emerald-600 font-bold shadow-xs"
+                        : "glass-pill text-slate-600 border-slate-200"
                     }`}
                   >
                     🟢 เปิดใช้งาน (Active)
@@ -896,10 +896,10 @@ export default function PermissionManager() {
                   <button
                     type="button"
                     onClick={() => setFormData({ ...formData, status: "inactive" })}
-                    className={`px-3 py-1.5 rounded-xl text-xs font-semibold border transition-all ${
+                    className={`px-3 py-1.5 rounded-xl text-xs font-semibold border transition-all cursor-pointer ${
                       formData.status === "inactive"
-                        ? "bg-slate-700 text-white border-slate-700 font-bold"
-                        : "bg-slate-50 text-slate-600 border-slate-200"
+                        ? "bg-slate-700 text-white border-slate-700 font-bold shadow-xs"
+                        : "glass-pill text-slate-600 border-slate-200"
                     }`}
                   >
                     ⚪ ปิดใช้งาน (Inactive)
@@ -908,18 +908,18 @@ export default function PermissionManager() {
               </div>
 
               {/* Submit Buttons */}
-              <div className="pt-4 border-t border-slate-200 flex items-center justify-end space-x-3">
+              <div className="pt-4 border-t border-slate-200/80 flex items-center justify-end space-x-3">
                 <button
                   type="button"
                   onClick={() => setIsModalOpen(false)}
-                  className="px-4 py-2.5 rounded-xl border border-slate-200 text-xs font-semibold text-slate-600 hover:bg-slate-100 transition-colors"
+                  className="px-4 py-2.5 rounded-xl glass-button-secondary text-xs font-semibold text-slate-600 transition-colors cursor-pointer"
                 >
                   ยกเลิก
                 </button>
                 <button
                   type="submit"
                   disabled={isSubmitting}
-                  className="px-6 py-2.5 rounded-xl bg-[#DA2128] hover:bg-[#B81B22] text-white text-xs font-bold transition-all shadow-md shadow-red-500/20 flex items-center space-x-2"
+                  className="px-6 py-2.5 rounded-xl glass-button-primary text-white text-xs font-bold transition-all flex items-center space-x-2 cursor-pointer"
                 >
                   {isSubmitting ? (
                     <>

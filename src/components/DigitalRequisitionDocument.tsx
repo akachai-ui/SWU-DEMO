@@ -497,7 +497,7 @@ export default function DigitalRequisitionDocument({
   };
 
   return (
-    <div className="fixed inset-0 z-[70] flex items-center justify-center p-2.5 sm:p-6 pb-6 sm:pb-6 bg-black/80 backdrop-blur-md overflow-y-auto print:p-0 print:bg-white print:static print:overflow-visible">
+    <div className="fixed inset-0 z-[70] flex items-center justify-center p-2.5 sm:p-6 pb-6 sm:pb-6 bg-slate-900/60 backdrop-blur-md overflow-y-auto print:p-0 print:bg-white print:static print:overflow-visible animate-fadeIn">
       {/* Dynamic Print CSS to guarantee ONLY the single document prints & fits 1-Page A4 */}
       <style dangerouslySetInnerHTML={{ __html: `
         @page {
@@ -543,7 +543,7 @@ export default function DigitalRequisitionDocument({
       {modalToast && (
         <div
           className={`fixed top-6 right-6 z-[100] flex items-center space-x-2 px-4 py-3 rounded-2xl shadow-2xl text-xs sm:text-sm font-semibold transition-all print:hidden ${
-            modalToast.type === "success" ? "bg-emerald-600 text-white" : "bg-red-600 text-white"
+            modalToast.type === "success" ? "bg-emerald-600/95 text-white border border-emerald-400/40" : "bg-red-600/95 text-white border border-red-400/40"
           }`}
         >
           {modalToast.type === "success" ? <CheckCircle2 className="w-5 h-5 flex-shrink-0" /> : <AlertCircle className="w-5 h-5 flex-shrink-0" />}
@@ -551,13 +551,13 @@ export default function DigitalRequisitionDocument({
         </div>
       )}
 
-      <div className="bg-white rounded-3xl max-w-4xl w-full p-3.5 sm:p-8 space-y-4 sm:space-y-6 shadow-2xl border border-slate-200 max-h-[92vh] overflow-y-auto print:p-0 print:border-none print:shadow-none animate-scaleUp">
+      <div className="glass-modal rounded-3xl max-w-4xl w-full p-3.5 sm:p-8 space-y-4 sm:space-y-6 shadow-2xl border border-white/90 max-h-[92vh] overflow-y-auto print:p-0 print:border-none print:shadow-none animate-scaleUp">
         
         {/* Top Control Bar (Hidden on Print) */}
-        <div className="flex items-center justify-between border-b border-slate-100 pb-3 print:hidden gap-2">
+        <div className="flex items-center justify-between border-b border-slate-200/60 pb-3 print:hidden gap-2">
           {/* Badge */}
           <div className="flex items-center space-x-1.5 min-w-0">
-            <span className="inline-flex items-center space-x-1.5 px-2.5 py-1 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200 text-[11px] sm:text-xs font-bold truncate">
+            <span className="inline-flex items-center space-x-1.5 px-2.5 py-1 rounded-full bg-emerald-50/90 text-emerald-700 border border-emerald-200 text-[11px] sm:text-xs font-bold truncate shadow-2xs">
               <ShieldCheck className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
               <span className="hidden sm:inline">เอกสารอิเล็กทรอนิกส์ 100% ไร้กระดาษ (Paperless E-Form)</span>
               <span className="sm:hidden">ไร้กระดาษ 100% (Paperless)</span>
@@ -570,7 +570,7 @@ export default function DigitalRequisitionDocument({
             <button
               onClick={handleCaptureScreenshot}
               disabled={isCapturing}
-              className="sm:hidden px-3 py-1.5 rounded-xl bg-[#DA2128] hover:bg-[#B81B22] text-white text-xs font-bold flex items-center space-x-1.5 shadow-sm active:scale-95 transition-all cursor-pointer disabled:opacity-50"
+              className="sm:hidden px-3 py-1.5 rounded-xl glass-button-primary text-white text-xs font-bold flex items-center space-x-1.5 shadow-sm active:scale-95 transition-all cursor-pointer disabled:opacity-50"
               title="แคปหน้าจอเอกสารเพื่อบันทึกหรือแชร์"
             >
               <Camera className="w-3.5 h-3.5" />
@@ -581,7 +581,7 @@ export default function DigitalRequisitionDocument({
             <button
               onClick={handleCaptureScreenshot}
               disabled={isCapturing}
-              className="hidden sm:inline-flex px-3 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold items-center space-x-1.5 transition-colors cursor-pointer disabled:opacity-50"
+              className="hidden sm:inline-flex px-3 py-1.5 rounded-xl glass-button-secondary text-slate-700 text-xs font-bold items-center space-x-1.5 transition-colors cursor-pointer disabled:opacity-50"
               title="บันทึกรูปภาพเอกสาร (PNG)"
             >
               <Camera className="w-4 h-4 text-slate-600" />
@@ -590,7 +590,7 @@ export default function DigitalRequisitionDocument({
 
             <button
               onClick={handlePrint}
-              className="hidden sm:inline-flex px-3 py-1.5 rounded-xl bg-[#DA2128] hover:bg-[#B81B22] text-white text-xs font-bold items-center space-x-1.5 shadow-sm transition-colors cursor-pointer"
+              className="hidden sm:inline-flex px-3 py-1.5 rounded-xl glass-button-primary text-white text-xs font-bold items-center space-x-1.5 shadow-sm transition-colors cursor-pointer"
               title="พิมพ์เอกสารหรือบันทึกเป็น PDF"
             >
               <Printer className="w-4 h-4" />

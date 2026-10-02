@@ -419,10 +419,10 @@ export default function MaterialShop() {
       {/* Toast Notification */}
       {notification && (
         <div
-          className={`fixed top-5 right-5 z-50 flex items-center space-x-2 px-4 py-3 rounded-xl shadow-xl text-xs sm:text-sm font-semibold transition-all ${
+          className={`fixed top-5 right-5 z-50 flex items-center space-x-2 px-4 py-3 rounded-2xl shadow-2xl text-xs sm:text-sm font-semibold backdrop-blur-xl transition-all ${
             notification.type === "success"
-              ? "bg-emerald-600 text-white"
-              : "bg-red-600 text-white"
+              ? "bg-emerald-600/95 text-white border border-emerald-400/40"
+              : "bg-red-600/95 text-white border border-red-400/40"
           }`}
         >
           {notification.type === "success" ? (
@@ -435,11 +435,11 @@ export default function MaterialShop() {
       )}
 
       {/* Top Banner & Action Controls */}
-      <div className="bg-white rounded-2xl sm:rounded-3xl p-3.5 sm:p-6 border border-slate-200/90 shadow-xs space-y-3.5 sm:space-y-5">
+      <div className="glass-panel rounded-2xl sm:rounded-3xl p-3.5 sm:p-6 space-y-3.5 sm:space-y-5">
         {/* Header Title & Action Button Row */}
         <div className="flex items-center justify-between gap-3 min-w-0">
           <div className="flex items-center space-x-2.5 min-w-0 flex-1">
-            <span className="p-2 sm:p-2.5 rounded-xl sm:rounded-2xl bg-red-50 text-[#DA2128] shrink-0">
+            <span className="p-2 sm:p-2.5 rounded-xl sm:rounded-2xl bg-red-50/90 text-[#DA2128] shrink-0 shadow-xs border border-red-200/60">
               <Package className="w-5 h-5 sm:w-6 sm:h-6" />
             </span>
             <div className="min-w-0 flex-1 space-y-0.5">
@@ -456,7 +456,7 @@ export default function MaterialShop() {
           {canAddConsumables && (
             <button
               onClick={handleOpenAddModal}
-              className="px-3 sm:px-4 py-2 sm:py-2.5 text-xs font-bold text-white bg-gradient-to-r from-[#DA2128] to-[#FF3B44] hover:from-[#B81B22] hover:to-[#DA2128] rounded-xl sm:rounded-2xl transition-all shadow-md shadow-red-500/20 flex items-center space-x-1.5 active:scale-95 shrink-0"
+              className="px-3 sm:px-4 py-2 sm:py-2.5 text-xs font-bold text-white glass-button-primary rounded-xl sm:rounded-2xl flex items-center space-x-1.5 active:scale-95 shrink-0 cursor-pointer"
             >
               <Plus className="w-4 h-4" />
               <span className="hidden sm:inline">เพิ่มรายการวัสดุใหม่</span>
@@ -467,7 +467,7 @@ export default function MaterialShop() {
 
         {/* Search & Stock Filter */}
         {items.length > 0 && (
-          <div className="grid grid-cols-1 sm:grid-cols-12 gap-2.5 sm:gap-3 pt-2 sm:pt-3 border-t border-slate-100">
+          <div className="grid grid-cols-1 sm:grid-cols-12 gap-2.5 sm:gap-3 pt-2 sm:pt-3 border-t border-slate-200/60">
             {/* Search Input */}
             <div className="sm:col-span-7 relative">
               <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none" />
@@ -476,7 +476,7 @@ export default function MaterialShop() {
                 placeholder="ค้นหาชื่อพัสดุ, SKU, ตำแหน่ง..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full pl-10 pr-8 py-2.5 bg-slate-50 border border-slate-200/90 rounded-xl sm:rounded-2xl text-xs sm:text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none focus:bg-white focus:ring-2 focus:ring-[#DA2128]/15 focus:border-[#DA2128] transition-all"
+                className="w-full pl-10 pr-8 py-2.5 glass-input rounded-xl sm:rounded-2xl text-xs sm:text-sm text-slate-900 placeholder:text-slate-400"
               />
               {searchQuery && (
                 <button
@@ -489,33 +489,33 @@ export default function MaterialShop() {
             </div>
 
             {/* Stock Segmented Filter */}
-            <div className="sm:col-span-5 flex items-center space-x-1 bg-slate-100/90 p-1 rounded-xl sm:rounded-2xl text-[11px] sm:text-xs font-semibold">
+            <div className="sm:col-span-5 flex items-center space-x-1 bg-slate-200/50 backdrop-blur-md p-1 rounded-xl sm:rounded-2xl text-[11px] sm:text-xs font-semibold border border-white/80 shadow-inner">
               <button
                 onClick={() => setStockFilter("all")}
-                className={`flex-1 py-1.5 rounded-lg sm:rounded-xl text-center transition-all ${
+                className={`flex-1 py-1.5 rounded-lg sm:rounded-xl text-center transition-all cursor-pointer ${
                   stockFilter === "all"
-                    ? "bg-white text-slate-900 shadow-xs font-bold"
-                    : "text-slate-500 hover:text-slate-800"
+                    ? "bg-white/95 text-slate-900 shadow-xs font-bold border border-white/80"
+                    : "text-slate-600 hover:text-slate-900"
                 }`}
               >
                 ทั้งหมด ({items.length})
               </button>
               <button
                 onClick={() => setStockFilter("in_stock")}
-                className={`flex-1 py-1.5 rounded-lg sm:rounded-xl text-center transition-all ${
+                className={`flex-1 py-1.5 rounded-lg sm:rounded-xl text-center transition-all cursor-pointer ${
                   stockFilter === "in_stock"
-                    ? "bg-white text-emerald-700 shadow-xs font-bold"
-                    : "text-slate-500 hover:text-slate-800"
+                    ? "bg-white/95 text-emerald-700 shadow-xs font-bold border border-white/80"
+                    : "text-slate-600 hover:text-slate-900"
                 }`}
               >
                 มีของ
               </button>
               <button
                 onClick={() => setStockFilter("low_stock")}
-                className={`flex-1 py-1.5 rounded-lg sm:rounded-xl text-center transition-all ${
+                className={`flex-1 py-1.5 rounded-lg sm:rounded-xl text-center transition-all cursor-pointer ${
                   stockFilter === "low_stock"
-                    ? "bg-white text-amber-700 shadow-xs font-bold"
-                    : "text-slate-500 hover:text-slate-800"
+                    ? "bg-white/95 text-amber-700 shadow-xs font-bold border border-white/80"
+                    : "text-slate-600 hover:text-slate-900"
                 }`}
               >
                 ใกล้หมด
@@ -533,8 +533,8 @@ export default function MaterialShop() {
                 onClick={() => setSelectedCategory(cat)}
                 className={`px-3 sm:px-3.5 py-1.5 rounded-xl whitespace-nowrap text-[11px] sm:text-xs font-medium transition-all cursor-pointer active:scale-95 ${
                   selectedCategory === cat
-                    ? "bg-slate-900 text-white font-bold shadow-xs"
-                    : "bg-slate-100/90 text-slate-600 hover:bg-slate-200 hover:text-slate-900"
+                    ? "bg-slate-900/90 backdrop-blur-md text-white font-bold shadow-xs border border-slate-800"
+                    : "glass-pill text-slate-600 hover:text-slate-900 hover:bg-white/80 border-slate-200/70"
                 }`}
               >
                 {cat}
@@ -546,14 +546,14 @@ export default function MaterialShop() {
 
       {/* Loading State */}
       {isLoading ? (
-        <div className="bg-white rounded-2xl border border-slate-200 p-16 text-center space-y-3">
+        <div className="glass-panel rounded-3xl p-16 text-center space-y-3">
           <RefreshCw className="w-8 h-8 text-[#DA2128] animate-spin mx-auto" />
           <p className="text-sm font-bold text-slate-700">กำลังเชื่อมต่อฐานข้อมูล Cloud Firestore...</p>
         </div>
       ) : items.length === 0 ? (
         /* Empty Database State - Ready for user to add real data */
-        <div className="bg-white rounded-2xl border-2 border-dashed border-slate-200 p-12 sm:p-16 text-center space-y-5 shadow-xs">
-          <div className="w-20 h-20 bg-red-50 text-[#DA2128] rounded-2xl flex items-center justify-center mx-auto shadow-xs">
+        <div className="glass-panel rounded-3xl border-2 border-dashed border-slate-300 p-12 sm:p-16 text-center space-y-5 shadow-xs">
+          <div className="w-20 h-20 bg-red-50/90 text-[#DA2128] rounded-2xl flex items-center justify-center mx-auto shadow-xs border border-red-200/60">
             <Package className="w-10 h-10" />
           </div>
           <div className="space-y-1.5 max-w-md mx-auto">
@@ -566,14 +566,14 @@ export default function MaterialShop() {
           </div>
           <button
             onClick={handleOpenAddModal}
-            className="px-6 py-3 bg-[#DA2128] hover:bg-[#B81B22] text-white text-xs sm:text-sm font-bold rounded-xl shadow-lg shadow-red-500/20 inline-flex items-center space-x-2 transition-all"
+            className="px-6 py-3 glass-button-primary text-white text-xs sm:text-sm font-bold rounded-2xl inline-flex items-center space-x-2 transition-all cursor-pointer"
           >
             <Plus className="w-4 h-4" />
             <span>➕ เพิ่มรายการวัสดุจริงรายการแรก</span>
           </button>
         </div>
       ) : filteredItems.length === 0 ? (
-        <div className="bg-white rounded-2xl border border-slate-200 p-12 text-center space-y-3 shadow-xs">
+        <div className="glass-panel rounded-3xl p-12 text-center space-y-3 shadow-xs">
           <Search className="w-8 h-8 text-slate-300 mx-auto" />
           <p className="text-sm font-bold text-slate-700">ไม่พบรายการที่ตรงกับเงื่อนไขการค้นหา</p>
           <button
@@ -582,7 +582,7 @@ export default function MaterialShop() {
               setSelectedCategory("ทั้งหมด");
               setStockFilter("all");
             }}
-            className="text-xs text-[#DA2128] hover:underline font-semibold"
+            className="text-xs text-[#DA2128] hover:underline font-semibold cursor-pointer"
           >
             ล้างตัวกรองทั้งหมด
           </button>
@@ -598,10 +598,10 @@ export default function MaterialShop() {
             return (
               <div
                 key={item.id || item.code}
-                className="group bg-white rounded-2xl border border-slate-200 hover:border-red-200 hover:shadow-lg transition-all flex flex-col justify-between overflow-hidden relative"
+                className="group glass-card rounded-2xl sm:rounded-3xl hover:border-red-200/90 transition-all flex flex-col justify-between overflow-hidden relative"
               >
                 {/* Image Container with Fallback */}
-                <div className="relative aspect-square w-full bg-slate-100 overflow-hidden">
+                <div className="relative aspect-square w-full bg-slate-100/60 overflow-hidden">
                   {item.imageUrl ? (
                     <img
                       src={item.imageUrl}
@@ -616,7 +616,7 @@ export default function MaterialShop() {
                   <div
                     className={`${
                       item.imageUrl ? "hidden" : "flex"
-                    } w-full h-full items-center justify-center bg-slate-100 text-slate-300`}
+                    } w-full h-full items-center justify-center bg-slate-100/50 text-slate-300`}
                   >
                     <Package className="w-12 h-12" />
                   </div>
@@ -632,7 +632,7 @@ export default function MaterialShop() {
                         สต็อกต่ำ ({item.stock} {item.unit})
                       </span>
                     ) : (
-                      <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-600/90 backdrop-blur text-white shadow-xs">
+                      <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-600/90 backdrop-blur-md text-white shadow-xs border border-white/40">
                         คงเหลือ {item.stock} {item.unit}
                       </span>
                     )}
@@ -643,14 +643,14 @@ export default function MaterialShop() {
                     <div className="absolute top-2.5 right-2.5 flex items-center space-x-1 opacity-0 group-hover:opacity-100 transition-opacity">
                       <button
                         onClick={(e) => handleOpenEditModal(item, e)}
-                        className="p-1.5 rounded-lg bg-white/90 backdrop-blur text-slate-600 hover:text-[#DA2128] hover:bg-white shadow-xs transition-colors"
+                        className="p-1.5 rounded-xl bg-white/90 backdrop-blur-md text-slate-600 hover:text-[#DA2128] hover:bg-white shadow-xs transition-colors cursor-pointer border border-white/80"
                         title="แก้ไขข้อมูล"
                       >
                         <Edit className="w-3.5 h-3.5" />
                       </button>
                       <button
                         onClick={(e) => handleDeleteItem(item, e)}
-                        className="p-1.5 rounded-lg bg-white/90 backdrop-blur text-slate-600 hover:text-red-600 hover:bg-white shadow-xs transition-colors"
+                        className="p-1.5 rounded-xl bg-white/90 backdrop-blur-md text-slate-600 hover:text-red-600 hover:bg-white shadow-xs transition-colors cursor-pointer border border-white/80"
                         title="ลบรายการ"
                       >
                         <Trash2 className="w-3.5 h-3.5" />
@@ -680,7 +680,7 @@ export default function MaterialShop() {
                   </div>
 
                   {/* Price & Cart Actions */}
-                  <div className="pt-2 border-t border-slate-100 space-y-2">
+                  <div className="pt-2 border-t border-slate-200/60 space-y-2">
                     <div className="flex items-baseline justify-between">
                       <div className="text-xs text-slate-400 font-medium">ราคาต่อหน่วย</div>
                       <div className="text-right">
@@ -694,10 +694,10 @@ export default function MaterialShop() {
                     {/* Add to Cart Stepper / Permission-based Action */}
                     {canRequestConsumables ? (
                       inCartQty > 0 ? (
-                        <div className="flex items-center justify-between bg-red-50 border border-red-200 rounded-xl p-1">
+                        <div className="flex items-center justify-between bg-red-50/90 border border-red-200 rounded-xl p-1 shadow-2xs">
                           <button
                             onClick={() => handleUpdateCartQty(item.code, -1)}
-                            className="w-7 h-7 rounded-lg bg-white text-[#DA2128] hover:bg-red-100 flex items-center justify-center shadow-2xs font-bold transition-all"
+                            className="w-7 h-7 rounded-lg bg-white text-[#DA2128] hover:bg-red-100 flex items-center justify-center shadow-2xs font-bold transition-all cursor-pointer"
                           >
                             -
                           </button>
@@ -706,7 +706,7 @@ export default function MaterialShop() {
                           </span>
                           <button
                             onClick={() => handleUpdateCartQty(item.code, 1)}
-                            className="w-7 h-7 rounded-lg bg-[#DA2128] text-white hover:bg-[#B81B22] flex items-center justify-center shadow-2xs font-bold transition-all"
+                            className="w-7 h-7 rounded-lg bg-[#DA2128] text-white hover:bg-[#B81B22] flex items-center justify-center shadow-2xs font-bold transition-all cursor-pointer"
                           >
                             +
                           </button>
@@ -718,7 +718,7 @@ export default function MaterialShop() {
                           className={`w-full py-2 px-3 rounded-xl text-xs font-bold transition-all flex items-center justify-center space-x-1.5 ${
                             isOut
                               ? "bg-slate-100 text-slate-400 cursor-not-allowed"
-                              : "bg-slate-900 hover:bg-[#DA2128] text-white shadow-xs cursor-pointer"
+                              : "bg-slate-900/90 hover:bg-[#DA2128] text-white shadow-xs cursor-pointer active:scale-95"
                           }`}
                         >
                           <ShoppingCart className="w-3.5 h-3.5" />
@@ -726,7 +726,7 @@ export default function MaterialShop() {
                         </button>
                       )
                     ) : (
-                      <div className="w-full py-2 px-3 rounded-xl text-xs font-medium text-center bg-slate-50 border border-slate-200 text-slate-500">
+                      <div className="w-full py-2 px-3 rounded-xl text-xs font-medium text-center glass-pill text-slate-500">
                         สิทธิ์ดูรายการอย่างเดียว
                       </div>
                     )}
@@ -739,15 +739,15 @@ export default function MaterialShop() {
       )}
 
       {/* ========================================================================= */}
-      {/* MODAL: ADD / EDIT MATERIAL ITEM (ฟอร์มเพิ่มข้อมูลจริงเข้า Firestore โดยใช้ LINK รูป) */}
+      {/* MODAL: ADD / EDIT MATERIAL ITEM */}
       {/* ========================================================================= */}
       {isAddModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs overflow-y-auto">
-          <div className="bg-white rounded-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto shadow-2xl border border-slate-200">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-md overflow-y-auto">
+          <div className="glass-modal rounded-3xl max-w-2xl w-full max-h-[90vh] overflow-y-auto shadow-2xl border border-white/90">
             {/* Modal Header */}
-            <div className="sticky top-0 bg-white px-6 py-4 border-b border-slate-200 flex items-center justify-between z-10">
+            <div className="sticky top-0 bg-white/95 backdrop-blur-md px-6 py-4 border-b border-slate-200/60 flex items-center justify-between z-10">
               <div className="flex items-center space-x-2.5">
-                <div className="p-2 rounded-xl bg-red-50 text-[#DA2128]">
+                <div className="p-2 rounded-xl bg-red-50 text-[#DA2128] border border-red-200/60">
                   <PlusCircle className="w-5 h-5" />
                 </div>
                 <div>
@@ -761,7 +761,7 @@ export default function MaterialShop() {
               </div>
               <button
                 onClick={() => setIsAddModalOpen(false)}
-                className="p-2 text-slate-400 hover:text-slate-600 rounded-xl hover:bg-slate-100"
+                className="p-2 text-slate-400 hover:text-slate-600 rounded-xl hover:bg-slate-100 cursor-pointer"
               >
                 <X className="w-5 h-5" />
               </button>
@@ -782,7 +782,7 @@ export default function MaterialShop() {
                           code: generateNewSku(prev.category)
                         }))
                       }
-                      className="text-[11px] text-[#DA2128] hover:underline font-semibold flex items-center space-x-1"
+                      className="text-[11px] text-[#DA2128] hover:underline font-semibold flex items-center space-x-1 cursor-pointer"
                     >
                       <Sparkles className="w-3 h-3" />
                       <span>สุ่มรหัสใหม่อัตโนมัติ</span>
@@ -794,7 +794,7 @@ export default function MaterialShop() {
                     value={formData.code}
                     onChange={(e) => setFormData({ ...formData, code: e.target.value.toUpperCase() })}
                     placeholder="เช่น MAT-OFF-001 หรือ MAT-ELE-001"
-                    className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs sm:text-sm font-mono text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#DA2128]/20 focus:border-[#DA2128]"
+                    className="w-full px-3.5 py-2.5 glass-input rounded-xl text-xs sm:text-sm font-mono text-slate-900"
                   />
                 </div>
 
@@ -809,7 +809,7 @@ export default function MaterialShop() {
                         category: newCat
                       }));
                     }}
-                    className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs sm:text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#DA2128]/20 focus:border-[#DA2128]"
+                    className="w-full px-3.5 py-2.5 glass-input rounded-xl text-xs sm:text-sm text-slate-900"
                   >
                     {CATEGORIES.filter((c) => c !== "ทั้งหมด").map((cat) => (
                       <option key={cat} value={cat}>
@@ -831,12 +831,12 @@ export default function MaterialShop() {
                   value={formData.name}
                   onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                   placeholder="ระบุชื่อพัสดุ เช่น กระดาษถ่ายเอกสาร A4 80 แกรม, ปลั๊กไฟ 3 ตา 5 เมตร"
-                  className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs sm:text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#DA2128]/20 focus:border-[#DA2128]"
+                  className="w-full px-3.5 py-2.5 glass-input rounded-xl text-xs sm:text-sm text-slate-900"
                 />
               </div>
 
               {/* Row 3: Image URL (Link) + Live Preview */}
-              <div className="bg-slate-50 p-4 rounded-xl border border-slate-200 space-y-3">
+              <div className="glass-pill p-4 rounded-2xl border border-slate-200/80 space-y-3">
                 <div>
                   <div className="flex items-center justify-between mb-1.5">
                     <label className="text-xs font-bold text-slate-800 flex items-center space-x-1.5">
@@ -850,13 +850,13 @@ export default function MaterialShop() {
                     value={formData.imageUrl}
                     onChange={(e) => setFormData({ ...formData, imageUrl: e.target.value })}
                     placeholder="https://example.com/images/item-photo.jpg"
-                    className="w-full px-3.5 py-2.5 bg-white border border-slate-200 rounded-xl text-xs sm:text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#DA2128]/20 focus:border-[#DA2128]"
+                    className="w-full px-3.5 py-2.5 glass-input rounded-xl text-xs sm:text-sm text-slate-900"
                   />
                 </div>
 
                 {/* Live Image Preview Box */}
                 {formData.imageUrl && (
-                  <div className="flex items-center space-x-3 p-2.5 bg-white rounded-xl border border-slate-200">
+                  <div className="flex items-center space-x-3 p-2.5 bg-white/90 backdrop-blur-md rounded-xl border border-slate-200/80 shadow-2xs">
                     <div className="w-16 h-16 rounded-lg bg-slate-100 overflow-hidden flex-shrink-0 border border-slate-200">
                       <img
                         src={formData.imageUrl}
@@ -892,7 +892,7 @@ export default function MaterialShop() {
                     required
                     value={formData.stock}
                     onChange={(e) => setFormData({ ...formData, stock: Number(e.target.value) })}
-                    className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs sm:text-sm text-slate-900 focus:outline-none focus:border-[#DA2128]"
+                    className="w-full px-3 py-2 glass-input rounded-xl text-xs sm:text-sm text-slate-900"
                   />
                 </div>
 
@@ -903,7 +903,7 @@ export default function MaterialShop() {
                     min="0"
                     value={formData.minStock}
                     onChange={(e) => setFormData({ ...formData, minStock: Number(e.target.value) })}
-                    className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs sm:text-sm text-slate-900 focus:outline-none focus:border-[#DA2128]"
+                    className="w-full px-3 py-2 glass-input rounded-xl text-xs sm:text-sm text-slate-900"
                   />
                 </div>
 
@@ -916,7 +916,7 @@ export default function MaterialShop() {
                     required
                     value={formData.unitPrice}
                     onChange={(e) => setFormData({ ...formData, unitPrice: Number(e.target.value) })}
-                    className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs sm:text-sm text-slate-900 focus:outline-none focus:border-[#DA2128]"
+                    className="w-full px-3 py-2 glass-input rounded-xl text-xs sm:text-sm text-slate-900"
                   />
                 </div>
 
@@ -925,7 +925,7 @@ export default function MaterialShop() {
                   <select
                     value={formData.unit}
                     onChange={(e) => setFormData({ ...formData, unit: e.target.value })}
-                    className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs sm:text-sm text-slate-900 focus:outline-none focus:border-[#DA2128]"
+                    className="w-full px-3 py-2 glass-input rounded-xl text-xs sm:text-sm text-slate-900"
                   >
                     {UNITS.map((u) => (
                       <option key={u} value={u}>
@@ -945,7 +945,7 @@ export default function MaterialShop() {
                     value={formData.location}
                     onChange={(e) => setFormData({ ...formData, location: e.target.value })}
                     placeholder="เช่น คลัง 1 ชั้น 2 ล็อก A-03"
-                    className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs sm:text-sm text-slate-900 focus:outline-none focus:border-[#DA2128]"
+                    className="w-full px-3.5 py-2.5 glass-input rounded-xl text-xs sm:text-sm text-slate-900"
                   />
                 </div>
 
@@ -956,24 +956,24 @@ export default function MaterialShop() {
                     value={formData.description || ""}
                     onChange={(e) => setFormData({ ...formData, description: e.target.value })}
                     placeholder="เช่น ยี่ห้อ, ขนาด, คุณสมบัติเฉพาะ"
-                    className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs sm:text-sm text-slate-900 focus:outline-none focus:border-[#DA2128]"
+                    className="w-full px-3.5 py-2.5 glass-input rounded-xl text-xs sm:text-sm text-slate-900"
                   />
                 </div>
               </div>
 
               {/* Submit Buttons */}
-              <div className="pt-4 border-t border-slate-200 flex items-center justify-end space-x-3">
+              <div className="pt-4 border-t border-slate-200/80 flex items-center justify-end space-x-3">
                 <button
                   type="button"
                   onClick={() => setIsAddModalOpen(false)}
-                  className="px-4 py-2.5 rounded-xl border border-slate-200 text-xs font-semibold text-slate-600 hover:bg-slate-100 transition-colors"
+                  className="px-4 py-2.5 rounded-xl glass-button-secondary text-xs font-semibold text-slate-600 transition-colors cursor-pointer"
                 >
                   ยกเลิก
                 </button>
                 <button
                   type="submit"
                   disabled={isSubmitting}
-                  className="px-6 py-2.5 rounded-xl bg-[#DA2128] hover:bg-[#B81B22] text-white text-xs font-bold transition-all shadow-md shadow-red-500/20 flex items-center space-x-2"
+                  className="px-6 py-2.5 rounded-xl glass-button-primary text-white text-xs font-bold transition-all flex items-center space-x-2 cursor-pointer"
                 >
                   {isSubmitting ? (
                     <>
@@ -997,12 +997,12 @@ export default function MaterialShop() {
       {/* MODAL: CART & CHECKOUT (ใบเบิกพัสดุ) */}
       {/* ========================================================================= */}
       {isCartOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs overflow-y-auto">
-          <div className="bg-white rounded-2xl max-w-xl w-full max-h-[90vh] overflow-y-auto shadow-2xl border border-slate-200">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-md overflow-y-auto">
+          <div className="glass-modal rounded-3xl max-w-xl w-full max-h-[90vh] overflow-y-auto shadow-2xl border border-white/90">
             {/* Header */}
-            <div className="sticky top-0 bg-white px-6 py-4 border-b border-slate-200 flex items-center justify-between z-10">
+            <div className="sticky top-0 bg-white/95 backdrop-blur-md px-6 py-4 border-b border-slate-200/60 flex items-center justify-between z-10">
               <div className="flex items-center space-x-2.5">
-                <div className="p-2 rounded-xl bg-red-50 text-[#DA2128]">
+                <div className="p-2 rounded-xl bg-red-50 text-[#DA2128] border border-red-200/60">
                   <ShoppingCart className="w-5 h-5" />
                 </div>
                 <div>
@@ -1012,7 +1012,7 @@ export default function MaterialShop() {
               </div>
               <button
                 onClick={() => setIsCartOpen(false)}
-                className="p-2 text-slate-400 hover:text-slate-600 rounded-xl hover:bg-slate-100"
+                className="p-2 text-slate-400 hover:text-slate-600 rounded-xl hover:bg-slate-100 cursor-pointer"
               >
                 <X className="w-5 h-5" />
               </button>
@@ -1024,10 +1024,10 @@ export default function MaterialShop() {
                 {cartItems.map(({ item, qty }) => (
                   <div
                     key={item.code}
-                    className="flex items-center justify-between p-3 bg-slate-50 border border-slate-200 rounded-xl text-xs"
+                    className="flex items-center justify-between p-3 glass-card rounded-2xl text-xs"
                   >
                     <div className="flex items-center space-x-3 overflow-hidden">
-                      <div className="w-10 h-10 rounded-lg bg-white border border-slate-200 overflow-hidden flex-shrink-0">
+                      <div className="w-10 h-10 rounded-xl bg-white border border-slate-200/80 overflow-hidden flex-shrink-0 shadow-2xs">
                         {item.imageUrl ? (
                           <img src={item.imageUrl} alt={item.name} className="w-full h-full object-cover" />
                         ) : (
@@ -1041,17 +1041,17 @@ export default function MaterialShop() {
                     </div>
 
                     <div className="flex items-center space-x-3 flex-shrink-0">
-                      <div className="flex items-center space-x-1.5 bg-white border border-slate-200 rounded-lg px-1.5 py-0.5">
+                      <div className="flex items-center space-x-1.5 bg-white/90 border border-slate-200 rounded-lg px-1.5 py-0.5 shadow-2xs">
                         <button
                           onClick={() => handleUpdateCartQty(item.code, -1)}
-                          className="text-slate-500 hover:text-red-600 font-bold px-1"
+                          className="text-slate-500 hover:text-red-600 font-bold px-1 cursor-pointer"
                         >
                           -
                         </button>
                         <span className="font-bold text-slate-900">{qty}</span>
                         <button
                           onClick={() => handleUpdateCartQty(item.code, 1)}
-                          className="text-slate-500 hover:text-red-600 font-bold px-1"
+                          className="text-slate-500 hover:text-red-600 font-bold px-1 cursor-pointer"
                         >
                           +
                         </button>
@@ -1061,7 +1061,7 @@ export default function MaterialShop() {
                       </span>
                       <button
                         onClick={() => handleRemoveFromCart(item.code)}
-                        className="text-slate-400 hover:text-red-600"
+                        className="text-slate-400 hover:text-red-600 cursor-pointer"
                       >
                         <Trash2 className="w-3.5 h-3.5" />
                       </button>
@@ -1071,7 +1071,7 @@ export default function MaterialShop() {
               </div>
 
               {/* Total Price Bar */}
-              <div className="p-3 bg-red-50 border border-red-200 rounded-xl flex items-center justify-between">
+              <div className="p-3 bg-red-50/90 border border-red-200/80 rounded-2xl flex items-center justify-between shadow-xs">
                 <span className="text-xs font-bold text-slate-700">มูลค่ารวมทั้งสิ้น</span>
                 <span className="text-base font-black text-[#DA2128]">
                   ฿{totalCartPrice.toLocaleString()} บาท
@@ -1079,7 +1079,7 @@ export default function MaterialShop() {
               </div>
 
               {/* Requester Information Form */}
-              <form onSubmit={handleCheckoutSubmit} className="space-y-3.5 pt-2 border-t border-slate-200">
+              <form onSubmit={handleCheckoutSubmit} className="space-y-3.5 pt-2 border-t border-slate-200/60">
                 <div className="flex items-center justify-between">
                   <h3 className="text-xs font-bold text-slate-900 flex items-center space-x-1.5">
                     <User className="w-3.5 h-3.5 text-[#DA2128]" />
@@ -1101,7 +1101,7 @@ export default function MaterialShop() {
                     placeholder="เช่น นายสมชาย ใจดี"
                     value={checkoutForm.requesterName || (user ? user.name : "")}
                     onChange={(e) => setCheckoutForm({ ...checkoutForm, requesterName: e.target.value })}
-                    className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-900 focus:outline-none focus:border-[#DA2128]"
+                    className="w-full px-3.5 py-2.5 glass-input rounded-xl text-xs text-slate-900"
                   />
                 </div>
 
@@ -1113,7 +1113,7 @@ export default function MaterialShop() {
                     placeholder="เช่น ส่วนพัฒนากายภาพ / ฝ่ายอาคารสถานที่"
                     value={checkoutForm.department || (user ? user.department : "ส่วนพัฒนากายภาพ มหาวิทยาลัยศรีนครินทรวิโรฒ")}
                     onChange={(e) => setCheckoutForm({ ...checkoutForm, department: e.target.value })}
-                    className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-900 focus:outline-none focus:border-[#DA2128]"
+                    className="w-full px-3.5 py-2.5 glass-input rounded-xl text-xs text-slate-900"
                   />
                 </div>
 
@@ -1125,7 +1125,7 @@ export default function MaterialShop() {
                     placeholder="ระบุเหตุผลความจำเป็นในการขอเบิกใช้งาน เช่น ใช้สำหรับงานซ่อมบำรุงอาคาร"
                     value={checkoutForm.purpose}
                     onChange={(e) => setCheckoutForm({ ...checkoutForm, purpose: e.target.value })}
-                    className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-900 focus:outline-none focus:border-[#DA2128]"
+                    className="w-full px-3.5 py-2.5 glass-input rounded-xl text-xs text-slate-900"
                   />
                 </div>
 
@@ -1133,14 +1133,14 @@ export default function MaterialShop() {
                   <button
                     type="button"
                     onClick={() => setIsCartOpen(false)}
-                    className="px-4 py-2 text-xs font-semibold text-slate-600 hover:bg-slate-100 rounded-xl"
+                    className="px-4 py-2 text-xs font-semibold text-slate-600 glass-button-secondary rounded-xl cursor-pointer"
                   >
                     เลือกเพิ่ม
                   </button>
                   <button
                     type="submit"
                     disabled={isSubmittingCheckout}
-                    className="px-6 py-2.5 bg-[#DA2128] hover:bg-[#B81B22] text-white text-xs font-bold rounded-xl shadow-md transition-all flex items-center space-x-1.5 cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed active:scale-95"
+                    className="px-6 py-2.5 glass-button-primary text-white text-xs font-bold rounded-xl transition-all flex items-center space-x-1.5 cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed active:scale-95"
                   >
                     {isSubmittingCheckout ? (
                       <>
@@ -1165,9 +1165,9 @@ export default function MaterialShop() {
       {/* MODAL: SUCCESS CONFIRMATION RECEIPT */}
       {/* ========================================================================= */}
       {isSuccessModalOpen && lastReqOrder && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs">
-          <div className="bg-white rounded-2xl max-w-md w-full p-6 space-y-4 shadow-2xl border border-slate-200 text-center animate-scaleUp">
-            <div className="w-14 h-14 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center mx-auto">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-md">
+          <div className="glass-modal rounded-3xl max-w-md w-full p-6 space-y-4 shadow-2xl border border-white/90 text-center animate-scaleUp">
+            <div className="w-14 h-14 rounded-2xl bg-emerald-100 text-emerald-600 flex items-center justify-center mx-auto shadow-xs border border-emerald-200">
               <CheckCircle2 className="w-8 h-8" />
             </div>
 
@@ -1176,7 +1176,7 @@ export default function MaterialShop() {
               <p className="text-xs text-slate-500">บันทึกข้อมูลเข้าสู่ระบบ Cloud Firestore แล้ว</p>
             </div>
 
-            <div className="bg-slate-50 p-4 rounded-xl border border-slate-200 text-left space-y-2 text-xs">
+            <div className="glass-pill p-4 rounded-2xl border border-slate-200/80 text-left space-y-2 text-xs">
               <div className="flex justify-between">
                 <span className="text-slate-500">เลขที่ใบเบิก:</span>
                 <span className="font-mono font-bold text-[#DA2128]">{lastReqOrder.reqNo}</span>
@@ -1204,7 +1204,7 @@ export default function MaterialShop() {
                   setIsSuccessModalOpen(false);
                   setIsDigitalDocOpen(true);
                 }}
-                className="w-full py-2.5 bg-slate-900 hover:bg-black text-white text-xs font-bold rounded-xl transition-all shadow-md flex items-center justify-center space-x-1.5 cursor-pointer"
+                className="w-full py-2.5 bg-slate-900/90 hover:bg-black text-white text-xs font-bold rounded-xl transition-all shadow-md flex items-center justify-center space-x-1.5 cursor-pointer border border-slate-700/60"
               >
                 <FileText className="w-4 h-4 text-amber-400" />
                 <span>เปิดดูใบขอเบิกและลงนามดิจิทัล (E-Form)</span>
@@ -1213,7 +1213,7 @@ export default function MaterialShop() {
               <button
                 type="button"
                 onClick={() => setIsSuccessModalOpen(false)}
-                className="w-full py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold rounded-xl transition-all cursor-pointer"
+                className="w-full py-2 glass-button-secondary text-slate-700 text-xs font-bold rounded-xl transition-all cursor-pointer"
               >
                 ปิดหน้าต่าง / กลับหน้าร้าน
               </button>
@@ -1244,8 +1244,8 @@ export default function MaterialShop() {
             onClick={() => setIsCartOpen(true)}
             className={`group relative flex items-center justify-center transition-all duration-300 shadow-2xl active:scale-95 cursor-pointer ${
               totalCartCount > 0
-                ? "bg-gradient-to-r from-[#DA2128] via-[#FF3B44] to-[#DA2128] hover:from-[#B81B22] hover:to-[#DA2128] text-white p-3 sm:pl-4 sm:pr-5 sm:py-3.5 rounded-full shadow-red-600/40 hover:shadow-red-600/60 ring-4 ring-red-500/20"
-                : "bg-slate-900/90 hover:bg-slate-900 text-white p-3 sm:px-4 sm:py-3.5 rounded-full shadow-slate-900/30 backdrop-blur-md border border-slate-700/60"
+                ? "glass-button-primary text-white p-3 sm:pl-4 sm:pr-5 sm:py-3.5 rounded-full ring-4 ring-red-500/20"
+                : "glass-button-secondary text-slate-700 p-3 sm:px-4 sm:py-3.5 rounded-full shadow-slate-900/10"
             }`}
             title="ดูรายการในตะกร้าขอเบิกพัสดุ"
           >

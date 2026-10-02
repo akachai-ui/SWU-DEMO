@@ -266,8 +266,8 @@ export default function RequisitionManagement({
       {/* Toast Notification */}
       {notification && (
         <div
-          className={`fixed top-5 right-5 z-50 flex items-center space-x-2 px-4 py-3 rounded-xl shadow-xl text-xs sm:text-sm font-semibold transition-all ${
-            notification.type === "success" ? "bg-emerald-600 text-white" : "bg-red-600 text-white"
+          className={`fixed top-5 right-5 z-50 flex items-center space-x-2 px-4 py-3 rounded-2xl shadow-2xl text-xs sm:text-sm font-semibold backdrop-blur-xl transition-all ${
+            notification.type === "success" ? "bg-emerald-600/95 text-white border border-emerald-400/40" : "bg-red-600/95 text-white border border-red-400/40"
           }`}
         >
           {notification.type === "success" ? <CheckCircle2 className="w-5 h-5 flex-shrink-0" /> : <AlertCircle className="w-5 h-5 flex-shrink-0" />}
@@ -276,11 +276,11 @@ export default function RequisitionManagement({
       )}
 
       {/* Main Header & Tab Navigation */}
-      <div className="bg-white rounded-2xl p-4 sm:p-6 border border-slate-200 shadow-xs space-y-4 sm:space-y-5">
+      <div className="glass-panel rounded-2xl sm:rounded-3xl p-4 sm:p-6 space-y-4 sm:space-y-5">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4">
           <div className="space-y-0.5">
             <div className="flex items-center space-x-2.5">
-              <span className="p-2 sm:p-2.5 rounded-xl bg-red-50 text-[#DA2128] shrink-0">
+              <span className="p-2 sm:p-2.5 rounded-xl bg-red-50/90 text-[#DA2128] shrink-0 shadow-xs border border-red-200/60">
                 <FileText className="w-5 h-5 sm:w-6 sm:h-6" />
               </span>
               <div className="min-w-0">
@@ -295,7 +295,7 @@ export default function RequisitionManagement({
           </div>
 
           {/* Sub Tab Switcher: My Requests vs Approver Hub */}
-          <div className="grid grid-cols-2 sm:flex items-center gap-1 bg-slate-100 p-1 rounded-2xl border border-slate-200 text-xs font-bold w-full sm:w-auto">
+          <div className="grid grid-cols-2 sm:flex items-center gap-1 bg-slate-200/50 backdrop-blur-md p-1 rounded-2xl border border-white/80 text-xs font-bold w-full sm:w-auto shadow-inner">
             <button
               onClick={() => {
                 setActiveSubTab("my_requests");
@@ -303,14 +303,14 @@ export default function RequisitionManagement({
               }}
               className={`flex items-center justify-center space-x-1.5 py-2 px-3 rounded-xl transition-all cursor-pointer ${
                 activeSubTab === "my_requests"
-                  ? "bg-white text-[#DA2128] shadow-xs font-black"
-                  : "text-slate-600 hover:text-slate-900"
+                  ? "bg-white/95 text-[#DA2128] shadow-sm font-black border border-white/90"
+                  : "text-slate-600 hover:text-slate-900 hover:bg-white/40"
               }`}
             >
               <User className="w-3.5 h-3.5 shrink-0" />
               <span className="truncate">ประวัติการเบิก</span>
               {myPendingCount > 0 && (
-                <span className="min-w-[18px] h-[18px] px-1 rounded-full bg-amber-500 text-white text-[10px] flex items-center justify-center font-black shrink-0">
+                <span className="min-w-[18px] h-[18px] px-1 rounded-full bg-amber-500 text-white text-[10px] flex items-center justify-center font-black shrink-0 shadow-2xs">
                   {myPendingCount}
                 </span>
               )}
@@ -324,14 +324,14 @@ export default function RequisitionManagement({
                 }}
                 className={`flex items-center justify-center space-x-1.5 py-2 px-3 rounded-xl transition-all cursor-pointer ${
                   activeSubTab === "approvals"
-                    ? "bg-white text-[#DA2128] shadow-xs font-black"
-                    : "text-slate-600 hover:text-slate-900"
+                    ? "bg-white/95 text-[#DA2128] shadow-sm font-black border border-white/90"
+                    : "text-slate-600 hover:text-slate-900 hover:bg-white/40"
                 }`}
               >
                 <ShieldCheck className="w-3.5 h-3.5 shrink-0" />
                 <span className="truncate">ศูนย์อนุมัติ</span>
                 {pendingCount > 0 && (
-                  <span className="min-w-[18px] h-[18px] px-1 rounded-full bg-[#DA2128] text-white text-[10px] flex items-center justify-center font-black animate-pulse shrink-0">
+                  <span className="min-w-[18px] h-[18px] px-1 rounded-full bg-[#DA2128] text-white text-[10px] flex items-center justify-center font-black animate-pulse shrink-0 shadow-2xs">
                     {pendingCount}
                   </span>
                 )}
@@ -341,7 +341,7 @@ export default function RequisitionManagement({
         </div>
 
         {/* Filter & Search Bar */}
-        <div className="grid grid-cols-1 sm:grid-cols-12 gap-2.5 sm:gap-3 pt-2 border-t border-slate-100">
+        <div className="grid grid-cols-1 sm:grid-cols-12 gap-2.5 sm:gap-3 pt-2 border-t border-slate-200/60">
           {/* Search */}
           <div className="sm:col-span-7 relative">
             <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
@@ -350,7 +350,7 @@ export default function RequisitionManagement({
               placeholder={activeSubTab === "my_requests" ? "ค้นหาเลขที่ใบเบิก, ชื่อวัสดุ..." : "ค้นหาเลขที่ใบเบิก, ชื่อผู้ขอ, รายการพัสดุ..."}
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full pl-10 pr-4 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs sm:text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none focus:border-[#DA2128] focus:bg-white"
+              className="w-full pl-10 pr-4 py-2.5 glass-input rounded-xl text-xs sm:text-sm text-slate-900 placeholder:text-slate-400"
             />
           </div>
 
@@ -362,8 +362,8 @@ export default function RequisitionManagement({
                 onClick={() => setStatusFilter(st)}
                 className={`px-3 py-1.5 rounded-full transition-all whitespace-nowrap cursor-pointer flex items-center space-x-1 shrink-0 ${
                   statusFilter === st
-                    ? "bg-slate-900 text-white shadow-xs font-bold"
-                    : "bg-slate-100 text-slate-600 hover:bg-slate-200 border border-slate-200/80"
+                    ? "bg-slate-900/90 backdrop-blur-md text-white shadow-xs font-bold border border-slate-800"
+                    : "glass-pill text-slate-600 hover:text-slate-900 hover:bg-white/80 border-slate-200/70"
                 }`}
               >
                 <span>{st}</span>
@@ -380,7 +380,7 @@ export default function RequisitionManagement({
 
       {/* Urgent Pending Approval Notification Banner for Approvers */}
       {activeSubTab === "approvals" && pendingCount > 0 && (
-        <div className="p-3.5 sm:p-4 bg-gradient-to-r from-amber-50 via-red-50/50 to-orange-50 border border-amber-200 rounded-2xl flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 shadow-xs animate-fadeIn">
+        <div className="p-3.5 sm:p-4 glass-card rounded-2xl sm:rounded-3xl border-amber-300/80 bg-gradient-to-r from-amber-50/80 via-red-50/50 to-orange-50/80 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 shadow-md animate-fadeIn">
           <div className="flex items-center space-x-3">
             <div className="w-9 h-9 rounded-xl bg-amber-500 text-white flex items-center justify-center text-base shrink-0 shadow-xs animate-pulse">
               🔔
@@ -388,7 +388,7 @@ export default function RequisitionManagement({
             <div>
               <h4 className="text-xs sm:text-sm font-black text-slate-900 flex items-center space-x-1.5">
                 <span>มีคำขอเบิกพัสดุรอการพิจารณาอนุมัติ</span>
-                <span className="px-2 py-0.5 rounded-full text-[11px] font-black bg-[#DA2128] text-white">
+                <span className="px-2 py-0.5 rounded-full text-[11px] font-black bg-[#DA2128] text-white shadow-2xs">
                   {pendingCount} รายการ
                 </span>
               </h4>
@@ -400,7 +400,7 @@ export default function RequisitionManagement({
           {statusFilter !== "รออนุมัติ" && (
             <button
               onClick={() => setStatusFilter("รออนุมัติ")}
-              className="w-full sm:w-auto px-3.5 py-2 bg-[#DA2128] hover:bg-[#B81B22] text-white text-xs font-bold rounded-xl shadow-xs transition-all flex items-center justify-center space-x-1.5 shrink-0 active:scale-95 cursor-pointer"
+              className="w-full sm:w-auto px-3.5 py-2 glass-button-primary text-white text-xs font-bold rounded-xl shadow-xs transition-all flex items-center justify-center space-x-1.5 shrink-0 active:scale-95 cursor-pointer"
             >
               <span>กรองเฉพาะรายการรออนุมัติ ({pendingCount})</span>
             </button>
@@ -410,13 +410,13 @@ export default function RequisitionManagement({
 
       {/* Orders List Table / Card Grid */}
       {isLoading ? (
-        <div className="bg-white rounded-2xl p-12 border border-slate-200 text-center space-y-3">
+        <div className="glass-panel rounded-3xl p-12 text-center space-y-3">
           <div className="w-8 h-8 rounded-full border-2 border-slate-200 border-t-[#DA2128] animate-spin mx-auto"></div>
           <p className="text-xs text-slate-500 font-medium">กำลังโหลดรายการคำขอเบิกพัสดุ...</p>
         </div>
       ) : displayedOrders.length === 0 ? (
-        <div className="bg-white rounded-2xl p-12 border border-slate-200 text-center space-y-3">
-          <div className="w-14 h-14 rounded-full bg-slate-100 text-slate-400 flex items-center justify-center mx-auto">
+        <div className="glass-panel rounded-3xl p-12 text-center space-y-3">
+          <div className="w-14 h-14 rounded-2xl bg-slate-100/80 text-slate-400 flex items-center justify-center mx-auto shadow-xs">
             <Package className="w-7 h-7" />
           </div>
           <h3 className="text-base font-bold text-slate-800">ไม่พบรายการขอเบิกพัสดุ</h3>
@@ -431,16 +431,16 @@ export default function RequisitionManagement({
           {displayedOrders.map((order) => (
             <div
               key={order.id || order.reqNo}
-              className={`bg-white border rounded-2xl p-3.5 sm:p-5 transition-all shadow-xs space-y-3 ${
+              className={`glass-card rounded-2xl sm:rounded-3xl p-3.5 sm:p-5 transition-all space-y-3 ${
                 order.status === "รออนุมัติ"
-                  ? "border-amber-300 ring-1 ring-amber-200/50 hover:border-amber-400"
-                  : "border-slate-200 hover:border-slate-300"
+                  ? "border-amber-300/90 ring-1 ring-amber-200/60 hover:border-amber-400 shadow-[0_4px_20px_rgba(245,158,11,0.06)]"
+                  : "hover:border-red-200/80"
               }`}
             >
               {/* Row 1: Header (ReqNo, Status, Signature Progress, Date) */}
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-slate-100 pb-2.5">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-slate-200/60 pb-2.5">
                 <div className="flex flex-wrap items-center gap-1.5">
-                  <span className="font-mono text-xs font-black text-[#DA2128] bg-red-50 border border-red-200/80 px-2 py-0.5 rounded-lg">
+                  <span className="font-mono text-xs font-black text-[#DA2128] bg-red-50/90 border border-red-200/80 px-2 py-0.5 rounded-lg shadow-2xs">
                     {order.reqNo}
                   </span>
                   {renderStatusBadge(order.status)}
@@ -453,14 +453,14 @@ export default function RequisitionManagement({
                       <Calendar className="w-3 h-3 text-slate-400" />
                       <span>
                         {order.createdAt.seconds
-                          ? new Date(order.createdAt.seconds * 1000).toLocaleDateString("th-TH", {
-                              year: "numeric",
-                              month: "short",
-                              day: "numeric",
-                              hour: "2-digit",
-                              minute: "2-digit"
-                            })
-                          : "เมื่อสักครู่"}
+                           ? new Date(order.createdAt.seconds * 1000).toLocaleDateString("th-TH", {
+                               year: "numeric",
+                               month: "short",
+                               day: "numeric",
+                               hour: "2-digit",
+                               minute: "2-digit"
+                             })
+                           : "เมื่อสักครู่"}
                       </span>
                     </span>
                   )}
@@ -485,7 +485,7 @@ export default function RequisitionManagement({
                   <p className="text-slate-800 line-clamp-1 font-medium">{order.purpose || "เพื่อใช้ในการปฏิบัติงาน"}</p>
                 </div>
 
-                <div className="sm:col-span-3 flex sm:flex-col justify-between sm:items-end items-center bg-slate-50 sm:bg-transparent p-2 sm:p-0 rounded-xl">
+                <div className="sm:col-span-3 flex sm:flex-col justify-between sm:items-end items-center glass-pill sm:bg-transparent p-2 sm:p-0 rounded-xl">
                   <span className="text-slate-500 text-[11px] font-medium">ยอดรวม {order.totalItems} ชิ้น ({order.items.length} รายการ)</span>
                   <span className="text-sm font-black text-[#DA2128]">
                     ฿{(order.totalAmount || 0).toLocaleString()} บาท
@@ -494,17 +494,17 @@ export default function RequisitionManagement({
               </div>
 
               {/* Row 3: Items Mini-Previews & Action Buttons */}
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 pt-2.5 border-t border-slate-100">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 pt-2.5 border-t border-slate-200/60">
                 {/* Items preview pills */}
                 <div className="flex items-center space-x-1.5 overflow-x-auto pb-1 sm:pb-0 scrollbar-none">
                   {order.items.slice(0, 3).map((item, idx) => (
                     <div
                       key={idx}
-                      className="flex items-center space-x-1.5 bg-slate-50 border border-slate-200 px-2 py-0.5 rounded-lg text-[11px] text-slate-700 whitespace-nowrap shrink-0"
+                      className="flex items-center space-x-1.5 glass-pill border-slate-200/80 px-2 py-0.5 rounded-lg text-[11px] text-slate-700 whitespace-nowrap shrink-0"
                     >
                       {item.imageUrl && (
                         /* eslint-disable-next-line @next/next/no-img-element */
-                        <img src={item.imageUrl} alt="" className="w-3.5 h-3.5 rounded object-cover" />
+                        <img src={item.imageUrl} alt="" className="w-3.5 h-3.5 rounded object-cover shadow-2xs" />
                       )}
                       <span className="font-medium truncate max-w-[110px]">{item.name}</span>
                       <span className="font-bold text-[#DA2128]">x{item.quantity}</span>
@@ -525,7 +525,7 @@ export default function RequisitionManagement({
                       setSelectedOrder(order);
                       setIsDigitalDocModalOpen(true);
                     }}
-                    className="w-full sm:w-auto px-3.5 py-2 rounded-xl bg-slate-900 hover:bg-black text-white text-xs font-bold flex items-center justify-center space-x-1.5 transition-colors cursor-pointer shadow-xs active:scale-95"
+                    className="w-full sm:w-auto px-3.5 py-2 rounded-xl bg-slate-900/90 hover:bg-black text-white text-xs font-bold flex items-center justify-center space-x-1.5 transition-all cursor-pointer shadow-xs active:scale-95 border border-slate-700/60"
                   >
                     <PenTool className="w-3.5 h-3.5 text-amber-400" />
                     <span>เปิดใบขอเบิกและลงนามดิจิทัล</span>
@@ -537,7 +537,7 @@ export default function RequisitionManagement({
                       <button
                         onClick={() => handleQuickApprove(order)}
                         disabled={isProcessing}
-                        className="flex-1 sm:flex-initial px-3.5 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 active:bg-emerald-800 text-white text-xs font-bold flex items-center justify-center space-x-1 shadow-xs transition-colors cursor-pointer"
+                        className="flex-1 sm:flex-initial px-3.5 py-2 rounded-xl bg-emerald-600/95 hover:bg-emerald-700 text-white text-xs font-bold flex items-center justify-center space-x-1 shadow-xs transition-colors cursor-pointer border border-emerald-500"
                         title="ลงนามอนุมัติดิจิทัลทันที"
                       >
                         <Check className="w-3.5 h-3.5" />
@@ -547,7 +547,7 @@ export default function RequisitionManagement({
                       <button
                         onClick={() => handleOpenRejectModal(order)}
                         disabled={isProcessing}
-                        className="flex-1 sm:flex-initial px-3.5 py-2 rounded-xl bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 text-xs font-bold flex items-center justify-center space-x-1 transition-colors cursor-pointer"
+                        className="flex-1 sm:flex-initial px-3.5 py-2 rounded-xl bg-rose-50/90 hover:bg-rose-100 text-rose-700 border border-rose-200 text-xs font-bold flex items-center justify-center space-x-1 transition-colors cursor-pointer"
                       >
                         <X className="w-3.5 h-3.5" />
                         <span>ปฏิเสธ</span>
@@ -559,7 +559,7 @@ export default function RequisitionManagement({
                     <button
                       onClick={() => handleQuickDispense(order)}
                       disabled={isProcessing}
-                      className="w-full sm:w-auto px-3.5 py-2 rounded-xl bg-[#DA2128] hover:bg-[#B81B22] text-white text-xs font-bold flex items-center justify-center space-x-1 shadow-xs transition-colors cursor-pointer"
+                      className="w-full sm:w-auto px-3.5 py-2 glass-button-primary text-white text-xs font-bold flex items-center justify-center space-x-1 shadow-xs transition-all cursor-pointer"
                     >
                       <PackageCheck className="w-3.5 h-3.5" />
                       <span>ลงนามจ่ายพัสดุ</span>
@@ -570,7 +570,7 @@ export default function RequisitionManagement({
 
               {/* Note / Approver Remarks */}
               {order.status === "ปฏิเสธ" && order.rejectReason && (
-                <div className="p-2.5 bg-rose-50 border border-rose-200 rounded-xl text-xs text-rose-800 flex items-start space-x-2">
+                <div className="p-2.5 bg-rose-50/90 border border-rose-200 rounded-xl text-xs text-rose-800 flex items-start space-x-2">
                   <AlertCircle className="w-4 h-4 text-rose-600 shrink-0 mt-0.5" />
                   <div>
                     <span className="font-bold">เหตุผลที่ปฏิเสธ: </span>
@@ -605,9 +605,9 @@ export default function RequisitionManagement({
       {/* MODAL: REJECT REASON */}
       {/* ========================================================================= */}
       {isRejectModalOpen && orderToReject && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs">
-          <div className="bg-white rounded-3xl max-w-md w-full p-6 space-y-4 shadow-2xl border border-slate-200 animate-scaleUp">
-            <div className="w-12 h-12 rounded-full bg-rose-100 text-rose-600 flex items-center justify-center mx-auto">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-md">
+          <div className="glass-modal rounded-3xl max-w-md w-full p-6 space-y-4 shadow-2xl border border-white/90 animate-scaleUp">
+            <div className="w-12 h-12 rounded-2xl bg-rose-100/90 text-rose-600 flex items-center justify-center mx-auto shadow-xs border border-rose-200">
               <XCircle className="w-6 h-6" />
             </div>
 
@@ -622,20 +622,20 @@ export default function RequisitionManagement({
               placeholder="เช่น พัสดุชนิดนี้จัดสรรสำหรับงานส่วนกลางเท่านั้น หรือข้อมูลไม่ครบถ้วน"
               value={rejectReason}
               onChange={(e) => setRejectReason(e.target.value)}
-              className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-900 focus:outline-none focus:border-[#DA2128]"
+              className="w-full p-3 glass-input rounded-xl text-xs text-slate-900"
             />
 
             <div className="flex items-center space-x-2 pt-2">
               <button
                 onClick={() => setIsRejectModalOpen(false)}
-                className="flex-1 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold rounded-xl transition-colors cursor-pointer"
+                className="flex-1 py-2.5 glass-button-secondary text-slate-700 text-xs font-bold rounded-xl transition-colors cursor-pointer"
               >
                 ยกเลิก
               </button>
               <button
                 onClick={handleConfirmReject}
                 disabled={isProcessing || !rejectReason.trim()}
-                className="flex-1 py-2.5 bg-rose-600 hover:bg-rose-700 text-white text-xs font-bold rounded-xl transition-colors disabled:opacity-50 cursor-pointer"
+                className="flex-1 py-2.5 bg-rose-600 hover:bg-rose-700 text-white text-xs font-bold rounded-xl transition-colors disabled:opacity-50 cursor-pointer shadow-sm"
               >
                 ยืนยันปฏิเสธ
               </button>
