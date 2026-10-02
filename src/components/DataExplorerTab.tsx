@@ -620,22 +620,27 @@ export default function DataExplorerTab() {
         ) : (
           <>
             {/* Mobile Responsive Cards Feed (< md) */}
-            <div className="md:hidden divide-y divide-slate-200/60 bg-white/40">
+            <div className="md:hidden p-3 space-y-3 bg-slate-100/50">
               {assetsData.map((item, idx) => {
                 const itemIndex = (pagination.page - 1) * pagination.limit + idx + 1;
+                const isEven = idx % 2 === 0;
                 return (
                   <div
                     key={`mob-${item.inventoryNo}-${idx}`}
                     onClick={() => setSelectedItemForModal(item)}
-                    className="p-4 space-y-3 hover:bg-red-50/40 active:bg-red-50/60 transition-colors cursor-pointer"
+                    className={`p-4 rounded-2xl border space-y-3 transition-all cursor-pointer shadow-xs hover:shadow-md ${
+                      isEven
+                        ? "bg-white border-slate-200/90"
+                        : "bg-slate-50 border-slate-300/80"
+                    }`}
                   >
                     {/* Top Row: Index, Category, Status */}
-                    <div className="flex items-center justify-between gap-2">
+                    <div className="flex items-center justify-between gap-2 border-b border-slate-200/60 pb-2.5">
                       <div className="flex items-center space-x-2 min-w-0 flex-1">
                         <span className="font-mono text-xs font-black text-[#DA2128] bg-red-50/90 border border-red-200/80 px-2 py-0.5 rounded-lg shadow-2xs shrink-0">
                           #{itemIndex}
                         </span>
-                        <span className="text-[11px] font-medium text-slate-600 bg-slate-100/90 border border-slate-200/70 px-2.5 py-0.5 rounded-lg truncate max-w-[170px]" title={item.category}>
+                        <span className="text-[11px] font-medium text-slate-700 bg-white/90 border border-slate-200/90 px-2.5 py-0.5 rounded-lg truncate max-w-[170px]" title={item.category}>
                           {item.category}
                         </span>
                       </div>
@@ -649,8 +654,8 @@ export default function DataExplorerTab() {
                       <h4 className="font-black text-sm text-slate-900 leading-snug">
                         {item.name}
                       </h4>
-                      <div className="flex flex-wrap items-center gap-x-2 gap-y-0.5 text-[11px] text-slate-400 font-mono mt-1">
-                        <span className="text-slate-600 font-bold">{item.inventoryNo}</span>
+                      <div className="flex flex-wrap items-center gap-x-2 gap-y-0.5 text-[11px] text-slate-500 font-mono mt-1">
+                        <span className="text-slate-700 font-bold">{item.inventoryNo}</span>
                         {item.acquisitionDate && (
                           <span>• ได้มาเมื่อ: {item.acquisitionDate}</span>
                         )}
@@ -659,14 +664,14 @@ export default function DataExplorerTab() {
 
                     {/* Details Grid (Cost, Location & Division) */}
                     <div className="grid grid-cols-2 gap-2 text-xs pt-0.5">
-                      <div className="p-2.5 rounded-xl bg-slate-50/90 border border-slate-200/70 space-y-0.5">
+                      <div className="p-2.5 rounded-xl bg-white/90 border border-slate-200/80 space-y-0.5 shadow-2xs">
                         <span className="text-[10px] text-slate-400 font-medium block">มูลค่าต้นทุน</span>
                         <p className="font-mono font-black text-[#DA2128] text-xs sm:text-sm">
                           ฿{item.amountNumeric ? item.amountNumeric.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : item.amountPosted}
                         </p>
                       </div>
 
-                      <div className="p-2.5 rounded-xl bg-slate-50/90 border border-slate-200/70 space-y-0.5 min-w-0">
+                      <div className="p-2.5 rounded-xl bg-white/90 border border-slate-200/80 space-y-0.5 min-w-0 shadow-2xs">
                         <span className="text-[10px] text-slate-400 font-medium block">สถานที่ / ผู้รับผิดชอบ</span>
                         <p className="text-slate-800 font-bold truncate text-xs" title={item.locationName || item.divisionLabel}>
                           {item.locationName || item.divisionLabel}
@@ -675,17 +680,19 @@ export default function DataExplorerTab() {
                     </div>
 
                     {/* Action Button */}
-                    <button
-                      type="button"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        setSelectedItemForModal(item);
-                      }}
-                      className="w-full py-2.5 px-3 rounded-xl glass-button-secondary text-slate-700 hover:text-[#DA2128] text-xs font-bold flex items-center justify-center space-x-1.5 shadow-2xs border border-slate-200/80 transition-all cursor-pointer active:scale-98"
-                    >
-                      <Eye className="w-3.5 h-3.5 text-[#DA2128]" />
-                      <span>ดูสเปก & ข้อมูลละเอียด</span>
-                    </button>
+                    <div className="pt-1">
+                      <button
+                        type="button"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setSelectedItemForModal(item);
+                        }}
+                        className="w-full py-2.5 px-3 rounded-xl bg-red-50/90 hover:bg-[#DA2128] text-[#DA2128] hover:text-white border border-red-200/90 text-xs font-bold flex items-center justify-center space-x-1.5 shadow-2xs transition-all cursor-pointer active:scale-98"
+                      >
+                        <Eye className="w-3.5 h-3.5" />
+                        <span>ดูสเปก & ข้อมูลละเอียด</span>
+                      </button>
+                    </div>
                   </div>
                 );
               })}

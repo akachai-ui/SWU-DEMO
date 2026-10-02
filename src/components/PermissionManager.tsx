@@ -491,13 +491,21 @@ export default function PermissionManager() {
       ) : (
         <div className="glass-panel rounded-2xl sm:rounded-3xl shadow-xl overflow-hidden">
           {/* Mobile Card View (< md) */}
-          <div className="md:hidden divide-y divide-slate-200/60 bg-white/40">
-            {filteredUsers.map((u) => {
+          <div className="md:hidden p-3 space-y-3 bg-slate-100/50">
+            {filteredUsers.map((u, idx) => {
               const rolePreset = ROLE_PRESETS[u.role] || ROLE_PRESETS.staff;
               const activePermCount = Object.values(u.permissions || {}).filter(Boolean).length;
+              const isEven = idx % 2 === 0;
 
               return (
-                <div key={`mob-${u.id || u.uid}`} className="p-4 space-y-3 hover:bg-red-50/30 transition-colors">
+                <div
+                  key={`mob-${u.id || u.uid}`}
+                  className={`p-4 rounded-2xl border space-y-3 transition-all shadow-xs ${
+                    isEven
+                      ? "bg-white border-slate-200/90"
+                      : "bg-slate-50 border-slate-300/80"
+                  }`}
+                >
                   {/* Top: Avatar, Name, Email, Status */}
                   <div className="flex items-start justify-between gap-2">
                     <div className="flex items-center space-x-2.5 min-w-0 flex-1">
