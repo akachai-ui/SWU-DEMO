@@ -596,7 +596,7 @@ export default function RealPortalPage() {
         </header>
 
         {/* Main Operational Body */}
-        <main className="flex-1 max-w-7xl w-full mx-auto px-3.5 sm:px-6 lg:px-8 py-4 sm:py-7 pb-16 sm:pb-8 relative z-10">
+        <main className="flex-1 max-w-7xl w-full mx-auto px-3.5 sm:px-6 lg:px-8 py-4 sm:py-7 pb-16 sm:pb-8">
           {activeMainTab === "shop" && canViewShop && <MaterialShop />}
           {activeMainTab === "my_requests" && canViewMyRequests && <RequisitionManagement initialViewMode="my_requests" />}
           {activeMainTab === "approvals" && canApprove && <RequisitionManagement initialViewMode="approvals" />}
@@ -695,7 +695,7 @@ export default function RealPortalPage() {
         </nav>
 
         {/* Official Modern Footer */}
-        <footer className="glass-nav border-t border-slate-200/80 pt-5 pb-28 sm:pb-5 text-center text-xs text-slate-600 print:hidden relative z-10">
+        <footer className="glass-nav border-t border-slate-200/80 pt-5 pb-28 sm:pb-5 text-center text-xs text-slate-600 print:hidden">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row items-center justify-between gap-3">
             <div className="flex flex-wrap items-center justify-center sm:justify-start gap-1.5 sm:gap-2 text-slate-700">
               <span className="font-bold text-slate-900">© 2026 Srinakharinwirot University (SWU)</span>
