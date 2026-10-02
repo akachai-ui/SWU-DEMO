@@ -437,51 +437,54 @@ export default function DataExplorerTab() {
           </div>
         </div>
 
-        {/* Division Switcher 4 Cards */}
+        {/* Division Switcher 4 Cards (Horizontal Swipe on Mobile, 4-Col Grid on Desktop) */}
         <div className="space-y-2">
           <div className="flex items-center justify-between">
             <span className="text-xs font-bold text-slate-500 uppercase tracking-wider flex items-center space-x-1.5">
               <FolderTree className="w-3.5 h-3.5 text-[#DA2128]" />
               <span>เลือกมุมมองตามฝ่ายงาน (Division Filter)</span>
             </span>
+            <span className="text-[10px] text-slate-400 font-medium sm:hidden flex items-center space-x-1">
+              <span>เลื่อนซ้าย-ขวา ➔</span>
+            </span>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+          <div className="flex sm:grid sm:grid-cols-2 lg:grid-cols-4 gap-2.5 sm:gap-3 overflow-x-auto pb-1.5 scrollbar-none snap-x">
             {divisionOptions.map((div) => {
               const isSelected = selectedDivision === div.key;
               return (
                 <button
                   key={div.key}
                   onClick={() => handleDivisionChange(div.key)}
-                  className={`p-4 rounded-2xl text-left transition-all flex flex-col justify-between space-y-3 cursor-pointer ${
+                  className={`w-[210px] sm:w-auto shrink-0 snap-start p-3 sm:p-4 rounded-xl sm:rounded-2xl text-left transition-all flex flex-col justify-between space-y-2.5 cursor-pointer ${
                     isSelected
                       ? "bg-red-50/90 border-2 border-[#DA2128] shadow-md shadow-red-500/10"
                       : "glass-card hover:border-slate-300"
                   }`}
                 >
                   <div className="flex items-start justify-between">
-                    <div className="space-y-0.5">
-                      <span className="text-lg">{div.icon}</span>
-                      <p className={`text-xs font-bold ${isSelected ? "text-[#DA2128]" : "text-slate-800"}`}>
+                    <div className="space-y-0.5 min-w-0 flex-1 pr-1">
+                      <span className="text-base sm:text-lg">{div.icon}</span>
+                      <p className={`text-xs font-bold truncate ${isSelected ? "text-[#DA2128]" : "text-slate-800"}`} title={div.name}>
                         {div.name}
                       </p>
                     </div>
                     {isSelected && (
-                      <span className="w-2 h-2 rounded-full bg-[#DA2128] animate-pulse"></span>
+                      <span className="w-2 h-2 rounded-full bg-[#DA2128] animate-pulse shrink-0 mt-1"></span>
                     )}
                   </div>
 
                   <div className="pt-2 border-t border-slate-200/60 flex items-baseline justify-between text-xs">
                     <div>
                       <span className="text-[10px] text-slate-400 block">จำนวนพัสดุ</span>
-                      <span className="font-extrabold text-slate-900 text-sm">
+                      <span className="font-extrabold text-slate-900 text-xs sm:text-sm">
                         {div.count.toLocaleString()}
                       </span>
                       <span className="text-[10px] text-slate-400 ml-1">รายการ</span>
                     </div>
                     <div className="text-right">
                       <span className="text-[10px] text-slate-400 block">มูลค่าต้นทุน</span>
-                      <span className="font-black text-[#DA2128] text-sm">
+                      <span className="font-black text-[#DA2128] text-xs sm:text-sm">
                         ฿{div.valMillion.toLocaleString(undefined, { maximumFractionDigits: 1 })}M
                       </span>
                     </div>
@@ -492,22 +495,22 @@ export default function DataExplorerTab() {
           </div>
         </div>
 
-        {/* 6 Category Group Cards */}
-        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-7 gap-2.5 pt-2">
+        {/* 6 Category Group Cards (Horizontal Swipe on Mobile, 7-Col Grid on Desktop) */}
+        <div className="flex sm:grid sm:grid-cols-3 lg:grid-cols-7 gap-2 sm:gap-2.5 pt-1 overflow-x-auto pb-1 scrollbar-none snap-x">
           {categoryGroups.map((grp) => {
             const isSelected = selectedGroup === grp.key;
             return (
               <button
                 key={grp.key}
                 onClick={() => handleGroupSelect(grp.key)}
-                className={`p-3 rounded-2xl text-left transition-all space-y-1.5 cursor-pointer ${
+                className={`w-[145px] sm:w-auto shrink-0 snap-start p-2.5 sm:p-3 rounded-xl sm:rounded-2xl text-left transition-all space-y-1 cursor-pointer ${
                   isSelected
                     ? "glass-button-primary text-white shadow-md"
                     : "glass-pill text-slate-700 hover:bg-white/90 border-slate-200/80"
                 }`}
               >
                 <div className="flex items-center justify-between gap-1 min-w-0">
-                  <span className={`shrink-0 ${isSelected ? "text-white" : "text-[#DA2128]"}`}>{grp.icon}</span>
+                  <span className={`shrink-0 text-sm sm:text-base ${isSelected ? "text-white" : "text-[#DA2128]"}`}>{grp.icon}</span>
                   <span className={`text-[10px] font-bold truncate ${isSelected ? "text-white" : "text-slate-500"}`}>
                     ฿{typeof grp.valMillion === "number" ? grp.valMillion.toLocaleString(undefined, { maximumFractionDigits: 1 }) : grp.valMillion}M
                   </span>
@@ -523,7 +526,7 @@ export default function DataExplorerTab() {
       </div>
 
       {/* Main Search and Table Controls */}
-      <div className="glass-panel rounded-2xl sm:rounded-3xl p-5 space-y-4 text-slate-800">
+      <div className="glass-panel rounded-2xl sm:rounded-3xl p-3.5 sm:p-5 space-y-3 sm:space-y-4 text-slate-800">
         <div className="grid grid-cols-1 sm:grid-cols-12 gap-3">
           {/* Search Box */}
           <div className="sm:col-span-6 relative">
