@@ -14,6 +14,11 @@ export const viewport: Viewport = {
 export const metadata: Metadata = {
   title: "SWU Inventory & Asset Management - มหาวิทยาลัยศรีนครินทรวิโรฒ",
   description: "ระบบบริหารจัดการพัสดุ ครุภัณฑ์ และใบขอเบิกดิจิทัล 100% ไร้กระดาษ ส่วนพัฒนากายภาพ มศว",
+  icons: {
+    icon: "/images/swu-logo.png",
+    shortcut: "/images/swu-logo.png",
+    apple: "/images/swu-logo.png",
+  },
   appleWebApp: {
     capable: true,
     statusBarStyle: "default",
@@ -21,6 +26,9 @@ export const metadata: Metadata = {
   },
   formatDetection: {
     telephone: false
+  },
+  other: {
+    "mobile-web-app-capable": "yes"
   }
 };
 
@@ -31,7 +39,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="th">
-      <body className="antialiased min-h-screen bg-[#121417] text-gray-100">
+      <body className="antialiased min-h-screen text-slate-800 selection:bg-[#DA2128] selection:text-white font-sans">
         <AuthProvider>
           {children}
         </AuthProvider>
