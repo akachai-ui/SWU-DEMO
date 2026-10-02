@@ -13,6 +13,20 @@ import {
 } from "firebase/firestore";
 import { db } from "./firebase";
 
+export interface StockLot {
+  lotId: string;
+  fiscalYear: string;        // e.g. "2567", "2568"
+  receivedDate: string;      // e.g. "2024-10-01"
+  fundingSource: string;     // e.g. "งบประมาณแผ่นดิน", "งบรายได้ส่วนงาน", "เงินบริจาค"
+  vendor?: string;           // e.g. "บจก. ออฟฟิศเมท"
+  documentRef?: string;      // e.g. "PO-68-0012" / "ใบตรวจรับ ว.12/68"
+  initialQty: number;        // Received quantity
+  remainingQty: number;      // Remaining quantity in this lot
+  unitPrice: number;         // Unit price for this lot
+  note?: string;
+  createdAt?: any;
+}
+
 export interface ConsumableItem {
   id?: string;
   code: string;
@@ -25,6 +39,11 @@ export interface ConsumableItem {
   location: string;
   imageUrl: string;
   description?: string;
+  fundingSource?: string;    // แหล่งที่มาของพัสดุ / งบประมาณ
+  receivedDate?: string;     // วัน เดือน ปี ที่รับเข้า
+  fiscalYear?: string;       // ปีงบประมาณ เช่น 2567, 2568
+  documentRef?: string;      // เลขที่ใบสั่งซื้อ (PO) / ใบตรวจรับ
+  lots?: StockLot[];         // ประวัติการรับเข้าและสต็อกแยกล็อต
   createdAt?: any;
   updatedAt?: any;
 }
@@ -432,4 +451,65 @@ export async function signReceiveRequisitionInFirestore(
     throw error;
   }
 }
+
+/**
+ * Replenish / Add a new stock lot to an existing consumable item in Firestore
+ */
+export async function replenishConsumableStockInFirestore(
+  docId: string,
+  newLotData: Omit<StockLot, "lotId">,
+  currentItem: ConsumableItem
+): Promise<StockLot> {
+  try {
+    const lotId = `LOT-${newLotData.fiscalYear || new Date().getFullYear() + 543}-${Math.floor(1000 + Math.random() * 9000)}`;
+    const newLot: StockLot = {
+      ...newLotData,
+      lotId,
+      initialQty: Number(newLotData.initialQty) || 0,
+      remainingQty: Number(newLotData.remainingQty ?? newLotData.initialQty) || 0,
+      unitPrice: Number(newLotData.unitPrice) || 0,
+      createdAt: new Date().toISOString()
+    };
+
+    const existingLots = Array.isArray(currentItem.lots) ? [...currentItem.lots] : [];
+    
+    // If this is the first lot and current item had stock without lot history, optionally wrap current stock as initial lot
+    if (existingLots.length === 0 && currentItem.stock > 0) {
+      existingLots.push({
+        lotId: `LOT-${currentItem.fiscalYear || "INIT"}-0001`,
+        fiscalYear: currentItem.fiscalYear || `${new Date().getFullYear() + 543}`,
+        receivedDate: currentItem.receivedDate || new Date().toISOString().split("T")[0],
+        fundingSource: currentItem.fundingSource || "งบประมาณเดิมในระบบ",
+        documentRef: currentItem.documentRef || "-",
+        initialQty: currentItem.stock,
+        remainingQty: currentItem.stock,
+        unitPrice: currentItem.unitPrice || 0,
+        note: "ยอดยกมาจากสต็อกเริ่มต้น"
+      });
+    }
+
+    const updatedLots = [newLot, ...existingLots];
+    
+    // Total stock = sum of remainingQty of all lots
+    const totalRemaining = updatedLots.reduce((acc, lot) => acc + (Number(lot.remainingQty) || 0), 0);
+
+    const docRef = doc(db, STOCK_COLLECTION, docId);
+    await updateDoc(docRef, {
+      stock: totalRemaining,
+      lots: updatedLots,
+      fiscalYear: newLot.fiscalYear || currentItem.fiscalYear,
+      fundingSource: newLot.fundingSource || currentItem.fundingSource,
+      receivedDate: newLot.receivedDate || currentItem.receivedDate,
+      documentRef: newLot.documentRef || currentItem.documentRef,
+      unitPrice: newLot.unitPrice > 0 ? newLot.unitPrice : currentItem.unitPrice,
+      updatedAt: serverTimestamp()
+    });
+
+    return newLot;
+  } catch (error) {
+    console.error("Firestore replenishConsumableStock error:", error);
+    throw error;
+  }
+}
+
 

@@ -3,12 +3,14 @@
 import React, { useState, useEffect } from "react";
 import {
   ConsumableItem,
+  StockLot,
   RequisitionOrder,
   subscribeToConsumables,
   addConsumableToFirestore,
   updateConsumableInFirestore,
   deleteConsumableFromFirestore,
-  saveRequisitionToFirestore
+  saveRequisitionToFirestore,
+  replenishConsumableStockInFirestore
 } from "@/lib/consumablesService";
 import { useAuth } from "@/lib/authContext";
 import DigitalRequisitionDocument from "@/components/DigitalRequisitionDocument";
@@ -38,7 +40,14 @@ import {
   User,
   Clock,
   ArrowRight,
-  Check
+  Check,
+  Calendar,
+  CreditCard,
+  History,
+  Tag,
+  Hash,
+  ArrowUpRight,
+  Layers2
 } from "lucide-react";
 
 const CATEGORIES = [
@@ -73,6 +82,24 @@ const UNITS = [
   "เมตร"
 ];
 
+export const FUNDING_SOURCES = [
+  "งบประมาณแผ่นดิน",
+  "งบรายได้ส่วนงาน",
+  "งบพัฒนาบุคลากร / ทุนการศึกษา",
+  "งบกองทุนวิจัย",
+  "งบกลางมหาวิทยาลัย",
+  "เงินบริจาค / โครงการพิเศษ",
+  "งบประมาณเหลือจ่ายปีก่อนหน้า",
+  "อื่นๆ"
+];
+
+export const FISCAL_YEARS = [
+  `${new Date().getFullYear() + 544}`,
+  `${new Date().getFullYear() + 543}`,
+  `${new Date().getFullYear() + 542}`,
+  `${new Date().getFullYear() + 541}`
+];
+
 export default function MaterialShop() {
   const { user } = useAuth();
   const [items, setItems] = useState<ConsumableItem[]>([]);
@@ -93,6 +120,22 @@ export default function MaterialShop() {
   const [isDigitalDocOpen, setIsDigitalDocOpen] = useState(false);
   const [lastReqOrder, setLastReqOrder] = useState<RequisitionOrder | null>(null);
 
+  // Lot Management & Replenishment Modal States
+  const [isLotModalOpen, setIsLotModalOpen] = useState(false);
+  const [selectedItemForLots, setSelectedItemForLots] = useState<ConsumableItem | null>(null);
+  const [isSubmittingLot, setIsSubmittingLot] = useState(false);
+  const [newLotForm, setNewLotForm] = useState({
+    fiscalYear: `${new Date().getFullYear() + 543}`,
+    receivedDate: new Date().toISOString().split("T")[0],
+    fundingSource: "งบประมาณแผ่นดิน",
+    customFundingSource: "",
+    documentRef: "",
+    vendor: "",
+    initialQty: 10,
+    unitPrice: 0,
+    note: ""
+  });
+
   // Cart State: { [code]: quantity }
   const [cart, setCart] = useState<{ [code: string]: number }>({});
 
@@ -107,7 +150,11 @@ export default function MaterialShop() {
     unitPrice: 0,
     location: "",
     imageUrl: "",
-    description: ""
+    description: "",
+    fundingSource: "งบประมาณแผ่นดิน",
+    receivedDate: new Date().toISOString().split("T")[0],
+    fiscalYear: `${new Date().getFullYear() + 543}`,
+    documentRef: ""
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSubmittingCheckout, setIsSubmittingCheckout] = useState(false);
@@ -262,7 +309,11 @@ export default function MaterialShop() {
       unitPrice: 0,
       location: "",
       imageUrl: "",
-      description: ""
+      description: "",
+      fundingSource: "งบประมาณแผ่นดิน",
+      receivedDate: new Date().toISOString().split("T")[0],
+      fiscalYear: `${new Date().getFullYear() + 543}`,
+      documentRef: ""
     });
     setIsAddModalOpen(true);
   };
@@ -272,9 +323,76 @@ export default function MaterialShop() {
     e.stopPropagation();
     setEditingId(item.id || item.code);
     setFormData({
-      ...item
+      ...item,
+      fundingSource: item.fundingSource || "งบประมาณแผ่นดิน",
+      receivedDate: item.receivedDate || new Date().toISOString().split("T")[0],
+      fiscalYear: item.fiscalYear || `${new Date().getFullYear() + 543}`,
+      documentRef: item.documentRef || ""
     });
     setIsAddModalOpen(true);
+  };
+
+  // Open Stock Lot Breakdown & Replenishment Modal
+  const handleOpenLotModal = (item: ConsumableItem, e?: React.MouseEvent) => {
+    if (e) e.stopPropagation();
+    setSelectedItemForLots(item);
+    setNewLotForm({
+      fiscalYear: item.fiscalYear || `${new Date().getFullYear() + 543}`,
+      receivedDate: new Date().toISOString().split("T")[0],
+      fundingSource: item.fundingSource || "งบประมาณแผ่นดิน",
+      customFundingSource: "",
+      documentRef: "",
+      vendor: "",
+      initialQty: 10,
+      unitPrice: item.unitPrice || 0,
+      note: ""
+    });
+    setIsLotModalOpen(true);
+  };
+
+  // Submit Restock Lot to Firestore
+  const handleReplenishLotSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (isSubmittingLot || !selectedItemForLots) return;
+
+    if (newLotForm.initialQty <= 0) {
+      showToast("กรุณาระบุจำนวนรับเข้าที่มากกว่า 0", "error");
+      return;
+    }
+
+    const effectiveFunding =
+      newLotForm.fundingSource === "อื่นๆ"
+        ? newLotForm.customFundingSource.trim() || "งบประมาณอื่นๆ"
+        : newLotForm.fundingSource;
+
+    setIsSubmittingLot(true);
+    try {
+      const docId = selectedItemForLots.id || selectedItemForLots.code;
+      await replenishConsumableStockInFirestore(
+        docId,
+        {
+          fiscalYear: newLotForm.fiscalYear,
+          receivedDate: newLotForm.receivedDate,
+          fundingSource: effectiveFunding,
+          documentRef: newLotForm.documentRef.trim(),
+          vendor: newLotForm.vendor.trim(),
+          initialQty: Number(newLotForm.initialQty),
+          remainingQty: Number(newLotForm.initialQty),
+          unitPrice: Number(newLotForm.unitPrice) || 0,
+          note: newLotForm.note.trim()
+        },
+        selectedItemForLots
+      );
+
+      showToast(`เติมสต็อก "${selectedItemForLots.name}" ล็อตใหม่ปีงบ ${newLotForm.fiscalYear} สำเร็จ!`);
+      setIsLotModalOpen(false);
+      setSelectedItemForLots(null);
+    } catch (err: any) {
+      console.error("Replenish lot error:", err);
+      showToast(`เติมสต็อกไม่สำเร็จ: ${err.message || "เกิดข้อผิดพลาด"}`, "error");
+    } finally {
+      setIsSubmittingLot(false);
+    }
   };
 
   // Submit Add / Edit Form to Firestore
@@ -313,7 +431,11 @@ export default function MaterialShop() {
         unitPrice: 0,
         location: "",
         imageUrl: "",
-        description: ""
+        description: "",
+        fundingSource: "งบประมาณแผ่นดิน",
+        receivedDate: new Date().toISOString().split("T")[0],
+        fiscalYear: `${new Date().getFullYear() + 543}`,
+        documentRef: ""
       });
       setIsAddModalOpen(false);
     } catch (err: any) {
@@ -671,6 +793,23 @@ export default function MaterialShop() {
                       {item.name}
                     </h3>
 
+                    {/* Fiscal Year & Funding Source Tag */}
+                    <div className="flex flex-wrap items-center gap-1 text-[10px] text-slate-500 pt-0.5">
+                      <span className="inline-flex items-center space-x-1 px-2 py-0.5 rounded-md bg-slate-100/90 text-slate-700 font-medium border border-slate-200/60 truncate max-w-full">
+                        <Tag className="w-2.5 h-2.5 text-[#DA2128] shrink-0" />
+                        <span>ปีงบ {item.fiscalYear || `${new Date().getFullYear() + 543}`}</span>
+                        {item.fundingSource && (
+                          <span className="text-slate-400 font-normal truncate">• {item.fundingSource}</span>
+                        )}
+                      </span>
+                      {Array.isArray(item.lots) && item.lots.length > 0 && (
+                        <span className="inline-flex items-center space-x-0.5 px-1.5 py-0.5 rounded-md bg-red-50/80 text-[#DA2128] font-semibold border border-red-200/50">
+                          <Layers2 className="w-2.5 h-2.5 shrink-0" />
+                          <span>{item.lots.length} ล็อต</span>
+                        </span>
+                      )}
+                    </div>
+
                     {item.location && (
                       <div className="flex items-center space-x-1 text-[11px] text-slate-400">
                         <MapPin className="w-3 h-3 text-slate-400 flex-shrink-0" />
@@ -690,6 +829,18 @@ export default function MaterialShop() {
                         <span className="text-[10px] text-slate-400 ml-1">/{item.unit}</span>
                       </div>
                     </div>
+
+                    {/* Officer Action: View Lots & Restock */}
+                    {canAddConsumables && (
+                      <button
+                        type="button"
+                        onClick={(e) => handleOpenLotModal(item, e)}
+                        className="w-full py-1.5 px-2.5 rounded-xl text-[11px] font-bold bg-slate-100 hover:bg-red-50 text-slate-700 hover:text-[#DA2128] border border-slate-200/80 hover:border-red-200 transition-all flex items-center justify-center space-x-1 cursor-pointer"
+                      >
+                        <History className="w-3 h-3 text-[#DA2128]" />
+                        <span>จัดการสต็อกแยกล็อต & เติมของ</span>
+                      </button>
+                    )}
 
                     {/* Add to Cart Stepper / Permission-based Action */}
                     {canRequestConsumables ? (
@@ -936,7 +1087,77 @@ export default function MaterialShop() {
                 </div>
               </div>
 
-              {/* Row 5: Location & Description */}
+              {/* Row 5: Funding Source & Received Date (ข้อมูลแหล่งที่มา & วันที่รับเข้า) */}
+              <div className="glass-pill p-4 rounded-2xl border border-slate-200/80 space-y-3.5 bg-slate-50/50">
+                <div className="flex items-center space-x-2 text-xs font-bold text-slate-800 border-b border-slate-200/60 pb-2">
+                  <CreditCard className="w-4 h-4 text-[#DA2128]" />
+                  <span>ข้อมูลแหล่งงบประมาณ & วันที่รับเข้าพัสดุ</span>
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                  <div>
+                    <label className="block text-[11px] font-bold text-slate-700 mb-1">
+                      ปีงบประมาณ *
+                    </label>
+                    <select
+                      value={formData.fiscalYear || `${new Date().getFullYear() + 543}`}
+                      onChange={(e) => setFormData({ ...formData, fiscalYear: e.target.value })}
+                      className="w-full px-3 py-2 glass-input rounded-xl text-xs text-slate-900 bg-white"
+                    >
+                      {FISCAL_YEARS.map((fy) => (
+                        <option key={fy} value={fy}>
+                          ปีงบประมาณ {fy}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+
+                  <div>
+                    <label className="block text-[11px] font-bold text-slate-700 mb-1 flex items-center space-x-1">
+                      <Calendar className="w-3 h-3 text-slate-500" />
+                      <span>วัน เดือน ปี ที่รับเข้า</span>
+                    </label>
+                    <input
+                      type="date"
+                      value={formData.receivedDate || new Date().toISOString().split("T")[0]}
+                      onChange={(e) => setFormData({ ...formData, receivedDate: e.target.value })}
+                      className="w-full px-3 py-2 glass-input rounded-xl text-xs text-slate-900 bg-white"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-[11px] font-bold text-slate-700 mb-1">
+                      เลขที่ PO / ใบตรวจรับ
+                    </label>
+                    <input
+                      type="text"
+                      placeholder="เช่น PO-68-0021"
+                      value={formData.documentRef || ""}
+                      onChange={(e) => setFormData({ ...formData, documentRef: e.target.value })}
+                      className="w-full px-3 py-2 glass-input rounded-xl text-xs text-slate-900 bg-white font-mono"
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-[11px] font-bold text-slate-700 mb-1">
+                    แหล่งที่มาของพัสดุ / ประเภทงบประมาณ
+                  </label>
+                  <select
+                    value={formData.fundingSource || "งบประมาณแผ่นดิน"}
+                    onChange={(e) => setFormData({ ...formData, fundingSource: e.target.value })}
+                    className="w-full px-3.5 py-2 glass-input rounded-xl text-xs text-slate-900 bg-white"
+                  >
+                    {FUNDING_SOURCES.map((fs) => (
+                      <option key={fs} value={fs}>
+                        {fs}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              </div>
+
+              {/* Row 6: Location & Description */}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
                   <label className="block text-xs font-bold text-slate-700 mb-1.5">ตำแหน่งจัดเก็บในคลัง / ตู้</label>
@@ -989,6 +1210,399 @@ export default function MaterialShop() {
                 </button>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+
+      {/* ========================================================================= */}
+      {/* MODAL: STOCK LOT MANAGEMENT & REPLENISHMENT (จัดการล็อต & เติมพัสดุ) */}
+      {/* ========================================================================= */}
+      {isLotModalOpen && selectedItemForLots && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-3 sm:p-6 py-6 sm:py-10 bg-slate-900/60 backdrop-blur-md overflow-y-auto">
+          <div className="glass-modal rounded-3xl max-w-4xl w-full my-auto shadow-2xl border border-white/90 overflow-hidden">
+            {/* Modal Header */}
+            <div className="sticky top-0 bg-white/95 backdrop-blur-md px-6 py-4 border-b border-slate-200/60 flex items-center justify-between z-10">
+              <div className="flex items-center space-x-3">
+                <div className="p-2.5 rounded-2xl bg-red-50 text-[#DA2128] border border-red-200/60">
+                  <History className="w-5 h-5" />
+                </div>
+                <div>
+                  <div className="flex items-center space-x-2">
+                    <h2 className="text-base sm:text-lg font-black text-slate-900">
+                      จัดการสต็อกแยกล็อต & เติมพัสดุ
+                    </h2>
+                    <span className="font-mono text-xs px-2 py-0.5 rounded-md bg-slate-100 text-slate-700 font-bold">
+                      {selectedItemForLots.code}
+                    </span>
+                  </div>
+                  <p className="text-xs text-slate-500 truncate max-w-md">
+                    {selectedItemForLots.name} (คงเหลือรวม {selectedItemForLots.stock} {selectedItemForLots.unit})
+                  </p>
+                </div>
+              </div>
+              <button
+                onClick={() => {
+                  setIsLotModalOpen(false);
+                  setSelectedItemForLots(null);
+                }}
+                className="p-2 text-slate-400 hover:text-slate-600 rounded-xl hover:bg-slate-100 cursor-pointer"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            {/* Modal Content */}
+            <div className="p-6 space-y-6 max-h-[75vh] overflow-y-auto">
+              {/* Summary Cards: Fiscal Year Breakdown */}
+              <div className="space-y-2">
+                <h3 className="text-xs font-bold text-slate-700 flex items-center space-x-1.5">
+                  <Tag className="w-3.5 h-3.5 text-[#DA2128]" />
+                  <span>สรุปยอดคงเหลือจำแนกตามปีงบประมาณ</span>
+                </h3>
+
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                  {/* Total Stock Card */}
+                  <div className="p-3.5 bg-red-50/80 border border-red-200/80 rounded-2xl">
+                    <p className="text-[11px] font-semibold text-slate-500">คงเหลือรวมทั้งหมด</p>
+                    <p className="text-xl font-black text-[#DA2128]">
+                      {selectedItemForLots.stock} <span className="text-xs font-bold text-slate-600">{selectedItemForLots.unit}</span>
+                    </p>
+                  </div>
+
+                  {/* Grouped by Fiscal Years */}
+                  {(() => {
+                    const lots = selectedItemForLots.lots || [];
+                    const yearMap: { [year: string]: number } = {};
+
+                    if (lots.length === 0) {
+                      const yr = selectedItemForLots.fiscalYear || `${new Date().getFullYear() + 543}`;
+                      yearMap[yr] = selectedItemForLots.stock;
+                    } else {
+                      lots.forEach((lot) => {
+                        const yr = lot.fiscalYear || "ไม่ระบุปี";
+                        yearMap[yr] = (yearMap[yr] || 0) + (Number(lot.remainingQty) || 0);
+                      });
+                    }
+
+                    return Object.entries(yearMap).map(([year, qty]) => (
+                      <div key={year} className="p-3.5 glass-card rounded-2xl border border-slate-200/80">
+                        <p className="text-[11px] font-semibold text-slate-500">ปีงบประมาณ {year}</p>
+                        <p className="text-lg font-bold text-slate-900">
+                          {qty} <span className="text-xs font-medium text-slate-500">{selectedItemForLots.unit}</span>
+                        </p>
+                      </div>
+                    ));
+                  })()}
+                </div>
+              </div>
+
+              {/* Form: Add New Restock Lot */}
+              <div className="p-5 rounded-2xl bg-gradient-to-br from-red-50/60 to-slate-50 border border-red-200/80 shadow-xs space-y-4">
+                <div className="flex items-center justify-between border-b border-red-200/60 pb-2.5">
+                  <div className="flex items-center space-x-2">
+                    <div className="w-6 h-6 rounded-lg bg-[#DA2128] text-white flex items-center justify-center font-bold text-xs">
+                      +
+                    </div>
+                    <h3 className="text-xs sm:text-sm font-bold text-slate-900">
+                      เติมพัสดุ / รับเข้าล็อตใหม่ (Add Restock Lot)
+                    </h3>
+                  </div>
+                  <span className="text-[11px] text-slate-500">บันทึกยอดจะถูกรวมเข้าสู่สต็อกทันที</span>
+                </div>
+
+                <form onSubmit={handleReplenishLotSubmit} className="space-y-4">
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                    <div>
+                      <label className="block text-[11px] font-bold text-slate-700 mb-1">
+                        จำนวนที่รับเข้า ({selectedItemForLots.unit}) *
+                      </label>
+                      <input
+                        type="number"
+                        min="1"
+                        required
+                        value={newLotForm.initialQty}
+                        onChange={(e) =>
+                          setNewLotForm({ ...newLotForm, initialQty: Math.max(1, Number(e.target.value)) })
+                        }
+                        className="w-full px-3 py-2 glass-input rounded-xl text-xs font-bold text-slate-900 bg-white"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block text-[11px] font-bold text-slate-700 mb-1">
+                        ปีงบประมาณ *
+                      </label>
+                      <select
+                        value={newLotForm.fiscalYear}
+                        onChange={(e) => setNewLotForm({ ...newLotForm, fiscalYear: e.target.value })}
+                        className="w-full px-3 py-2 glass-input rounded-xl text-xs text-slate-900 bg-white"
+                      >
+                        {FISCAL_YEARS.map((fy) => (
+                          <option key={fy} value={fy}>
+                            ปีงบประมาณ {fy}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+
+                    <div>
+                      <label className="block text-[11px] font-bold text-slate-700 mb-1 flex items-center space-x-1">
+                        <Calendar className="w-3 h-3 text-slate-500" />
+                        <span>วัน เดือน ปี ที่รับเข้า *</span>
+                      </label>
+                      <input
+                        type="date"
+                        required
+                        value={newLotForm.receivedDate}
+                        onChange={(e) => setNewLotForm({ ...newLotForm, receivedDate: e.target.value })}
+                        className="w-full px-3 py-2 glass-input rounded-xl text-xs text-slate-900 bg-white"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                    <div>
+                      <label className="block text-[11px] font-bold text-slate-700 mb-1">
+                        แหล่งงบประมาณ / ที่มา *
+                      </label>
+                      <select
+                        value={newLotForm.fundingSource}
+                        onChange={(e) => setNewLotForm({ ...newLotForm, fundingSource: e.target.value })}
+                        className="w-full px-3 py-2 glass-input rounded-xl text-xs text-slate-900 bg-white"
+                      >
+                        {FUNDING_SOURCES.map((fs) => (
+                          <option key={fs} value={fs}>
+                            {fs}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+
+                    {newLotForm.fundingSource === "อื่นๆ" ? (
+                      <div>
+                        <label className="block text-[11px] font-bold text-slate-700 mb-1">
+                          ระบุแหล่งที่มาเพิ่มเติม *
+                        </label>
+                        <input
+                          type="text"
+                          required
+                          placeholder="ระบุแหล่งงบประมาณ"
+                          value={newLotForm.customFundingSource}
+                          onChange={(e) =>
+                            setNewLotForm({ ...newLotForm, customFundingSource: e.target.value })
+                          }
+                          className="w-full px-3 py-2 glass-input rounded-xl text-xs text-slate-900 bg-white"
+                        />
+                      </div>
+                    ) : (
+                      <div>
+                        <label className="block text-[11px] font-bold text-slate-700 mb-1">
+                          ราคาต่อหน่วยล็อตนี้ (฿)
+                        </label>
+                        <input
+                          type="number"
+                          min="0"
+                          step="0.5"
+                          value={newLotForm.unitPrice}
+                          onChange={(e) =>
+                            setNewLotForm({ ...newLotForm, unitPrice: Number(e.target.value) })
+                          }
+                          className="w-full px-3 py-2 glass-input rounded-xl text-xs text-slate-900 bg-white"
+                        />
+                      </div>
+                    )}
+
+                    <div>
+                      <label className="block text-[11px] font-bold text-slate-700 mb-1">
+                        เลขที่เอกสาร / PO / ใบตรวจรับ
+                      </label>
+                      <input
+                        type="text"
+                        placeholder="เช่น PO-68-0042"
+                        value={newLotForm.documentRef}
+                        onChange={(e) => setNewLotForm({ ...newLotForm, documentRef: e.target.value })}
+                        className="w-full px-3 py-2 glass-input rounded-xl text-xs text-slate-900 bg-white font-mono"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <div>
+                      <label className="block text-[11px] font-bold text-slate-700 mb-1">
+                        ผู้ขาย / ร้านค้า / บริษัทคู่ค้า
+                      </label>
+                      <input
+                        type="text"
+                        placeholder="เช่น บจก. ออฟฟิศ ดีโป้"
+                        value={newLotForm.vendor}
+                        onChange={(e) => setNewLotForm({ ...newLotForm, vendor: e.target.value })}
+                        className="w-full px-3 py-2 glass-input rounded-xl text-xs text-slate-900 bg-white"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block text-[11px] font-bold text-slate-700 mb-1">
+                        หมายเหตุเพิ่มเติม
+                      </label>
+                      <input
+                        type="text"
+                        placeholder="เช่น รับเข้าประจำไตรมาสที่ 1"
+                        value={newLotForm.note}
+                        onChange={(e) => setNewLotForm({ ...newLotForm, note: e.target.value })}
+                        className="w-full px-3 py-2 glass-input rounded-xl text-xs text-slate-900 bg-white"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="flex justify-end pt-1">
+                    <button
+                      type="submit"
+                      disabled={isSubmittingLot}
+                      className="px-5 py-2.5 rounded-xl glass-button-primary text-white text-xs font-bold transition-all flex items-center space-x-1.5 cursor-pointer shadow-md"
+                    >
+                      {isSubmittingLot ? (
+                        <>
+                          <RefreshCw className="w-3.5 h-3.5 animate-spin" />
+                          <span>กำลังบันทึกล็อต...</span>
+                        </>
+                      ) : (
+                        <>
+                          <Plus className="w-3.5 h-3.5" />
+                          <span>บันทึกการรับเข้า & เติมสต็อก</span>
+                        </>
+                      )}
+                    </button>
+                  </div>
+                </form>
+              </div>
+
+              {/* Historical Lots Table */}
+              <div className="space-y-2.5">
+                <h3 className="text-xs font-bold text-slate-700 flex items-center space-x-1.5">
+                  <Layers2 className="w-3.5 h-3.5 text-[#DA2128]" />
+                  <span>ประวัติรายการล็อตพัสดุทั้งหมด ({selectedItemForLots.lots?.length || 1} ล็อต)</span>
+                </h3>
+
+                <div className="overflow-x-auto rounded-2xl border border-slate-200/80 bg-white shadow-2xs">
+                  <table className="w-full text-left text-xs">
+                    <thead className="bg-slate-50 border-b border-slate-200/80 text-[11px] font-bold text-slate-600">
+                      <tr>
+                        <th className="py-2.5 px-3">รหัสล็อต</th>
+                        <th className="py-2.5 px-3">ปีงบประมาณ</th>
+                        <th className="py-2.5 px-3">วันที่รับเข้า</th>
+                        <th className="py-2.5 px-3">แหล่งที่มา / PO</th>
+                        <th className="py-2.5 px-3 text-right">จำนวนรับเข้า</th>
+                        <th className="py-2.5 px-3 text-right">คงเหลือ</th>
+                        <th className="py-2.5 px-3 text-right">ราคา/หน่วย</th>
+                        <th className="py-2.5 px-3 text-center">สถานะ</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-slate-100">
+                      {Array.isArray(selectedItemForLots.lots) && selectedItemForLots.lots.length > 0 ? (
+                        selectedItemForLots.lots.map((lot) => {
+                          const isDepleted = Number(lot.remainingQty) <= 0;
+                          return (
+                            <tr key={lot.lotId} className="hover:bg-slate-50/80 transition-colors">
+                              <td className="py-2.5 px-3 font-mono font-bold text-slate-800">
+                                {lot.lotId}
+                              </td>
+                              <td className="py-2.5 px-3">
+                                <span className="px-2 py-0.5 rounded-md bg-slate-100 text-slate-700 font-semibold text-[10px]">
+                                  {lot.fiscalYear}
+                                </span>
+                              </td>
+                              <td className="py-2.5 px-3 text-slate-600">
+                                {lot.receivedDate || "-"}
+                              </td>
+                              <td className="py-2.5 px-3">
+                                <div className="text-slate-900 font-medium">{lot.fundingSource}</div>
+                                {lot.documentRef && (
+                                  <div className="text-[10px] text-slate-400 font-mono">PO: {lot.documentRef}</div>
+                                )}
+                              </td>
+                              <td className="py-2.5 px-3 text-right font-semibold text-slate-600">
+                                {lot.initialQty} {selectedItemForLots.unit}
+                              </td>
+                              <td className="py-2.5 px-3 text-right font-bold text-slate-900">
+                                <span className={isDepleted ? "text-slate-400 line-through" : "text-[#DA2128]"}>
+                                  {lot.remainingQty} {selectedItemForLots.unit}
+                                </span>
+                              </td>
+                              <td className="py-2.5 px-3 text-right font-mono text-slate-700">
+                                ฿{(lot.unitPrice || 0).toLocaleString()}
+                              </td>
+                              <td className="py-2.5 px-3 text-center">
+                                {isDepleted ? (
+                                  <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-slate-100 text-slate-500">
+                                    หมดแล้ว
+                                  </span>
+                                ) : (
+                                  <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-100 text-emerald-700 border border-emerald-200/60">
+                                    พร้อมเบิก
+                                  </span>
+                                )}
+                              </td>
+                            </tr>
+                          );
+                        })
+                      ) : (
+                        <tr className="hover:bg-slate-50/80 transition-colors">
+                          <td className="py-2.5 px-3 font-mono font-bold text-slate-800">
+                            LOT-{selectedItemForLots.fiscalYear || "INIT"}-0001
+                          </td>
+                          <td className="py-2.5 px-3">
+                            <span className="px-2 py-0.5 rounded-md bg-slate-100 text-slate-700 font-semibold text-[10px]">
+                              {selectedItemForLots.fiscalYear || `${new Date().getFullYear() + 543}`}
+                            </span>
+                          </td>
+                          <td className="py-2.5 px-3 text-slate-600">
+                            {selectedItemForLots.receivedDate || "-"}
+                          </td>
+                          <td className="py-2.5 px-3">
+                            <div className="text-slate-900 font-medium">
+                              {selectedItemForLots.fundingSource || "งบประมาณแผ่นดิน"}
+                            </div>
+                            {selectedItemForLots.documentRef && (
+                              <div className="text-[10px] text-slate-400 font-mono">
+                                PO: {selectedItemForLots.documentRef}
+                              </div>
+                            )}
+                          </td>
+                          <td className="py-2.5 px-3 text-right font-semibold text-slate-600">
+                            {selectedItemForLots.stock} {selectedItemForLots.unit}
+                          </td>
+                          <td className="py-2.5 px-3 text-right font-bold text-[#DA2128]">
+                            {selectedItemForLots.stock} {selectedItemForLots.unit}
+                          </td>
+                          <td className="py-2.5 px-3 text-right font-mono text-slate-700">
+                            ฿{(selectedItemForLots.unitPrice || 0).toLocaleString()}
+                          </td>
+                          <td className="py-2.5 px-3 text-center">
+                            <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-100 text-emerald-700 border border-emerald-200/60">
+                              พร้อมเบิก
+                            </span>
+                          </td>
+                        </tr>
+                      )}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+
+            {/* Modal Footer */}
+            <div className="px-6 py-3.5 bg-slate-50 border-t border-slate-200/80 flex justify-end">
+              <button
+                type="button"
+                onClick={() => {
+                  setIsLotModalOpen(false);
+                  setSelectedItemForLots(null);
+                }}
+                className="px-5 py-2 rounded-xl glass-button-secondary text-xs font-semibold text-slate-700 cursor-pointer"
+              >
+                ปิดหน้าต่าง
+              </button>
+            </div>
           </div>
         </div>
       )}
