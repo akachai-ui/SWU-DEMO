@@ -224,11 +224,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       return { success: true };
     } catch (error: any) {
       console.error("Google Auth error:", error);
+      const currentHost = typeof window !== "undefined" ? window.location.hostname : "";
       let message = "ไม่สามารถเข้าสู่ระบบด้วย Google ได้";
       if (error.code === "auth/popup-closed-by-user") {
         message = "หน้าต่างเข้าสู่ระบบถูกปิดก่อนทำรายการสำเร็จ";
       } else if (error.code === "auth/unauthorized-domain") {
-        message = "โดเมนนี้ยังไม่ได้เพิ่มใน Authorized Domains ของ Firebase Authentication";
+        message = `โดเมนหรือ IP (${currentHost}) ยังไม่ได้เพิ่มใน Authorized Domains ของ Firebase Console โปรดเพิ่ม "${currentHost}" ใน Authentication > Settings หรือใช้งานด้วย อีเมล/รหัสผ่าน ด้านล่างได้ทันที`;
       } else if (error.message) {
         message = error.message;
       }

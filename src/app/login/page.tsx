@@ -246,9 +246,24 @@ export default function LoginPage() {
 
             {/* Error Message */}
             {errorMessage && (
-              <div className="bg-red-50 border border-red-200 p-3.5 rounded-xl flex items-start space-x-2.5 text-xs text-red-700 animate-fadeIn">
-                <AlertCircle className="w-4 h-4 text-[#DA2128] shrink-0 mt-0.5" />
-                <span className="leading-relaxed font-medium">{errorMessage}</span>
+              <div className="bg-red-50 border border-red-200 p-3.5 rounded-xl flex flex-col space-y-2 text-xs text-red-700 animate-fadeIn">
+                <div className="flex items-start space-x-2.5">
+                  <AlertCircle className="w-4 h-4 text-[#DA2128] shrink-0 mt-0.5" />
+                  <span className="leading-relaxed font-medium">{errorMessage}</span>
+                </div>
+                {errorMessage.includes("Authorized Domains") && (
+                  <div className="pt-1.5 border-t border-red-200/80 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 text-[11px]">
+                    <a
+                      href="https://console.firebase.google.com/project/swu-demo-b20f8/authentication/settings"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="font-bold text-[#DA2128] hover:underline inline-flex items-center space-x-1"
+                    >
+                      <span>🔗 เปิด Firebase Console เพื่อเพิ่ม Domain</span>
+                    </a>
+                    <span className="text-slate-500">หรือใช้อีเมล/รหัสผ่านเข้าสู่ระบบ</span>
+                  </div>
+                )}
               </div>
             )}
 
