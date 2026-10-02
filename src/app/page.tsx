@@ -49,12 +49,52 @@ export default function RealPortalPage() {
   const canManageUsers = Boolean(user?.permissions?.canManageUsers || user?.role === "super_admin");
   const canAccessDev = Boolean(user?.permissions?.canAccessDevPortal || user?.role === "super_admin");
 
+  // 1. Audio and Speech Synthesizer Preloading & Global Gesture Unlock
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+
+    const unlockAudioAndVoices = () => {
+      try {
+        const AudioContextClass = window.AudioContext || (window as any).webkitAudioContext;
+        if (AudioContextClass) {
+          const ctx = new AudioContextClass();
+          if (ctx.state === "suspended") {
+            ctx.resume();
+          }
+        }
+      } catch (e) {}
+
+      if ("speechSynthesis" in window) {
+        window.speechSynthesis.resume();
+        window.speechSynthesis.getVoices();
+      }
+    };
+
+    if ("speechSynthesis" in window) {
+      window.speechSynthesis.getVoices();
+      window.speechSynthesis.onvoiceschanged = () => {
+        window.speechSynthesis.getVoices();
+      };
+    }
+
+    window.addEventListener("click", unlockAudioAndVoices, { passive: true });
+    window.addEventListener("touchstart", unlockAudioAndVoices, { passive: true });
+
+    return () => {
+      window.removeEventListener("click", unlockAudioAndVoices);
+      window.removeEventListener("touchstart", unlockAudioAndVoices);
+    };
+  }, []);
+
   // Play pleasant chime synthesizer on new incoming requisition
   const playNotificationChime = () => {
     try {
       const AudioContextClass = window.AudioContext || (window as any).webkitAudioContext;
       if (!AudioContextClass) return;
       const audioCtx = new AudioContextClass();
+      if (audioCtx.state === "suspended") {
+        audioCtx.resume();
+      }
       const osc = audioCtx.createOscillator();
       const gain = audioCtx.createGain();
       osc.connect(gain);
@@ -62,40 +102,43 @@ export default function RealPortalPage() {
       osc.type = "sine";
       osc.frequency.setValueAtTime(587.33, audioCtx.currentTime); // D5
       osc.frequency.setValueAtTime(880, audioCtx.currentTime + 0.12); // A5
-      gain.gain.setValueAtTime(0.2, audioCtx.currentTime);
+      gain.gain.setValueAtTime(0.25, audioCtx.currentTime);
       gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.5);
       osc.start(audioCtx.currentTime);
       osc.stop(audioCtx.currentTime + 0.5);
     } catch (e) {
-      // audio autoplay policy catch
+      console.warn("Chime audio error:", e);
     }
   };
 
   // Play Thai Speech Voice + Chime
-  const playVoiceAndChimeAlert = (order?: RequisitionOrder) => {
-    // 1. Play soft chime first
+  const playVoiceAndChimeAlert = (order?: Partial<RequisitionOrder>) => {
     playNotificationChime();
 
-    // 2. Speak via Web Speech API in Thai
     if (typeof window !== "undefined" && "speechSynthesis" in window) {
       try {
-        window.speechSynthesis.cancel();
+        window.speechSynthesis.resume();
+
         const requester = order?.requesterName ? `จากคุณ ${order.requesterName}` : "";
         const messageText = `มีคำขอเบิกพัสดุใหม่ ${requester} รอการอนุมัติค่ะ`;
         const utterance = new SpeechSynthesisUtterance(messageText);
         utterance.lang = "th-TH";
         utterance.rate = 1.0;
-        utterance.pitch = 1.05;
+        utterance.pitch = 1.0;
+        utterance.volume = 1.0;
 
-        const voices = window.speechSynthesis.getVoices();
-        const thaiVoice = voices.find((v) => v.lang === "th-TH" || v.lang.startsWith("th"));
+        const allVoices = window.speechSynthesis.getVoices();
+        const thaiVoice = allVoices.find((v) => v.lang === "th-TH" || v.lang.replace("_", "-").toLowerCase().startsWith("th"));
         if (thaiVoice) {
           utterance.voice = thaiVoice;
         }
 
-        setTimeout(() => {
-          window.speechSynthesis.speak(utterance);
-        }, 350);
+        utterance.onerror = (e) => {
+          console.warn("Speech synthesis utterance error:", e);
+        };
+
+        window.speechSynthesis.resume();
+        window.speechSynthesis.speak(utterance);
       } catch (err) {
         console.warn("Speech synthesis error:", err);
       }
@@ -300,6 +343,28 @@ export default function RealPortalPage() {
                       <LogOut className="w-3.5 h-3.5" />
                     </button>
                   </div>
+                )}
+
+                {canApprove && (
+                  <button
+                    type="button"
+                    onClick={() =>
+                      playVoiceAndChimeAlert({
+                        reqNo: "REQ-TEST",
+                        requesterName: user?.name || "สมชาย ใจดี",
+                        department: "ส่วนพัฒนากายภาพ",
+                        totalItems: 2,
+                        totalAmount: 450,
+                        status: "รออนุมัติ",
+                        items: []
+                      })
+                    }
+                    className="hidden md:inline-flex items-center space-x-1.5 text-xs font-bold text-slate-700 hover:text-[#DA2128] bg-slate-100 hover:bg-red-50 border border-slate-200 hover:border-red-200 px-3 py-1.5 rounded-full transition-all shadow-xs shrink-0 cursor-pointer active:scale-95"
+                    title="คลิกเพื่อทดสอบเปิดเสียงพูดแจ้งเตือน"
+                  >
+                    <Volume2 className="w-3.5 h-3.5 text-[#DA2128]" />
+                    <span>ทดสอบเสียงพูด</span>
+                  </button>
                 )}
 
                 {canAccessDev && (
