@@ -8,6 +8,8 @@ import {
   createUserWithEmailAndPassword,
   signOut,
   onAuthStateChanged,
+  setPersistence,
+  browserLocalPersistence,
   User as FirebaseUser
 } from "firebase/auth";
 import {
@@ -163,6 +165,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   // Listen to Firebase Auth state
   useEffect(() => {
+    if (typeof window !== "undefined") {
+      setPersistence(auth, browserLocalPersistence).catch((err) => {
+        console.warn("Could not set auth persistence:", err);
+      });
+    }
+
     const unsubscribe = onAuthStateChanged(auth, async (fbUser) => {
       setLoading(true);
       if (fbUser) {

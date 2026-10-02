@@ -377,6 +377,16 @@ export default function LoginPage() {
               </button>
             </form>
 
+            {/* Mobile Browser Tip */}
+            <div className="p-3 bg-slate-50 border border-slate-200/80 rounded-xl text-[11px] text-slate-500 space-y-1">
+              <p className="font-semibold text-slate-700 flex items-center space-x-1">
+                <span>📱 คำแนะนำสำหรับผู้ใช้สมาร์ตโฟน (iOS / LINE):</span>
+              </p>
+              <p className="leading-relaxed">
+                หากเปิดผ่านแอป LINE หรือ Safari Private Tab แล้วติดปัญหา Google Pop-up แนะนำให้เข้าสู่ระบบด้วย <b>อีเมลและรหัสผ่าน</b> ด้านบน หรือเปิดลิงก์ผ่าน Safari/Chrome
+              </p>
+            </div>
+
           </div>
         </div>
       </main>
