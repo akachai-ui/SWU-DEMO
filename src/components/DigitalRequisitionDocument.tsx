@@ -31,8 +31,12 @@ import {
   User,
   Calendar,
   Hash,
-  Share2
+  Share2,
+  Camera,
+  Download,
+  Smartphone
 } from "lucide-react";
+import html2canvas from "html2canvas";
 
 interface DigitalRequisitionDocumentProps {
   order: RequisitionOrder;
@@ -50,6 +54,7 @@ export default function DigitalRequisitionDocument({
   const { user } = useAuth();
   const [currentOrder, setCurrentOrder] = useState<RequisitionOrder>(order);
   const [isProcessing, setIsProcessing] = useState(false);
+  const [isCapturing, setIsCapturing] = useState(false);
   const [rejectReason, setRejectReason] = useState("");
   const [isRejectModalOpen, setIsRejectModalOpen] = useState(false);
   const [modalToast, setModalToast] = useState<{ message: string; type: "success" | "error" } | null>(null);
@@ -70,6 +75,48 @@ export default function DigitalRequisitionDocument({
   const showToast = (message: string, type: "success" | "error" = "success") => {
     setModalToast({ message, type });
     setTimeout(() => setModalToast(null), 3500);
+  };
+
+  // Screenshot / Share for Smartphone & Paperless
+  const handleCaptureScreenshot = async () => {
+    const element = document.getElementById("printable-requisition-voucher");
+    if (!element) return;
+    setIsCapturing(true);
+    try {
+      const canvas = await html2canvas(element, {
+        scale: 2, // 2x high resolution
+        useCORS: true,
+        backgroundColor: "#ffffff",
+        logging: false
+      });
+
+      // Try native Web Share on mobile if supported
+      const blob = await new Promise<Blob | null>((resolve) => canvas.toBlob(resolve, "image/png"));
+      if (blob && navigator.canShare && navigator.canShare({ files: [new File([blob], `${currentOrder.reqNo}-voucher.png`, { type: "image/png" })] })) {
+        const file = new File([blob], `${currentOrder.reqNo}-voucher.png`, { type: "image/png" });
+        await navigator.share({
+          title: `ใบขอเบิกพัสดุดิจิทัล ${currentOrder.reqNo}`,
+          text: `ใบขอเบิกพัสดุดิจิทัล มศว เลขที่ ${currentOrder.reqNo}`,
+          files: [file]
+        });
+        showToast("แชร์รูปภาพเอกสารเรียบร้อยแล้ว!");
+      } else {
+        // Download as PNG image
+        const imageUri = canvas.toDataURL("image/png");
+        const link = document.createElement("a");
+        link.href = imageUri;
+        link.download = `SWU-Requisition-${currentOrder.reqNo}.png`;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        showToast("บันทึกรูปภาพใบขอเบิกเรียบร้อยแล้ว!");
+      }
+    } catch (err: any) {
+      console.error("Screenshot capture error:", err);
+      showToast("ไม่สามารถแคปภาพได้ กรุณาลองใหม่อีกครั้ง", "error");
+    } finally {
+      setIsCapturing(false);
+    }
   };
 
   const canApprove = user?.permissions?.canApproveRequisitions || user?.role === "super_admin";
@@ -504,29 +551,56 @@ export default function DigitalRequisitionDocument({
         </div>
       )}
 
-      <div className="bg-white rounded-3xl max-w-4xl w-full p-5 sm:p-8 space-y-6 shadow-2xl border border-slate-200 max-h-[92vh] overflow-y-auto print:p-0 print:border-none print:shadow-none animate-scaleUp">
+      <div className="bg-white rounded-3xl max-w-4xl w-full p-3 sm:p-8 space-y-4 sm:space-y-6 shadow-2xl border border-slate-200 max-h-[94vh] overflow-y-auto print:p-0 print:border-none print:shadow-none animate-scaleUp">
         
         {/* Top Control Bar (Hidden on Print) */}
-        <div className="flex items-center justify-between border-b border-slate-100 pb-3.5 print:hidden">
-          <div className="flex items-center space-x-2">
-            <span className="flex items-center space-x-1.5 px-3 py-1 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200 text-xs font-bold">
-              <ShieldCheck className="w-3.5 h-3.5 text-emerald-600" />
-              <span>เอกสารอิเล็กทรอนิกส์ 100% ไร้กระดาษ (Paperless E-Form)</span>
+        <div className="flex items-center justify-between border-b border-slate-100 pb-3 print:hidden gap-2">
+          {/* Badge */}
+          <div className="flex items-center space-x-1.5 min-w-0">
+            <span className="inline-flex items-center space-x-1.5 px-2.5 py-1 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200 text-[11px] sm:text-xs font-bold truncate">
+              <ShieldCheck className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
+              <span className="hidden sm:inline">เอกสารอิเล็กทรอนิกส์ 100% ไร้กระดาษ (Paperless E-Form)</span>
+              <span className="sm:hidden">ไร้กระดาษ 100% (Paperless)</span>
             </span>
           </div>
 
-          <div className="flex items-center space-x-2">
+          {/* Action Buttons */}
+          <div className="flex items-center space-x-1.5 sm:space-x-2 shrink-0">
+            {/* Mobile: Screenshot / Capture Button */}
+            <button
+              onClick={handleCaptureScreenshot}
+              disabled={isCapturing}
+              className="sm:hidden px-3 py-1.5 rounded-xl bg-[#DA2128] hover:bg-[#B81B22] text-white text-xs font-bold flex items-center space-x-1.5 shadow-sm active:scale-95 transition-all cursor-pointer disabled:opacity-50"
+              title="แคปหน้าจอเอกสารเพื่อบันทึกหรือแชร์"
+            >
+              <Camera className="w-3.5 h-3.5" />
+              <span>{isCapturing ? "กำลังบันทึก..." : "แคปหน้าจอ"}</span>
+            </button>
+
+            {/* Desktop: Print & Screenshot Buttons */}
+            <button
+              onClick={handleCaptureScreenshot}
+              disabled={isCapturing}
+              className="hidden sm:inline-flex px-3 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold items-center space-x-1.5 transition-colors cursor-pointer disabled:opacity-50"
+              title="บันทึกรูปภาพเอกสาร (PNG)"
+            >
+              <Camera className="w-4 h-4 text-slate-600" />
+              <span>{isCapturing ? "กำลังบันทึก..." : "บันทึกภาพ (PNG)"}</span>
+            </button>
+
             <button
               onClick={handlePrint}
-              className="px-3 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold flex items-center space-x-1.5 transition-colors cursor-pointer"
+              className="hidden sm:inline-flex px-3 py-1.5 rounded-xl bg-[#DA2128] hover:bg-[#B81B22] text-white text-xs font-bold items-center space-x-1.5 shadow-sm transition-colors cursor-pointer"
               title="พิมพ์เอกสารหรือบันทึกเป็น PDF"
             >
               <Printer className="w-4 h-4" />
-              <span className="hidden sm:inline">พิมพ์ / บันทึก PDF (1 หน้าพอดี)</span>
+              <span>พิมพ์ / บันทึก PDF</span>
             </button>
+
             <button
               onClick={onClose}
-              className="p-1.5 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-xl transition-colors cursor-pointer"
+              className="p-1.5 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-xl transition-colors cursor-pointer shrink-0"
+              title="ปิดหน้าต่าง"
             >
               <X className="w-5 h-5" />
             </button>
@@ -536,20 +610,20 @@ export default function DigitalRequisitionDocument({
         {/* ========================================================================= */}
         {/* OFFICIAL SWU REQUISITION DOCUMENT (E-FORM) */}
         {/* ========================================================================= */}
-        <div id="printable-requisition-voucher" className="border-2 border-slate-200/90 rounded-2xl p-5 sm:p-8 space-y-5 bg-white shadow-xs print:border-none print:p-0 print:space-y-2">
+        <div id="printable-requisition-voucher" className="border-2 border-slate-200/90 rounded-2xl p-3.5 sm:p-8 space-y-4 sm:space-y-5 bg-white shadow-xs print:border-none print:p-0 print:space-y-2">
           
           {/* Header Section */}
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b-2 border-slate-200 pb-4 print:pb-2 print:border-b">
-            <div className="flex items-center space-x-3.5">
-              <SWULogo size="md" className="print:scale-90 print:origin-left" />
-              <div className="space-y-0.5 border-l-2 border-slate-200 pl-3.5 print:pl-2.5">
-                <h2 className="text-base sm:text-lg font-black text-slate-900 tracking-tight leading-tight print:text-sm">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b-2 border-slate-200 pb-3.5 print:pb-2 print:border-b">
+            <div className="flex items-center space-x-3">
+              <SWULogo size="md" className="shrink-0 print:scale-90 print:origin-left" />
+              <div className="space-y-0.5 border-l-2 border-slate-200 pl-3 print:pl-2.5 min-w-0">
+                <h2 className="text-sm sm:text-lg font-black text-slate-900 tracking-tight leading-tight print:text-sm">
                   แบบฟอร์มขอเบิกพัสดุและวัสดุสิ้นเปลือง
                 </h2>
-                <p className="text-xs text-slate-600 font-bold print:text-[10px]">
+                <p className="text-[11px] sm:text-xs text-slate-600 font-bold print:text-[10px]">
                   ส่วนพัฒนากายภาพ มหาวิทยาลัยศรีนครินทรวิโรฒ
                 </p>
-                <p className="text-[11px] text-slate-400 font-medium print:text-[9px]">
+                <p className="text-[10px] sm:text-[11px] text-slate-400 font-medium print:text-[9px]">
                   ระบบบริหารคลังพัสดุและลงนามดิจิทัล (E-Requisition & Digital Sign-off)
                 </p>
               </div>
@@ -557,17 +631,17 @@ export default function DigitalRequisitionDocument({
 
             {/* Document Meta Capsule */}
             <div className="text-left sm:text-right space-y-1 bg-slate-50 p-2.5 rounded-xl border border-slate-200 shrink-0 print:p-1.5 print:bg-white print:border-slate-300">
-              <div className="flex sm:justify-end items-center space-x-2">
+              <div className="flex justify-between sm:justify-end items-center space-x-2">
                 <span className="text-[11px] text-slate-500 font-semibold print:text-[9px]">เลขที่เอกสาร:</span>
                 <span className="font-mono text-xs sm:text-sm font-black text-[#DA2128] print:text-xs">
                   {currentOrder.reqNo}
                 </span>
               </div>
-              <div className="flex sm:justify-end items-center space-x-2 text-xs text-slate-600 print:text-[9px]">
+              <div className="flex justify-between sm:justify-end items-center space-x-2 text-xs text-slate-600 print:text-[9px]">
                 <span className="text-[11px] text-slate-500 print:text-[9px]">วันที่ขอเบิก:</span>
-                <span className="font-medium">{formatDateTime(currentOrder.createdAt)}</span>
+                <span className="font-medium text-[11px] sm:text-xs">{formatDateTime(currentOrder.createdAt)}</span>
               </div>
-              <div className="flex sm:justify-end items-center space-x-2">
+              <div className="flex justify-between sm:justify-end items-center space-x-2">
                 <span className="text-[11px] text-slate-500 print:text-[9px]">สถานะ:</span>
                 {currentOrder.status === "รออนุมัติ" && (
                   <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-100 text-amber-800 border border-amber-200 print:text-[8px] print:py-0">
@@ -612,14 +686,60 @@ export default function DigitalRequisitionDocument({
             </div>
           </div>
 
-          {/* Requisition Table */}
-          <div className="space-y-1.5">
+          {/* Requisition Table & Mobile Cards */}
+          <div className="space-y-2">
             <h3 className="text-xs font-black text-slate-900 flex items-center space-x-1.5 uppercase tracking-wide print:text-[10px]">
               <span>รายการพัสดุและวัสดุสิ้นเปลืองที่ขอเบิก</span>
               <span className="text-slate-500 font-normal">({currentOrder.items.length} รายการ)</span>
             </h3>
 
-            <div className="border border-slate-200 rounded-xl overflow-hidden text-xs print:text-[10px]">
+            {/* Smartphone View: Modern Clean Item Cards (sm:hidden) */}
+            <div className="sm:hidden space-y-2 print:hidden">
+              {currentOrder.items.map((item, idx) => (
+                <div key={idx} className="bg-slate-50/90 border border-slate-200 rounded-xl p-2.5 space-y-1.5">
+                  <div className="flex items-start justify-between gap-2">
+                    <div className="flex items-center space-x-1.5 min-w-0">
+                      <span className="px-1.5 py-0.5 rounded-md bg-white border border-slate-200 text-[10px] font-mono font-bold text-slate-600">
+                        #{idx + 1}
+                      </span>
+                      <span className="px-1.5 py-0.5 rounded-md bg-red-50 text-[#DA2128] border border-red-200 text-[10px] font-mono font-bold">
+                        {item.code}
+                      </span>
+                    </div>
+                    <span className="text-xs font-black text-[#DA2128] shrink-0">
+                      ฿{((item.unitPrice || 0) * item.quantity).toLocaleString()}
+                    </span>
+                  </div>
+
+                  <p className="font-bold text-xs text-slate-900 leading-snug">{item.name}</p>
+
+                  <div className="flex items-center justify-between text-[11px] text-slate-500 pt-1 border-t border-slate-200/60">
+                    <span>
+                      จำนวน: <strong className="text-slate-800 font-bold">{item.quantity} {item.unit}</strong>
+                    </span>
+                    <span>
+                      ราคา/หน่วย: ฿{(item.unitPrice || 0).toLocaleString()}
+                    </span>
+                  </div>
+                </div>
+              ))}
+
+              {/* Total Card on Smartphone */}
+              <div className="bg-gradient-to-r from-red-50 to-rose-50 border-2 border-red-200 rounded-xl p-3 flex items-center justify-between shadow-xs">
+                <div>
+                  <span className="text-xs font-bold text-slate-700">ยอดรวมทั้งสิ้น</span>
+                  <p className="text-[10px] text-slate-500">รวม {currentOrder.totalItems} ชิ้น</p>
+                </div>
+                <div className="text-right">
+                  <span className="text-base font-black text-[#DA2128]">
+                    ฿{(currentOrder.totalAmount || 0).toLocaleString()} บาท
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            {/* Desktop & Print View: 7-Column Table (hidden sm:block print:block) */}
+            <div className="hidden sm:block print:block border border-slate-200 rounded-xl overflow-hidden text-xs print:text-[10px]">
               <table className="w-full text-left">
                 <thead>
                   <tr className="bg-slate-100 border-b border-slate-200 text-slate-700 font-bold">
@@ -1015,7 +1135,16 @@ export default function DigitalRequisitionDocument({
         </div>
 
         {/* Modal Close Bottom Bar (Hidden on Print) */}
-        <div className="flex justify-end space-x-3 pt-1 print:hidden">
+        <div className="flex items-center justify-between sm:justify-end space-x-2 sm:space-x-3 pt-1 print:hidden">
+          <button
+            onClick={handleCaptureScreenshot}
+            disabled={isCapturing}
+            className="sm:hidden px-4 py-2.5 bg-red-50 hover:bg-red-100 text-[#DA2128] border border-red-200 text-xs font-bold rounded-xl transition-all shadow-xs flex items-center space-x-1.5 cursor-pointer disabled:opacity-50 active:scale-95"
+          >
+            <Camera className="w-4 h-4" />
+            <span>{isCapturing ? "กำลังบันทึก..." : "แคปหน้าจอ"}</span>
+          </button>
+
           <button
             onClick={onClose}
             className="px-6 py-2.5 bg-slate-900 hover:bg-black text-white text-xs font-bold rounded-xl transition-all shadow-md cursor-pointer"
