@@ -38,6 +38,7 @@ export default function RealPortalPage() {
   // Requisitions & Real-time Alert States
   const [pendingApprovalCount, setPendingApprovalCount] = useState(0);
   const [newRequisitionAlert, setNewRequisitionAlert] = useState<RequisitionOrder | null>(null);
+  const [isLogoutConfirmOpen, setIsLogoutConfirmOpen] = useState(false);
   const isInitialLoadRef = useRef(true);
   const prevPendingCountRef = useRef(0);
 
@@ -369,8 +370,9 @@ export default function RealPortalPage() {
                     </div>
 
                     <button
-                      onClick={logout}
-                      className="p-1 hover:bg-red-50 text-slate-400 hover:text-[#DA2128] rounded-full transition-colors shrink-0"
+                      type="button"
+                      onClick={() => setIsLogoutConfirmOpen(true)}
+                      className="p-1 hover:bg-red-50 text-slate-400 hover:text-[#DA2128] rounded-full transition-colors shrink-0 cursor-pointer active:scale-95"
                       title="ออกจากระบบ"
                     >
                       <LogOut className="w-3.5 h-3.5" />
@@ -609,12 +611,69 @@ export default function RealPortalPage() {
                 พิมพ์เขียวระบบและคู่มือ (/dev)
               </Link>
               <span className="text-slate-300">|</span>
-              <button onClick={logout} className="text-slate-600 hover:text-[#DA2128] transition-colors">
+              <button
+                type="button"
+                onClick={() => setIsLogoutConfirmOpen(true)}
+                className="text-slate-600 hover:text-[#DA2128] transition-colors cursor-pointer"
+              >
                 ออกจากระบบ
               </button>
             </div>
           </div>
         </footer>
+
+        {/* ========================================================================= */}
+        {/* LOGOUT CONFIRMATION MODAL */}
+        {/* ========================================================================= */}
+        {isLogoutConfirmOpen && (
+          <div className="fixed inset-0 z-[100] bg-black/75 backdrop-blur-sm flex items-center justify-center p-4 animate-fadeIn print:hidden">
+            <div className="bg-white rounded-3xl max-w-sm w-full p-6 text-center space-y-4 shadow-2xl border border-slate-200 animate-scaleUp">
+              <div className="w-14 h-14 rounded-2xl bg-red-50 text-[#DA2128] border border-red-200 flex items-center justify-center mx-auto shadow-xs">
+                <LogOut className="w-7 h-7" />
+              </div>
+
+              <div className="space-y-1">
+                <h3 className="text-base font-black text-slate-900">
+                  ยืนยันการออกจากระบบ?
+                </h3>
+                <p className="text-xs text-slate-500 leading-relaxed">
+                  คุณต้องการออกจากระบบบริหารคลังพัสดุและครุภัณฑ์ใช่หรือไม่
+                </p>
+              </div>
+
+              {user && (
+                <div className="bg-slate-50 border border-slate-200 rounded-xl p-2.5 text-xs text-slate-700 flex items-center justify-center space-x-2">
+                  <User className="w-3.5 h-3.5 text-slate-400" />
+                  <span className="font-bold truncate">{user.name}</span>
+                  <span className="text-[10px] px-1.5 py-0.5 rounded-md bg-slate-200 text-slate-600 font-semibold">
+                    {user.role === "super_admin" ? "Admin" : user.role === "approver" ? "ผู้อนุมัติ" : user.role === "technician" ? "ช่าง" : "Staff"}
+                  </span>
+                </div>
+              )}
+
+              <div className="grid grid-cols-2 gap-2 pt-1">
+                <button
+                  type="button"
+                  onClick={() => setIsLogoutConfirmOpen(false)}
+                  className="py-2.5 px-4 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs rounded-xl transition-all active:scale-95 cursor-pointer"
+                >
+                  ยกเลิก
+                </button>
+                <button
+                  type="button"
+                  onClick={async () => {
+                    setIsLogoutConfirmOpen(false);
+                    await logout();
+                  }}
+                  className="py-2.5 px-4 bg-[#DA2128] hover:bg-[#B81B22] text-white font-bold text-xs rounded-xl transition-all shadow-md shadow-red-500/20 active:scale-95 flex items-center justify-center space-x-1.5 cursor-pointer"
+                >
+                  <LogOut className="w-3.5 h-3.5" />
+                  <span>ออกจากระบบ</span>
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     </ProtectedRoute>
   );
