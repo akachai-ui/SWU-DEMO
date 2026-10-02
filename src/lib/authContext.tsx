@@ -110,38 +110,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     const userEmail = (fbUser.email || "").toLowerCase().trim();
     if (!userEmail) return null;
 
-    let record = await findUserPermissionInFirestore(userEmail, fbUser.uid);
+    const record = await findUserPermissionInFirestore(userEmail, fbUser.uid);
 
-    // If NOT found in users_permissions -> Create default staff profile automatically!
+    // If NOT found in users_permissions -> STRICTLY DENY ACCESS (Admin must create user first)
     if (!record) {
-      const sanitizedEmailKey = userEmail.replace(/[@.]/g, "_");
-      const docId = fbUser.uid || sanitizedEmailKey;
-      const defaultRole: UserRole = "staff";
-      const rolePreset = ROLE_PRESETS.staff;
-      const initialData = {
-        uid: fbUser.uid,
-        name: fbUser.displayName || userEmail.split("@")[0],
-        email: userEmail,
-        role: defaultRole,
-        roleNameTh: rolePreset.roleNameTh,
-        department: "ส่วนพัฒนากายภาพ มหาวิทยาลัยศรีนครินทรวิโรฒ",
-        position: "เจ้าหน้าที่",
-        permissions: { ...rolePreset.defaultPermissions },
-        avatarUrl: fbUser.photoURL || null,
-        status: "active",
-        createdAt: serverTimestamp(),
-        lastLogin: serverTimestamp(),
-        updatedAt: serverTimestamp()
-      };
-
-      try {
-        const targetDocRef = doc(db, "users_permissions", docId);
-        await setDoc(targetDocRef, initialData, { merge: true });
-        record = { docId, data: initialData };
-      } catch (e) {
-        console.error("Error creating initial user permission:", e);
-        record = { docId, data: initialData };
-      }
+      console.warn(`Access Denied: ${userEmail} is not authorized in users_permissions.`);
+      return null;
     }
 
     const { docId, data } = record;

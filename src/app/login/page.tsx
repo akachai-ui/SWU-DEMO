@@ -10,21 +10,18 @@ import {
   CheckCircle2,
   Mail,
   Lock,
-  User,
   ShieldCheck,
   Eye,
   EyeOff,
-  Sparkles
+  ShieldAlert
 } from "lucide-react";
 
 export default function LoginPage() {
   const router = useRouter();
-  const { user, loginWithEmail, registerWithEmail, sendPasswordReset, logout } = useAuth();
+  const { user, loginWithEmail, sendPasswordReset, logout } = useAuth();
 
-  const [mode, setMode] = useState<"login" | "register">("login");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [name, setName] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
   const [successMessage, setSuccessMessage] = useState("");
@@ -61,38 +58,19 @@ export default function LoginPage() {
     setErrorMessage("");
     setSuccessMessage("");
     setIsVerifying(true);
-    setVerifyingText(mode === "login" ? "กำลังตรวจสอบข้อมูลเข้าสู่ระบบ..." : "กำลังลงทะเบียนบัญชีผู้ใช้งาน...");
+    setVerifyingText("กำลังตรวจสอบข้อมูลและสิทธิ์การเข้าใช้งาน...");
 
     try {
-      if (mode === "login") {
-        const res = await loginWithEmail(email, password);
-        if (res.success) {
-          setVerifyingText("เข้าสู่ระบบสำเร็จ กำลังไปยังหน้าหลัก...");
-          setSuccessMessage("เข้าสู่ระบบสำเร็จ!");
-          setTimeout(() => {
-            router.push("/");
-          }, 600);
-        } else {
-          setIsVerifying(false);
-          setErrorMessage(res.message || "อีเมลหรือรหัสผ่านไม่ถูกต้อง");
-        }
+      const res = await loginWithEmail(email, password);
+      if (res.success) {
+        setVerifyingText("ตรวจสอบสิทธิ์สำเร็จ กำลังเข้าสู่ระบบ...");
+        setSuccessMessage("เข้าสู่ระบบสำเร็จ!");
+        setTimeout(() => {
+          router.push("/");
+        }, 600);
       } else {
-        if (!name.trim()) {
-          setIsVerifying(false);
-          setErrorMessage("กรุณากรอกชื่อ - นามสกุล");
-          return;
-        }
-        const res = await registerWithEmail(email, password, name);
-        if (res.success) {
-          setVerifyingText("สร้างบัญชีสำเร็จ กำลังเข้าสู่ระบบ...");
-          setSuccessMessage("ลงทะเบียนและเข้าสู่ระบบสำเร็จ!");
-          setTimeout(() => {
-            router.push("/");
-          }, 600);
-        } else {
-          setIsVerifying(false);
-          setErrorMessage(res.message || "ไม่สามารถสร้างบัญชีผู้ใช้ได้");
-        }
+        setIsVerifying(false);
+        setErrorMessage(res.message || "อีเมลหรือรหัสผ่านไม่ถูกต้อง หรือไม่มีสิทธิ์เข้าใช้งาน");
       }
     } catch (err: any) {
       setIsVerifying(false);
@@ -159,40 +137,10 @@ export default function LoginPage() {
                 </p>
               </div>
 
-              {/* Tab Switcher: Login vs Register */}
-              <div className="pt-2 w-full">
-                <div className="grid grid-cols-2 p-1 bg-slate-100 rounded-2xl text-xs font-bold text-slate-600">
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setMode("login");
-                      setErrorMessage("");
-                      setSuccessMessage("");
-                    }}
-                    className={`py-2.5 rounded-xl transition-all ${
-                      mode === "login"
-                        ? "bg-white text-[#DA2128] shadow-sm font-black"
-                        : "hover:text-slate-900"
-                    }`}
-                  >
-                    เข้าสู่ระบบ (Sign In)
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setMode("register");
-                      setErrorMessage("");
-                      setSuccessMessage("");
-                    }}
-                    className={`py-2.5 rounded-xl transition-all ${
-                      mode === "register"
-                        ? "bg-white text-[#DA2128] shadow-sm font-black"
-                        : "hover:text-slate-900"
-                    }`}
-                  >
-                    ลงทะเบียนใหม่
-                  </button>
-                </div>
+              <div className="pt-1">
+                <span className="inline-flex items-center px-3 py-1 rounded-full text-[11px] font-bold bg-red-50 text-[#DA2128] border border-red-200/80">
+                  🔒 ระบบเข้าใช้งานสำหรับบุคลากรภายใน
+                </span>
               </div>
             </div>
 
@@ -263,38 +211,18 @@ export default function LoginPage() {
               </div>
             )}
 
-            {/* Primary: Email & Password Form */}
+            {/* Email & Password Sign-In Form */}
             <form onSubmit={handleEmailFormSubmit} className="space-y-4">
-              {mode === "register" && (
-                <div className="space-y-1.5">
-                  <label className="text-slate-700 font-bold block text-xs">
-                    ชื่อ - นามสกุล <span className="text-red-500">*</span>
-                  </label>
-                  <div className="relative">
-                    <User className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none" />
-                    <input
-                      type="text"
-                      required
-                      placeholder="เช่น นายสมชาย ใจดี"
-                      value={name}
-                      onChange={(e) => setName(e.target.value)}
-                      disabled={isVerifying}
-                      className="w-full pl-10 pr-3.5 py-3 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-900 focus:outline-none focus:border-[#DA2128] focus:bg-white transition-colors"
-                    />
-                  </div>
-                </div>
-              )}
-
               <div className="space-y-1.5">
                 <label className="text-slate-700 font-bold block text-xs">
-                  อีเมล (Email) <span className="text-red-500">*</span>
+                  อีเมลผู้ใช้งาน (User Email) <span className="text-red-500">*</span>
                 </label>
                 <div className="relative">
                   <Mail className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none" />
                   <input
                     type="email"
                     required
-                    placeholder="name@g.swu.ac.th หรืออีเมลของท่าน"
+                    placeholder="เช่น user@g.swu.ac.th หรืออีเมลของท่าน"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     disabled={isVerifying}
@@ -308,15 +236,13 @@ export default function LoginPage() {
                   <label className="text-slate-700 font-bold block text-xs">
                     รหัสผ่าน (Password) <span className="text-red-500">*</span>
                   </label>
-                  {mode === "login" && (
-                    <button
-                      type="button"
-                      onClick={handleForgotPassword}
-                      className="text-[11px] font-semibold text-[#DA2128] hover:underline cursor-pointer"
-                    >
-                      ลืมรหัสผ่าน / ขอลิงก์ตั้งรหัส
-                    </button>
-                  )}
+                  <button
+                    type="button"
+                    onClick={handleForgotPassword}
+                    className="text-[11px] font-semibold text-[#DA2128] hover:underline cursor-pointer"
+                  >
+                    ลืมรหัสผ่าน / ขอลิงก์ตั้งรหัส
+                  </button>
                 </div>
                 <div className="relative">
                   <Lock className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none" />
@@ -324,7 +250,7 @@ export default function LoginPage() {
                     type={showPassword ? "text" : "password"}
                     required
                     minLength={6}
-                    placeholder="อย่างน้อย 6 ตัวอักษร"
+                    placeholder="กรอกรหัสผ่านของท่าน"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     disabled={isVerifying}
@@ -346,21 +272,19 @@ export default function LoginPage() {
                 disabled={isVerifying}
                 className="w-full bg-[#DA2128] hover:bg-[#B81B22] active:bg-[#9B151B] text-white font-bold py-3.5 px-4 rounded-2xl shadow-lg shadow-red-500/20 active:scale-[0.99] transition-all flex items-center justify-center space-x-2 text-xs sm:text-sm cursor-pointer disabled:opacity-70 mt-3"
               >
-                <span>{mode === "login" ? "เข้าสู่ระบบ (Sign In)" : "สร้างบัญชีผู้ใช้งานใหม่"}</span>
+                <span>เข้าสู่ระบบ (Sign In)</span>
                 <ArrowRight className="w-4 h-4" />
               </button>
             </form>
 
-            {/* Quick Demo Credentials Tip */}
-            <div className="p-3.5 bg-slate-50 border border-slate-200/80 rounded-2xl text-[11px] text-slate-500 space-y-1 mt-2">
-              <div className="flex items-center justify-between font-semibold text-slate-700">
-                <span className="flex items-center space-x-1.5">
-                  <Sparkles className="w-3.5 h-3.5 text-[#DA2128]" />
-                  <span>คำแนะนำการใช้งาน:</span>
-                </span>
+            {/* Internal System Admin Notice */}
+            <div className="p-3.5 bg-slate-50 border border-slate-200/80 rounded-2xl text-[11px] text-slate-500 space-y-1.5 mt-2">
+              <div className="flex items-center space-x-1.5 font-semibold text-slate-700">
+                <ShieldAlert className="w-4 h-4 text-[#DA2128] shrink-0" />
+                <span>สำหรับบุคลากรใหม่:</span>
               </div>
               <p className="leading-relaxed text-slate-600">
-                เข้าสู่ระบบด้วย <b>อีเมลและรหัสผ่าน</b> ได้ทันที หากยังไม่มีบัญชีให้กดแท็บ <b>ลงทะเบียนใหม่</b> ด้านบน หรือหากลืมรหัสผ่านสามารถกด <b>ลืมรหัสผ่าน</b> เพื่อรับลิงก์ตั้งรหัสผ่านใหม่ทางอีเมลได้ตลอดเวลาครับ
+                เนื่องจากเป็นระบบภายในส่วนพัฒนากายภาพ การสร้างบัญชีผู้ใช้และการกำหนดสิทธิ์จะดำเนินการโดย **ผู้ดูแลระบบ (Admin)** เท่านั้น หากท่านยังไม่มีบัญชีหรือต้องการขอสิทธิ์เข้าใช้งาน โปรดติดต่อผู้ดูแลระบบครับ
               </p>
             </div>
 
