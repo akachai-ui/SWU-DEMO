@@ -82,12 +82,7 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-dvh bg-gradient-to-br from-slate-100/90 via-slate-50 to-stone-100/70 text-slate-800 flex flex-col justify-between selection:bg-[#DA2128] selection:text-white font-sans relative overflow-hidden">
-      {/* Soft Ambient Calming Background Orbs (Comfortable for prolonged viewing) */}
-      <div className="absolute -top-32 -left-32 w-96 h-96 bg-slate-300/30 rounded-full blur-3xl pointer-events-none"></div>
-      <div className="absolute top-1/3 -right-32 w-96 h-96 bg-red-200/20 rounded-full blur-3xl pointer-events-none"></div>
-      <div className="absolute -bottom-32 left-1/3 w-96 h-96 bg-slate-200/50 rounded-full blur-3xl pointer-events-none"></div>
-
+    <div className="min-h-dvh bg-white text-slate-800 flex flex-col justify-between selection:bg-[#DA2128] selection:text-white font-sans relative">
       {/* Top Accent Line */}
       <div className="h-1.5 w-full bg-gradient-to-r from-[#DA2128] via-[#FF3B44] to-[#DA2128] relative z-20"></div>
 
@@ -95,8 +90,6 @@ export default function LoginPage() {
       {isVerifying && (
         <div className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-md flex items-center justify-center p-4 animate-fadeIn">
           <div className="glass-modal rounded-3xl p-7 sm:p-9 max-w-sm w-full flex flex-col items-center text-center space-y-5 animate-scaleUp relative overflow-hidden shadow-2xl">
-            <div className="absolute -top-12 -right-12 w-36 h-36 bg-red-100/60 rounded-full blur-2xl pointer-events-none"></div>
-
             <SWULogo size="lg" />
 
             <div className="space-y-3 flex flex-col items-center">
@@ -127,9 +120,7 @@ export default function LoginPage() {
         <div className="w-full max-w-md">
           
           {/* Frosted Glass Card Container */}
-          <div className="glass-modal rounded-3xl p-6 sm:p-8 space-y-5 sm:space-y-6 shadow-[0_16px_40px_-10px_rgba(15,23,42,0.07)] relative overflow-hidden border border-white/95">
-            <div className="absolute -right-12 -top-12 w-48 h-48 bg-red-100/40 rounded-full blur-2xl pointer-events-none"></div>
-            <div className="absolute -left-12 -bottom-12 w-48 h-48 bg-slate-200/50 rounded-full blur-2xl pointer-events-none"></div>
+          <div className="glass-modal rounded-3xl p-6 sm:p-8 space-y-5 sm:space-y-6 shadow-xl relative overflow-hidden border border-slate-200">
 
             {/* Header Text & Logo */}
             <div className="text-center space-y-3 relative z-10 flex flex-col items-center">

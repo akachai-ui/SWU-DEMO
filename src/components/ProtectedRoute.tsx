@@ -19,11 +19,8 @@ export default function ProtectedRoute({ children }: { children: React.ReactNode
 
   if (loading) {
     return (
-      <div className="min-h-dvh bg-gradient-to-b from-slate-50 via-white to-slate-100 flex flex-col items-center justify-center p-4 font-sans selection:bg-[#DA2128] selection:text-white">
-        <div className="bg-white/80 backdrop-blur-md border border-slate-200/80 shadow-2xl rounded-3xl p-8 sm:p-10 max-w-sm w-full flex flex-col items-center text-center space-y-6 animate-fadeIn relative overflow-hidden">
-          {/* Subtle Accent Glow */}
-          <div className="absolute -top-10 -right-10 w-32 h-32 bg-[#DA2128]/10 rounded-full blur-2xl pointer-events-none"></div>
-
+      <div className="min-h-dvh bg-white flex flex-col items-center justify-center p-4 font-sans selection:bg-[#DA2128] selection:text-white">
+        <div className="bg-white border border-slate-200 shadow-xl rounded-3xl p-8 sm:p-10 max-w-sm w-full flex flex-col items-center text-center space-y-6 animate-fadeIn relative overflow-hidden">
           <SWULogo size="xl" />
 
           <div className="space-y-3 flex flex-col items-center">
@@ -53,7 +50,7 @@ export default function ProtectedRoute({ children }: { children: React.ReactNode
 
   if (!user && pathname !== "/login") {
     return (
-      <div className="min-h-dvh bg-gradient-to-b from-slate-50 via-white to-slate-100 flex flex-col items-center justify-center p-4 font-sans">
+      <div className="min-h-dvh bg-white flex flex-col items-center justify-center p-4 font-sans">
         <div className="bg-white border border-slate-200 shadow-xl rounded-3xl p-8 max-w-sm w-full flex flex-col items-center text-center space-y-4">
           <SWULogo size="xl" />
           <div className="flex items-center space-x-2 text-xs font-semibold text-[#DA2128]">
