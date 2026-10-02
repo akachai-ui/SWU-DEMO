@@ -403,66 +403,64 @@ export default function MaterialShop() {
       )}
 
       {/* Top Banner & Action Controls */}
-      <div className="bg-white rounded-2xl p-5 sm:p-6 border border-slate-200 shadow-xs space-y-5">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-          <div className="space-y-1">
-            <div className="flex items-center space-x-2.5">
-              <span className="p-2.5 rounded-xl bg-red-50 text-[#DA2128]">
-                <Package className="w-6 h-6" />
-              </span>
-              <div>
-                <h1 className="text-xl sm:text-2xl font-black text-slate-900 tracking-tight">
-                  คลังและระบบขอเบิกวัสดุสิ้นเปลือง
-                </h1>
-                <p className="text-xs text-slate-500">
-                  ระบบสารสนเทศคลังพัสดุและรายการขอเบิก ส่วนพัฒนากายภาพ มศว
-                </p>
-              </div>
+      <div className="bg-white rounded-2xl sm:rounded-3xl p-3.5 sm:p-6 border border-slate-200/90 shadow-xs space-y-3.5 sm:space-y-5">
+        {/* Header Title & Action Button Row */}
+        <div className="flex items-center justify-between gap-3 min-w-0">
+          <div className="flex items-center space-x-2.5 min-w-0 flex-1">
+            <span className="p-2 sm:p-2.5 rounded-xl sm:rounded-2xl bg-red-50 text-[#DA2128] shrink-0">
+              <Package className="w-5 h-5 sm:w-6 sm:h-6" />
+            </span>
+            <div className="min-w-0 flex-1 space-y-0.5">
+              <h1 className="text-base sm:text-2xl font-black text-slate-900 tracking-tight leading-tight truncate">
+                คลังและระบบเบิกจ่ายพัสดุ
+              </h1>
+              <p className="text-[11px] sm:text-xs text-slate-500 truncate">
+                ระบบพัสดุสิ้นเปลือง ส่วนพัฒนากายภาพ มศว
+              </p>
             </div>
           </div>
 
-          {/* Action Buttons */}
+          {/* Action Button (Add Material) */}
           {canAddConsumables && (
-            <div className="flex items-center space-x-2 sm:space-x-3 flex-wrap sm:flex-nowrap">
-              <button
-                onClick={handleOpenAddModal}
-                className="px-4 py-2.5 text-xs font-bold text-white bg-[#DA2128] hover:bg-[#B81B22] rounded-xl transition-all shadow-md shadow-red-500/20 flex items-center space-x-1.5 active:scale-[0.99]"
-              >
-                <Plus className="w-4 h-4" />
-                <span>เพิ่มรายการวัสดุใหม่</span>
-              </button>
-            </div>
+            <button
+              onClick={handleOpenAddModal}
+              className="px-3 sm:px-4 py-2 sm:py-2.5 text-xs font-bold text-white bg-gradient-to-r from-[#DA2128] to-[#FF3B44] hover:from-[#B81B22] hover:to-[#DA2128] rounded-xl sm:rounded-2xl transition-all shadow-md shadow-red-500/20 flex items-center space-x-1.5 active:scale-95 shrink-0"
+            >
+              <Plus className="w-4 h-4" />
+              <span className="hidden sm:inline">เพิ่มรายการวัสดุใหม่</span>
+              <span className="sm:hidden">เพิ่มพัสดุ</span>
+            </button>
           )}
         </div>
 
-        {/* Search & Filters */}
+        {/* Search & Stock Filter */}
         {items.length > 0 && (
-          <div className="grid grid-cols-1 sm:grid-cols-12 gap-3 pt-2 border-t border-slate-100">
+          <div className="grid grid-cols-1 sm:grid-cols-12 gap-2.5 sm:gap-3 pt-2 sm:pt-3 border-t border-slate-100">
             {/* Search Input */}
-            <div className="sm:col-span-8 relative">
-              <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
+            <div className="sm:col-span-7 relative">
+              <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none" />
               <input
                 type="text"
-                placeholder="ค้นหาชื่อพัสดุ, รหัสพัสดุ (SKU), ตำแหน่งจัดเก็บ..."
+                placeholder="ค้นหาชื่อพัสดุ, SKU, ตำแหน่ง..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full pl-10 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs sm:text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-[#DA2128]/20 focus:border-[#DA2128] transition-all"
+                className="w-full pl-10 pr-8 py-2.5 bg-slate-50 border border-slate-200/90 rounded-xl sm:rounded-2xl text-xs sm:text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none focus:bg-white focus:ring-2 focus:ring-[#DA2128]/15 focus:border-[#DA2128] transition-all"
               />
               {searchQuery && (
                 <button
                   onClick={() => setSearchQuery("")}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 text-xs"
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 text-xs p-1"
                 >
                   ✕
                 </button>
               )}
             </div>
 
-            {/* Stock Filter */}
-            <div className="sm:col-span-4 flex items-center space-x-1.5 bg-slate-50 p-1 border border-slate-200 rounded-xl text-xs font-semibold">
+            {/* Stock Segmented Filter */}
+            <div className="sm:col-span-5 flex items-center space-x-1 bg-slate-100/90 p-1 rounded-xl sm:rounded-2xl text-[11px] sm:text-xs font-semibold">
               <button
                 onClick={() => setStockFilter("all")}
-                className={`flex-1 py-1.5 rounded-lg text-center transition-all ${
+                className={`flex-1 py-1.5 rounded-lg sm:rounded-xl text-center transition-all ${
                   stockFilter === "all"
                     ? "bg-white text-slate-900 shadow-xs font-bold"
                     : "text-slate-500 hover:text-slate-800"
@@ -472,7 +470,7 @@ export default function MaterialShop() {
               </button>
               <button
                 onClick={() => setStockFilter("in_stock")}
-                className={`flex-1 py-1.5 rounded-lg text-center transition-all ${
+                className={`flex-1 py-1.5 rounded-lg sm:rounded-xl text-center transition-all ${
                   stockFilter === "in_stock"
                     ? "bg-white text-emerald-700 shadow-xs font-bold"
                     : "text-slate-500 hover:text-slate-800"
@@ -482,7 +480,7 @@ export default function MaterialShop() {
               </button>
               <button
                 onClick={() => setStockFilter("low_stock")}
-                className={`flex-1 py-1.5 rounded-lg text-center transition-all ${
+                className={`flex-1 py-1.5 rounded-lg sm:rounded-xl text-center transition-all ${
                   stockFilter === "low_stock"
                     ? "bg-white text-amber-700 shadow-xs font-bold"
                     : "text-slate-500 hover:text-slate-800"
@@ -494,17 +492,17 @@ export default function MaterialShop() {
           </div>
         )}
 
-        {/* Category Pills */}
+        {/* Category Horizontal Scrolling Chips */}
         {items.length > 0 && (
-          <div className="flex items-center space-x-2 overflow-x-auto pb-1 scrollbar-none text-xs">
+          <div className="flex items-center space-x-1.5 sm:space-x-2 overflow-x-auto pb-0.5 no-scrollbar text-xs">
             {CATEGORIES.map((cat) => (
               <button
                 key={cat}
                 onClick={() => setSelectedCategory(cat)}
-                className={`px-3.5 py-1.5 rounded-full whitespace-nowrap font-medium transition-all ${
+                className={`px-3 sm:px-3.5 py-1.5 rounded-xl whitespace-nowrap text-[11px] sm:text-xs font-medium transition-all cursor-pointer active:scale-95 ${
                   selectedCategory === cat
                     ? "bg-slate-900 text-white font-bold shadow-xs"
-                    : "bg-slate-100 text-slate-600 hover:bg-slate-200 hover:text-slate-900"
+                    : "bg-slate-100/90 text-slate-600 hover:bg-slate-200 hover:text-slate-900"
                 }`}
               >
                 {cat}
