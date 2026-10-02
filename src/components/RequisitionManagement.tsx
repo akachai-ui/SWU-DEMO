@@ -113,7 +113,7 @@ export default function RequisitionManagement({
 
   // Action: Quick Approve Order
   const handleQuickApprove = async (order: RequisitionOrder) => {
-    if (!order.id) return;
+    if (!order.id || isProcessing) return;
     setIsProcessing(true);
     try {
       await signApproveRequisitionInFirestore(order.id, {
@@ -131,7 +131,7 @@ export default function RequisitionManagement({
 
   // Action: Quick Dispense Order
   const handleQuickDispense = async (order: RequisitionOrder) => {
-    if (!order.id) return;
+    if (!order.id || isProcessing) return;
     setIsProcessing(true);
     try {
       await signDispenseRequisitionInFirestore(order.id, {
@@ -155,7 +155,7 @@ export default function RequisitionManagement({
 
   // Action: Submit Reject Order
   const handleConfirmReject = async () => {
-    if (!orderToReject?.id) return;
+    if (!orderToReject?.id || isProcessing) return;
     if (!rejectReason.trim()) {
       showToast("กรุณาระบุเหตุผลในการปฏิเสธคำขอ", "error");
       return;
@@ -173,6 +173,7 @@ export default function RequisitionManagement({
         rejectReason.trim()
       );
       showToast(`ปฏิเสธคำขอเบิก ${orderToReject.reqNo} แล้ว`);
+      setRejectReason("");
       setIsRejectModalOpen(false);
       setOrderToReject(null);
     } catch (err: any) {

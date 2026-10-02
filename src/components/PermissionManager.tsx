@@ -267,6 +267,8 @@ export default function PermissionManager() {
   // Submit User Permission to Firestore and Firebase Auth
   const handleFormSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (isSubmitting) return; // Prevent double submit
+
     if (!formData.name.trim() || !formData.email.trim()) {
       showToast("กรุณากรอกชื่อ-นามสกุล และอีเมล", "error");
       return;
@@ -285,6 +287,21 @@ export default function PermissionManager() {
           showToast(`บันทึกสิทธิ์ผู้ใช้ "${formData.name}" บน Cloud Firestore สำเร็จ!`);
         }
       }
+
+      // Reset form state
+      setFormData({
+        uid: "",
+        name: "",
+        email: "",
+        role: "staff",
+        roleNameTh: ROLE_PRESETS.staff.roleNameTh,
+        department: "ส่วนพัฒนากายภาพ มหาวิทยาลัยศรีนครินทรวิโรฒ",
+        position: "",
+        status: "active",
+        permissions: { ...ROLE_PRESETS.staff.defaultPermissions }
+      });
+      setInitialPassword("");
+      setEditingId(null);
       setIsModalOpen(false);
     } catch (err: any) {
       console.error("Save permission error:", err);

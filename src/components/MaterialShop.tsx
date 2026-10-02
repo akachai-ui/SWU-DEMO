@@ -110,6 +110,7 @@ export default function MaterialShop() {
     description: ""
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isSubmittingCheckout, setIsSubmittingCheckout] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [notification, setNotification] = useState<{ message: string; type: "success" | "error" } | null>(null);
 
@@ -279,6 +280,8 @@ export default function MaterialShop() {
   // Submit Add / Edit Form to Firestore
   const handleFormSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (isSubmitting) return; // Prevent double submit
+
     if (!formData.name.trim()) {
       showToast("กรุณากรอกชื่อรายการวัสดุ", "error");
       return;
@@ -299,6 +302,19 @@ export default function MaterialShop() {
         await addConsumableToFirestore(formData);
         showToast(`บันทึกข้อมูล "${formData.name}" เข้าสู่ Cloud Firestore สำเร็จ!`);
       }
+      // Reset material form to blank
+      setFormData({
+        code: "",
+        name: "",
+        category: "วัสดุสำนักงาน",
+        unit: "อัน",
+        stock: 1,
+        minStock: 1,
+        unitPrice: 0,
+        location: "",
+        imageUrl: "",
+        description: ""
+      });
       setIsAddModalOpen(false);
     } catch (err: any) {
       console.error("Save error:", err);
@@ -324,7 +340,9 @@ export default function MaterialShop() {
   // Submit Requisition Order
   const handleCheckoutSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (isSubmittingCheckout) return; // Prevent duplicate submit
     if (cartItems.length === 0) return;
+
     const finalRequesterName = checkoutForm.requesterName.trim() || user?.name || "";
     const finalDepartment = checkoutForm.department.trim() || user?.department || "ส่วนพัฒนากายภาพ มหาวิทยาลัยศรีนครินทรวิโรฒ";
 
@@ -333,53 +351,67 @@ export default function MaterialShop() {
       return;
     }
 
-    const reqNo = `REQ-SWU-${new Date().getFullYear() + 543}-${Math.floor(1000 + Math.random() * 9000)}`;
-    const verificationToken = `SWU-REQ-${Date.now().toString(36).toUpperCase()}-${Math.random().toString(36).substring(2, 6).toUpperCase()}`;
-    const orderData: Omit<RequisitionOrder, "id" | "createdAt"> = {
-      reqNo,
-      requesterEmail: user?.email || "",
-      requesterName: finalRequesterName,
-      department: finalDepartment,
-      purpose: checkoutForm.purpose || "เพื่อใช้ในการปฏิบัติงาน",
-      urgency: checkoutForm.urgency,
-      items: cartItems.map(({ item, qty }) => ({
-        code: item.code,
-        name: item.name,
-        unit: item.unit,
-        quantity: qty,
-        unitPrice: item.unitPrice || 0,
-        totalPrice: (item.unitPrice || 0) * qty,
-        imageUrl: item.imageUrl
-      })),
-      totalItems: totalCartCount,
-      totalAmount: totalCartPrice,
-      status: "รออนุมัติ",
-      requesterSignature: {
-        name: finalRequesterName,
-        email: user?.email || "",
-        role: "ผู้ขอเบิกพัสดุ",
-        signedAt: new Date().toISOString(),
-        status: "APPROVED",
-        verificationToken
-      }
-    };
+    setIsSubmittingCheckout(true);
 
     try {
+      const reqNo = `REQ-SWU-${new Date().getFullYear() + 543}-${Math.floor(1000 + Math.random() * 9000)}`;
+      const verificationToken = `SWU-REQ-${Date.now().toString(36).toUpperCase()}-${Math.random().toString(36).substring(2, 6).toUpperCase()}`;
+      const orderData: Omit<RequisitionOrder, "id" | "createdAt"> = {
+        reqNo,
+        requesterEmail: user?.email || "",
+        requesterName: finalRequesterName,
+        department: finalDepartment,
+        purpose: checkoutForm.purpose || "เพื่อใช้ในการปฏิบัติงาน",
+        urgency: checkoutForm.urgency,
+        items: cartItems.map(({ item, qty }) => ({
+          code: item.code,
+          name: item.name,
+          unit: item.unit,
+          quantity: qty,
+          unitPrice: item.unitPrice || 0,
+          totalPrice: (item.unitPrice || 0) * qty,
+          imageUrl: item.imageUrl
+        })),
+        totalItems: totalCartCount,
+        totalAmount: totalCartPrice,
+        status: "รออนุมัติ",
+        requesterSignature: {
+          name: finalRequesterName,
+          email: user?.email || "",
+          role: "ผู้ขอเบิกพัสดุ",
+          signedAt: new Date().toISOString(),
+          status: "APPROVED",
+          verificationToken
+        }
+      };
+
       await saveRequisitionToFirestore(orderData);
+      
       // Deduct stock in Firestore
       for (const { item, qty } of cartItems) {
         const newStock = Math.max(0, item.stock - qty);
         await updateConsumableInFirestore(item.id || item.code, { stock: newStock });
       }
-      showToast("บันทึกใบขอเบิกพัสดุลงใน Firestore เรียบร้อยแล้ว!");
-    } catch (err) {
-      console.warn("Requisition save warning:", err);
-    }
 
-    setLastReqOrder(orderData as RequisitionOrder);
-    setCart({});
-    setIsCartOpen(false);
-    setIsSuccessModalOpen(true);
+      showToast("บันทึกใบขอเบิกพัสดุลงใน Firestore เรียบร้อยแล้ว!");
+
+      // Reset and Clear Form + Cart
+      setLastReqOrder(orderData as RequisitionOrder);
+      setCart({});
+      setCheckoutForm({
+        requesterName: user?.name || "",
+        department: user?.department || "ส่วนพัฒนากายภาพ มหาวิทยาลัยศรีนครินทรวิโรฒ",
+        purpose: "",
+        urgency: "ปกติ"
+      });
+      setIsCartOpen(false);
+      setIsSuccessModalOpen(true);
+    } catch (err: any) {
+      console.warn("Requisition save error:", err);
+      showToast(`บันทึกไม่สำเร็จ: ${err.message || "เกิดข้อผิดพลาด"}`, "error");
+    } finally {
+      setIsSubmittingCheckout(false);
+    }
   };
 
   return (
@@ -1107,10 +1139,20 @@ export default function MaterialShop() {
                   </button>
                   <button
                     type="submit"
-                    className="px-6 py-2.5 bg-[#DA2128] hover:bg-[#B81B22] text-white text-xs font-bold rounded-xl shadow-md transition-all flex items-center space-x-1.5"
+                    disabled={isSubmittingCheckout}
+                    className="px-6 py-2.5 bg-[#DA2128] hover:bg-[#B81B22] text-white text-xs font-bold rounded-xl shadow-md transition-all flex items-center space-x-1.5 cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed active:scale-95"
                   >
-                    <CheckCircle2 className="w-4 h-4" />
-                    <span>ยืนยันส่งใบขอเบิกพัสดุ</span>
+                    {isSubmittingCheckout ? (
+                      <>
+                        <RefreshCw className="w-4 h-4 animate-spin" />
+                        <span>กำลังส่งใบขอเบิก...</span>
+                      </>
+                    ) : (
+                      <>
+                        <CheckCircle2 className="w-4 h-4" />
+                        <span>ยืนยันส่งใบขอเบิกพัสดุ</span>
+                      </>
+                    )}
                   </button>
                 </div>
               </form>
