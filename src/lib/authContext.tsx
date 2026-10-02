@@ -110,12 +110,38 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     const userEmail = (fbUser.email || "").toLowerCase().trim();
     if (!userEmail) return null;
 
-    const record = await findUserPermissionInFirestore(userEmail, fbUser.uid);
+    let record = await findUserPermissionInFirestore(userEmail, fbUser.uid);
 
-    // If NOT found in users_permissions -> STRICTLY DENY ACCESS
+    // If NOT found in users_permissions -> Create default staff profile automatically!
     if (!record) {
-      console.warn(`Access Denied: ${userEmail} is not found in users_permissions collection.`);
-      return null;
+      const sanitizedEmailKey = userEmail.replace(/[@.]/g, "_");
+      const docId = fbUser.uid || sanitizedEmailKey;
+      const defaultRole: UserRole = "staff";
+      const rolePreset = ROLE_PRESETS.staff;
+      const initialData = {
+        uid: fbUser.uid,
+        name: fbUser.displayName || userEmail.split("@")[0],
+        email: userEmail,
+        role: defaultRole,
+        roleNameTh: rolePreset.roleNameTh,
+        department: "ส่วนพัฒนากายภาพ มหาวิทยาลัยศรีนครินทรวิโรฒ",
+        position: "เจ้าหน้าที่",
+        permissions: { ...rolePreset.defaultPermissions },
+        avatarUrl: fbUser.photoURL || null,
+        status: "active",
+        createdAt: serverTimestamp(),
+        lastLogin: serverTimestamp(),
+        updatedAt: serverTimestamp()
+      };
+
+      try {
+        const targetDocRef = doc(db, "users_permissions", docId);
+        await setDoc(targetDocRef, initialData, { merge: true });
+        record = { docId, data: initialData };
+      } catch (e) {
+        console.error("Error creating initial user permission:", e);
+        record = { docId, data: initialData };
+      }
     }
 
     const { docId, data } = record;
@@ -183,7 +209,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             setUser(profile);
             localStorage.setItem("swu_auth_user", JSON.stringify(profile));
           } else {
-            // User not authorized in users_permissions
             await signOut(auth);
             setFirebaseUser(null);
             setUser(null);
@@ -207,7 +232,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     return () => unsubscribe();
   }, []);
 
-  // 1. Google Sign-In (Firebase Auth) - Checked against users_permissions
+  // 1. Google Sign-In (Firebase Auth)
   const loginWithGooglePopup = async () => {
     try {
       const provider = new GoogleAuthProvider();
@@ -215,7 +240,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       const result = await signInWithPopup(auth, provider);
       const email = result.user.email || "";
 
-      // Strict check against Firestore users_permissions
       const profile = await verifyAndLoadUserProfile(result.user);
       if (!profile) {
         await signOut(auth);
@@ -224,7 +248,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         localStorage.removeItem("swu_auth_user");
         return {
           success: false,
-          message: `บัญชี Google (${email}) ไม่มีสิทธิ์เข้าใช้งานระบบ โปรดติดต่อผู้ดูแลระบบ`
+          message: `บัญชี Google (${email}) ถูกระงับการใช้งาน โปรดติดต่อผู้ดูแลระบบ`
         };
       }
 
@@ -239,7 +263,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       if (error.code === "auth/popup-closed-by-user") {
         message = "หน้าต่างเข้าสู่ระบบถูกปิดก่อนทำรายการสำเร็จ";
       } else if (error.code === "auth/unauthorized-domain") {
-        message = `โดเมนหรือ IP (${currentHost}) ยังไม่ได้เพิ่มใน Authorized Domains ของ Firebase Console โปรดเพิ่ม "${currentHost}" ใน Authentication > Settings หรือใช้งานด้วย อีเมล/รหัสผ่าน ด้านล่างได้ทันที`;
+        message = `โดเมนหรือ IP (${currentHost}) ยังไม่ได้เพิ่มใน Authorized Domains ของ Firebase Console โปรดเข้าสู่ระบบด้วย อีเมล/รหัสผ่าน ด้านล่างได้ทันที`;
       } else if (error.message) {
         message = error.message;
       }
@@ -247,21 +271,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
-  // 2. Email & Password Sign-In (Firebase Auth) - Checked against users_permissions
+  // 2. Email & Password Sign-In (Direct DB & Auth)
   const loginWithEmail = async (email: string, password: string) => {
     try {
       const cleanEmail = email.trim().toLowerCase();
-
-      // Step A: Pre-check in Firestore users_permissions first
-      const record = await findUserPermissionInFirestore(cleanEmail);
-      if (!record) {
-        return {
-          success: false,
-          message: `อีเมล (${cleanEmail}) ไม่มีสิทธิ์เข้าใช้งานระบบ โปรดติดต่อผู้ดูแลระบบ`
-        };
+      if (!cleanEmail || !password) {
+        return { success: false, message: "กรุณากรอกอีเมลและรหัสผ่าน" };
       }
 
-      // Step B: Authenticate with Firebase
       const result = await signInWithEmailAndPassword(auth, cleanEmail, password);
       const profile = await verifyAndLoadUserProfile(result.user);
 
@@ -272,7 +289,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         localStorage.removeItem("swu_auth_user");
         return {
           success: false,
-          message: `บัญชีของท่านไม่มีสิทธิ์เข้าใช้งานระบบ โปรดติดต่อผู้ดูแลระบบ`
+          message: `บัญชีของท่านถูกระงับการใช้งาน โปรดติดต่อผู้ดูแลระบบ`
         };
       }
 
@@ -284,7 +301,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       console.error("Email Login error:", error);
       let message = "อีเมลหรือรหัสผ่านไม่ถูกต้อง";
       if (error.code === "auth/user-not-found" || error.code === "auth/invalid-credential") {
-        message = "ไม่พบบัญชีผู้ใช้งาน หรือรหัสผ่านไม่ถูกต้อง";
+        message = "ไม่พบบัญชีผู้ใช้งาน หรือรหัสผ่านไม่ถูกต้อง (หากยังไม่มีบัญชี สามารถกดแท็บ 'ลงทะเบียนใหม่' ด้านบนได้เลยครับ)";
       } else if (error.code === "auth/wrong-password") {
         message = "รหัสผ่านไม่ถูกต้อง";
       } else if (error.code === "auth/invalid-email") {
@@ -296,42 +313,57 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
-  // 3. Register with Email & Password (Only allowed if email already exists in users_permissions)
+  // 3. Register with Email & Password
   const registerWithEmail = async (email: string, password: string, name: string) => {
     try {
       const cleanEmail = email.trim().toLowerCase();
-
-      // Check if this email was pre-registered/authorized by Admin in users_permissions
-      const record = await findUserPermissionInFirestore(cleanEmail);
-      if (!record) {
-        return {
-          success: false,
-          message: `อีเมลนี้ไม่มีสิทธิ์ลงทะเบียนเข้าใช้งานระบบ โปรดติดต่อผู้ดูแลระบบ`
-        };
+      if (!cleanEmail || !password) {
+        return { success: false, message: "กรุณากรอกอีเมลและรหัสผ่าน" };
       }
 
       const result = await createUserWithEmailAndPassword(auth, cleanEmail, password);
+
+      // Check if existing doc exists or create new one
+      const sanitizedEmailKey = cleanEmail.replace(/[@.]/g, "_");
+      const existing = await findUserPermissionInFirestore(cleanEmail, result.user.uid);
+      const docId = existing ? existing.docId : (result.user.uid || sanitizedEmailKey);
+      const targetDocRef = doc(db, "users_permissions", docId);
+
+      const defaultRole: UserRole = existing?.data?.role || "staff";
+      const rolePreset = ROLE_PRESETS[defaultRole] || ROLE_PRESETS.staff;
+      const initialData = {
+        uid: result.user.uid,
+        name: name.trim() || existing?.data?.name || cleanEmail.split("@")[0],
+        email: cleanEmail,
+        role: defaultRole,
+        roleNameTh: existing?.data?.roleNameTh || rolePreset.roleNameTh,
+        department: existing?.data?.department || "ส่วนพัฒนากายภาพ มหาวิทยาลัยศรีนครินทรวิโรฒ",
+        position: existing?.data?.position || "เจ้าหน้าที่",
+        permissions: existing?.data?.permissions || { ...rolePreset.defaultPermissions },
+        status: existing?.data?.status || "active",
+        createdAt: existing?.data?.createdAt || serverTimestamp(),
+        lastLogin: serverTimestamp(),
+        updatedAt: serverTimestamp()
+      };
+
+      await setDoc(targetDocRef, initialData, { merge: true });
+
       const profile = await verifyAndLoadUserProfile(result.user);
-
-      if (!profile) {
-        await signOut(auth);
-        return {
-          success: false,
-          message: "เกิดข้อผิดพลาดในการตรวจสอบสิทธิ์ผู้ใช้งาน"
-        };
+      if (profile) {
+        setUser(profile);
+        setFirebaseUser(result.user);
+        localStorage.setItem("swu_auth_user", JSON.stringify(profile));
       }
-
-      setUser(profile);
-      setFirebaseUser(result.user);
-      localStorage.setItem("swu_auth_user", JSON.stringify(profile));
       return { success: true };
     } catch (error: any) {
       console.error("Registration error:", error);
       let message = "ไม่สามารถสร้างบัญชีผู้ใช้ได้";
       if (error.code === "auth/email-already-in-use") {
-        message = "อีเมลนี้มีผู้ใช้งานในระบบแล้ว ท่านสามารถกดเข้าสู่ระบบได้ทันที";
+        message = "อีเมลนี้มีบัญชีในระบบแล้ว สามารถกดแท็บ 'เข้าสู่ระบบ' หรือกด 'ลืมรหัสผ่าน' เพื่อตั้งรหัสผ่านใหม่ได้ทันที";
       } else if (error.code === "auth/weak-password") {
         message = "รหัสผ่านต้องมีความยาวอย่างน้อย 6 ตัวอักษร";
+      } else if (error.code === "auth/invalid-email") {
+        message = "รูปแบบอีเมลไม่ถูกต้อง";
       }
       return { success: false, message };
     }
