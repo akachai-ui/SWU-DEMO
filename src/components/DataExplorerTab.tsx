@@ -843,8 +843,8 @@ export default function DataExplorerTab() {
 
       {/* Asset Detail Modal */}
       {selectedItemForModal && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-md">
-          <div className="glass-modal rounded-3xl max-w-2xl w-full p-6 space-y-5 shadow-2xl text-slate-800 max-h-[90vh] overflow-y-auto border border-white/90">
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-3 sm:p-6 py-6 sm:py-10 bg-slate-900/60 backdrop-blur-md overflow-y-auto">
+          <div className="glass-modal rounded-3xl max-w-2xl w-full p-5 sm:p-7 space-y-5 shadow-2xl text-slate-800 my-auto border border-white/90">
             <div className="flex items-start justify-between border-b border-slate-200/60 pb-4">
               <div className="space-y-1">
                 <div className="inline-flex items-center space-x-2 bg-red-50 text-[#DA2128] text-[10px] px-2.5 py-0.5 rounded-full font-bold border border-red-200">

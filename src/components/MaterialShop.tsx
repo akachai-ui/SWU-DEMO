@@ -742,8 +742,8 @@ export default function MaterialShop() {
       {/* MODAL: ADD / EDIT MATERIAL ITEM */}
       {/* ========================================================================= */}
       {isAddModalOpen && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-md overflow-y-auto">
-          <div className="glass-modal rounded-3xl max-w-2xl w-full max-h-[90vh] overflow-y-auto shadow-2xl border border-white/90">
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-3 sm:p-6 py-6 sm:py-10 bg-slate-900/60 backdrop-blur-md overflow-y-auto">
+          <div className="glass-modal rounded-3xl max-w-2xl w-full my-auto shadow-2xl border border-white/90 overflow-hidden">
             {/* Modal Header */}
             <div className="sticky top-0 bg-white/95 backdrop-blur-md px-6 py-4 border-b border-slate-200/60 flex items-center justify-between z-10">
               <div className="flex items-center space-x-2.5">
@@ -997,8 +997,8 @@ export default function MaterialShop() {
       {/* MODAL: CART & CHECKOUT (ใบเบิกพัสดุ) */}
       {/* ========================================================================= */}
       {isCartOpen && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-md overflow-y-auto">
-          <div className="glass-modal rounded-3xl max-w-xl w-full max-h-[90vh] overflow-y-auto shadow-2xl border border-white/90">
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-3 sm:p-6 py-6 sm:py-10 bg-slate-900/60 backdrop-blur-md overflow-y-auto">
+          <div className="glass-modal rounded-3xl max-w-xl w-full my-auto shadow-2xl border border-white/90 overflow-hidden">
             {/* Header */}
             <div className="sticky top-0 bg-white/95 backdrop-blur-md px-6 py-4 border-b border-slate-200/60 flex items-center justify-between z-10">
               <div className="flex items-center space-x-2.5">

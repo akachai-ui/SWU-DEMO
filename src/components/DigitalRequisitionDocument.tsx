@@ -497,7 +497,7 @@ export default function DigitalRequisitionDocument({
   };
 
   return (
-    <div className="fixed inset-0 z-[100] flex items-center justify-center p-2.5 sm:p-6 pb-6 sm:pb-6 bg-slate-900/60 backdrop-blur-md overflow-y-auto print:p-0 print:bg-white print:static print:overflow-visible animate-fadeIn">
+    <div className="fixed inset-0 z-[100] flex items-center justify-center p-3 sm:p-6 py-6 sm:py-10 bg-slate-900/60 backdrop-blur-md overflow-y-auto print:p-0 print:bg-white print:static print:overflow-visible animate-fadeIn">
       {/* Dynamic Print CSS to guarantee ONLY the single document prints & fits 1-Page A4 */}
       <style dangerouslySetInnerHTML={{ __html: `
         @page {
@@ -551,7 +551,7 @@ export default function DigitalRequisitionDocument({
         </div>
       )}
 
-      <div className="glass-modal rounded-3xl max-w-4xl w-full p-3.5 sm:p-8 space-y-4 sm:space-y-6 shadow-2xl border border-white/90 max-h-[92vh] overflow-y-auto print:p-0 print:border-none print:shadow-none animate-scaleUp">
+      <div className="glass-modal rounded-3xl max-w-4xl w-full p-4 sm:p-8 space-y-4 sm:space-y-6 shadow-2xl border border-white/90 my-auto print:p-0 print:border-none print:shadow-none animate-scaleUp">
         
         {/* Top Control Bar (Hidden on Print) */}
         <div className="flex items-center justify-between border-b border-slate-200/60 pb-3 print:hidden gap-2">
