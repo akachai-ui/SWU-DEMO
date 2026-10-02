@@ -498,7 +498,7 @@ export default function RealPortalPage() {
         </header>
 
         {/* Main Operational Body */}
-        <main className="flex-1 max-w-7xl w-full mx-auto px-3.5 sm:px-6 lg:px-8 py-4 sm:py-7 pb-28 sm:pb-8">
+        <main className="flex-1 max-w-7xl w-full mx-auto px-3.5 sm:px-6 lg:px-8 py-4 sm:py-7 pb-36 sm:pb-8">
           {activeMainTab === "shop" && canViewShop && <MaterialShop />}
           {activeMainTab === "my_requests" && canViewMyRequests && <RequisitionManagement initialViewMode="my_requests" />}
           {activeMainTab === "approvals" && canApprove && <RequisitionManagement initialViewMode="approvals" />}
@@ -507,7 +507,7 @@ export default function RealPortalPage() {
         </main>
 
         {/* Native Smartphone App Bottom Navigation Bar (1-Thumb Navigation with Approval Badge) */}
-        <nav className="sm:hidden fixed bottom-0 left-0 right-0 z-30 bg-white/95 backdrop-blur-xl border-t border-slate-200/90 shadow-[0_-4px_25px_rgba(0,0,0,0.08)] pb-[max(env(safe-area-inset-bottom),8px)] pt-1.5 px-2 print:hidden">
+        <nav className="sm:hidden fixed bottom-0 left-0 right-0 z-30 bg-white/95 backdrop-blur-xl border-t border-slate-200/90 shadow-[0_-4px_25px_rgba(0,0,0,0.08)] pb-[max(env(safe-area-inset-bottom),6px)] pt-1 px-1.5 print:hidden">
           <div className="flex items-center justify-around max-w-lg mx-auto">
             {canViewShop && (
               <button

@@ -1238,14 +1238,14 @@ export default function MaterialShop() {
       {/* FLOATING ACTION SHOPPING CART BUTTON (BOTTOM-RIGHT FAB) */}
       {/* ========================================================================= */}
       {canRequestConsumables && (
-        <div className="fixed bottom-20 right-4 sm:bottom-8 sm:right-8 z-40 animate-fadeIn">
+        <div className="fixed bottom-[72px] right-3.5 sm:bottom-8 sm:right-8 z-40 animate-fadeIn">
           <button
             type="button"
             onClick={() => setIsCartOpen(true)}
             className={`group relative flex items-center justify-center transition-all duration-300 shadow-2xl active:scale-95 cursor-pointer ${
               totalCartCount > 0
-                ? "bg-gradient-to-r from-[#DA2128] via-[#FF3B44] to-[#DA2128] hover:from-[#B81B22] hover:to-[#DA2128] text-white pl-4 pr-5 py-3.5 rounded-full shadow-red-600/40 hover:shadow-red-600/60 ring-4 ring-red-500/20"
-                : "bg-slate-900/90 hover:bg-slate-900 text-white p-3.5 sm:px-4 sm:py-3.5 rounded-full shadow-slate-900/30 backdrop-blur-md border border-slate-700/60"
+                ? "bg-gradient-to-r from-[#DA2128] via-[#FF3B44] to-[#DA2128] hover:from-[#B81B22] hover:to-[#DA2128] text-white p-3 sm:pl-4 sm:pr-5 sm:py-3.5 rounded-full shadow-red-600/40 hover:shadow-red-600/60 ring-4 ring-red-500/20"
+                : "bg-slate-900/90 hover:bg-slate-900 text-white p-3 sm:px-4 sm:py-3.5 rounded-full shadow-slate-900/30 backdrop-blur-md border border-slate-700/60"
             }`}
             title="ดูรายการในตะกร้าขอเบิกพัสดุ"
           >
