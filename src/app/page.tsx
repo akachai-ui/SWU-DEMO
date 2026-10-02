@@ -117,8 +117,8 @@ export default function RealPortalPage() {
 
             </div>
 
-            {/* Bottom Row: Navigation Tabs (Segmented Controller with Full Space) */}
-            <div className="py-2.5 flex items-center overflow-x-auto scrollbar-none">
+            {/* Bottom Row: Desktop Navigation Tabs (Segmented Controller with Full Space) */}
+            <div className="hidden sm:flex py-2.5 items-center overflow-x-auto scrollbar-none">
               <div className="flex items-center space-x-1.5 p-1 bg-slate-100/90 rounded-2xl border border-slate-200/80 text-xs font-bold min-w-full sm:min-w-0">
                 <button
                   onClick={() => setActiveMainTab("shop")}
@@ -190,13 +190,92 @@ export default function RealPortalPage() {
         </header>
 
         {/* Main Operational Body */}
-        <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-5 sm:py-7 pb-20 sm:pb-8">
+        <main className="flex-1 max-w-7xl w-full mx-auto px-3.5 sm:px-6 lg:px-8 py-4 sm:py-7 pb-28 sm:pb-8">
           {activeMainTab === "shop" && <MaterialShop />}
           {activeMainTab === "my_requests" && <RequisitionManagement initialViewMode="my_requests" />}
           {activeMainTab === "approvals" && <RequisitionManagement initialViewMode="approvals" />}
           {activeMainTab === "assets" && <DataExplorerTab />}
           {activeMainTab === "users" && <PermissionManager />}
         </main>
+
+        {/* Native Smartphone App Bottom Navigation Bar (1-Thumb Navigation) */}
+        <nav className="sm:hidden fixed bottom-0 left-0 right-0 z-50 bg-white/95 backdrop-blur-xl border-t border-slate-200/90 shadow-[0_-4px_25px_rgba(0,0,0,0.08)] pb-[max(env(safe-area-inset-bottom),8px)] pt-2 print:hidden">
+          <div className="grid grid-flow-col auto-cols-fr items-center px-1">
+            <button
+              onClick={() => setActiveMainTab("shop")}
+              className={`flex flex-col items-center justify-center py-1 px-1 rounded-xl transition-all active:scale-90 ${
+                activeMainTab === "shop"
+                  ? "text-[#DA2128] font-black"
+                  : "text-slate-500 hover:text-slate-800 font-medium"
+              }`}
+            >
+              <div className={`p-1 rounded-xl transition-all ${activeMainTab === "shop" ? "bg-red-50" : ""}`}>
+                <ShoppingBag className="w-5 h-5" />
+              </div>
+              <span className="text-[10px] mt-0.5 leading-tight">ร้านเบิก</span>
+            </button>
+
+            <button
+              onClick={() => setActiveMainTab("my_requests")}
+              className={`flex flex-col items-center justify-center py-1 px-1 rounded-xl transition-all active:scale-90 ${
+                activeMainTab === "my_requests"
+                  ? "text-[#DA2128] font-black"
+                  : "text-slate-500 hover:text-slate-800 font-medium"
+              }`}
+            >
+              <div className={`p-1 rounded-xl transition-all ${activeMainTab === "my_requests" ? "bg-red-50" : ""}`}>
+                <FileText className="w-5 h-5" />
+              </div>
+              <span className="text-[10px] mt-0.5 leading-tight">ประวัติฉัน</span>
+            </button>
+
+            {canApprove && (
+              <button
+                onClick={() => setActiveMainTab("approvals")}
+                className={`flex flex-col items-center justify-center py-1 px-1 rounded-xl transition-all active:scale-90 ${
+                  activeMainTab === "approvals"
+                    ? "text-[#DA2128] font-black"
+                    : "text-slate-500 hover:text-slate-800 font-medium"
+                }`}
+              >
+                <div className={`p-1 rounded-xl transition-all ${activeMainTab === "approvals" ? "bg-red-50" : ""}`}>
+                  <ShieldCheck className="w-5 h-5" />
+                </div>
+                <span className="text-[10px] mt-0.5 leading-tight">อนุมัติ</span>
+              </button>
+            )}
+
+            <button
+              onClick={() => setActiveMainTab("assets")}
+              className={`flex flex-col items-center justify-center py-1 px-1 rounded-xl transition-all active:scale-90 ${
+                activeMainTab === "assets"
+                  ? "text-[#DA2128] font-black"
+                  : "text-slate-500 hover:text-slate-800 font-medium"
+              }`}
+            >
+              <div className={`p-1 rounded-xl transition-all ${activeMainTab === "assets" ? "bg-red-50" : ""}`}>
+                <FileSpreadsheet className="w-5 h-5" />
+              </div>
+              <span className="text-[10px] mt-0.5 leading-tight">ครุภัณฑ์</span>
+            </button>
+
+            {canManageUsers && (
+              <button
+                onClick={() => setActiveMainTab("users")}
+                className={`flex flex-col items-center justify-center py-1 px-1 rounded-xl transition-all active:scale-90 ${
+                  activeMainTab === "users"
+                    ? "text-[#DA2128] font-black"
+                    : "text-slate-500 hover:text-slate-800 font-medium"
+                }`}
+              >
+                <div className={`p-1 rounded-xl transition-all ${activeMainTab === "users" ? "bg-red-50" : ""}`}>
+                  <Users className="w-5 h-5" />
+                </div>
+                <span className="text-[10px] mt-0.5 leading-tight">สิทธิ์ผู้ใช้</span>
+              </button>
+            )}
+          </div>
+        </nav>
 
         {/* Official Modern Footer */}
         <footer className="border-t border-slate-200/80 bg-white py-5 text-center text-xs text-slate-500 print:hidden">

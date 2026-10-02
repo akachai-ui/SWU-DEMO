@@ -1183,7 +1183,7 @@ export default function MaterialShop() {
       {/* ========================================================================= */}
       {/* FLOATING ACTION SHOPPING CART BUTTON (BOTTOM-RIGHT FAB) */}
       {/* ========================================================================= */}
-      <div className="fixed bottom-6 right-6 sm:bottom-8 sm:right-8 z-40 animate-fadeIn">
+      <div className="fixed bottom-20 right-4 sm:bottom-8 sm:right-8 z-40 animate-fadeIn">
         <button
           type="button"
           onClick={() => setIsCartOpen(true)}
