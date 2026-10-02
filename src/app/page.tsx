@@ -25,6 +25,7 @@ import {
   Users,
   Bell,
   BellRing,
+  Volume2,
   X,
   ChevronRight,
   Sparkles
@@ -62,11 +63,42 @@ export default function RealPortalPage() {
       osc.frequency.setValueAtTime(587.33, audioCtx.currentTime); // D5
       osc.frequency.setValueAtTime(880, audioCtx.currentTime + 0.12); // A5
       gain.gain.setValueAtTime(0.2, audioCtx.currentTime);
-      gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.6);
+      gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.5);
       osc.start(audioCtx.currentTime);
-      osc.stop(audioCtx.currentTime + 0.6);
+      osc.stop(audioCtx.currentTime + 0.5);
     } catch (e) {
       // audio autoplay policy catch
+    }
+  };
+
+  // Play Thai Speech Voice + Chime
+  const playVoiceAndChimeAlert = (order?: RequisitionOrder) => {
+    // 1. Play soft chime first
+    playNotificationChime();
+
+    // 2. Speak via Web Speech API in Thai
+    if (typeof window !== "undefined" && "speechSynthesis" in window) {
+      try {
+        window.speechSynthesis.cancel();
+        const requester = order?.requesterName ? `จากคุณ ${order.requesterName}` : "";
+        const messageText = `มีคำขอเบิกพัสดุใหม่ ${requester} รอการอนุมัติค่ะ`;
+        const utterance = new SpeechSynthesisUtterance(messageText);
+        utterance.lang = "th-TH";
+        utterance.rate = 1.0;
+        utterance.pitch = 1.05;
+
+        const voices = window.speechSynthesis.getVoices();
+        const thaiVoice = voices.find((v) => v.lang === "th-TH" || v.lang.startsWith("th"));
+        if (thaiVoice) {
+          utterance.voice = thaiVoice;
+        }
+
+        setTimeout(() => {
+          window.speechSynthesis.speak(utterance);
+        }, 350);
+      } catch (err) {
+        console.warn("Speech synthesis error:", err);
+      }
     }
   };
 
@@ -83,7 +115,7 @@ export default function RealPortalPage() {
           if (currentCount > prevPendingCountRef.current && pending.length > 0) {
             const latest = pending[0];
             setNewRequisitionAlert(latest);
-            playNotificationChime();
+            playVoiceAndChimeAlert(latest);
           }
         } else {
           isInitialLoadRef.current = false;
@@ -144,12 +176,23 @@ export default function RealPortalPage() {
                     <span className="w-1.5 h-1.5 rounded-full bg-[#DA2128] animate-pulse"></span>
                     <span>คำขอเบิกใหม่รออนุมัติ!</span>
                   </span>
-                  <button
-                    onClick={() => setNewRequisitionAlert(null)}
-                    className="text-slate-400 hover:text-slate-600 p-1 rounded-lg hover:bg-slate-100 transition-colors"
-                  >
-                    <X className="w-4 h-4" />
-                  </button>
+                  <div className="flex items-center space-x-1">
+                    <button
+                      type="button"
+                      onClick={() => playVoiceAndChimeAlert(newRequisitionAlert)}
+                      className="text-slate-400 hover:text-[#DA2128] p-1 rounded-lg hover:bg-slate-100 transition-colors"
+                      title="กดเพื่อฟังเสียงพูดแจ้งเตือนซ้ำ"
+                    >
+                      <Volume2 className="w-4 h-4" />
+                    </button>
+                    <button
+                      onClick={() => setNewRequisitionAlert(null)}
+                      className="text-slate-400 hover:text-slate-600 p-1 rounded-lg hover:bg-slate-100 transition-colors"
+                      title="ปิดการแจ้งเตือน"
+                    >
+                      <X className="w-4 h-4" />
+                    </button>
+                  </div>
                 </div>
                 
                 <h4 className="text-sm font-black text-slate-900 truncate">
