@@ -39,6 +39,7 @@ export default function RealPortalPage() {
   const [pendingApprovalCount, setPendingApprovalCount] = useState(0);
   const [newRequisitionAlert, setNewRequisitionAlert] = useState<RequisitionOrder | null>(null);
   const [isLogoutConfirmOpen, setIsLogoutConfirmOpen] = useState(false);
+  const [welcomeToast, setWelcomeToast] = useState<string | null>(null);
   const isInitialLoadRef = useRef(true);
   const prevPendingCountRef = useRef(0);
 
@@ -185,6 +186,8 @@ export default function RealPortalPage() {
 
     const userDisplayName = name ? `คุณ ${name}` : "";
     const welcomeText = `ยินดีต้อนรับ${userDisplayName} เข้าสู่ระบบบริหารคลังพัสดุ มศว ค่ะ`;
+    setWelcomeToast(`ยินดีต้อนรับ ${userDisplayName || "ท่าน"} เข้าสู่ระบบ`);
+    setTimeout(() => setWelcomeToast(null), 6000);
 
     if (typeof window === "undefined") return;
 
@@ -208,8 +211,16 @@ export default function RealPortalPage() {
       const playPromise = audio.play();
       if (playPromise !== undefined) {
         playPromise.catch((err) => {
-          console.warn("Welcome TTS audio play prevented or failed:", err);
-          runFallback();
+          console.warn("Welcome TTS autoplay blocked by browser policy, queuing for first interaction:", err);
+          const onUserGesture = () => {
+            window.removeEventListener("click", onUserGesture);
+            window.removeEventListener("touchstart", onUserGesture);
+            playNotificationChime();
+            const retryAudio = new Audio(audioUrl);
+            retryAudio.play().catch(() => runFallback());
+          };
+          window.addEventListener("click", onUserGesture, { once: true, passive: true });
+          window.addEventListener("touchstart", onUserGesture, { once: true, passive: true });
         });
       }
     } catch (e) {
@@ -224,10 +235,7 @@ export default function RealPortalPage() {
     const shouldPlay = sessionStorage.getItem("play_welcome_voice");
     if (shouldPlay === "true") {
       sessionStorage.removeItem("play_welcome_voice");
-      const timer = setTimeout(() => {
-        playWelcomeVoice(user.name);
-      }, 700);
-      return () => clearTimeout(timer);
+      playWelcomeVoice(user.name);
     }
   }, [user]);
 
@@ -287,6 +295,42 @@ export default function RealPortalPage() {
       <div className="min-h-dvh bg-[#F8FAFC] text-slate-800 flex flex-col justify-between selection:bg-[#DA2128] selection:text-white font-sans relative">
         {/* Top Accent Gradient Bar */}
         <div className="h-1.5 w-full bg-gradient-to-r from-[#DA2128] via-[#FF3B44] to-[#DA2128]"></div>
+
+        {/* Realtime Welcome Toast Notification on Login */}
+        {welcomeToast && (
+          <div className="fixed top-4 right-4 sm:top-6 sm:right-6 z-50 max-w-sm w-full animate-bounceIn shadow-2xl rounded-2xl bg-white border border-slate-200 p-3.5 sm:p-4 overflow-hidden flex items-center justify-between gap-3">
+            <div className="flex items-center space-x-3 min-w-0">
+              <div className="p-2 rounded-xl bg-red-50 text-[#DA2128] shrink-0">
+                <Sparkles className="w-5 h-5 animate-pulse" />
+              </div>
+              <div className="min-w-0">
+                <h4 className="text-xs font-black text-slate-900 truncate">
+                  {welcomeToast}
+                </h4>
+                <p className="text-[11px] text-slate-500 truncate">
+                  ระบบบริหารคลังพัสดุและครุภัณฑ์ มศว
+                </p>
+              </div>
+            </div>
+            <div className="flex items-center space-x-1 shrink-0">
+              <button
+                type="button"
+                onClick={() => playWelcomeVoice(user?.name)}
+                className="p-1.5 text-slate-400 hover:text-[#DA2128] hover:bg-slate-100 rounded-lg transition-colors cursor-pointer"
+                title="ฟังเสียงต้อนรับซ้ำ"
+              >
+                <Volume2 className="w-4 h-4" />
+              </button>
+              <button
+                type="button"
+                onClick={() => setWelcomeToast(null)}
+                className="p-1.5 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-lg transition-colors cursor-pointer"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+          </div>
+        )}
 
         {/* Realtime Floating Pop-up Notification for Approvers */}
         {newRequisitionAlert && canApprove && (
