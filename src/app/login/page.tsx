@@ -63,6 +63,9 @@ export default function LoginPage() {
     try {
       const res = await loginWithEmail(email, password);
       if (res.success) {
+        if (typeof window !== "undefined") {
+          sessionStorage.setItem("play_welcome_voice", "true");
+        }
         setVerifyingText("ตรวจสอบสิทธิ์สำเร็จ กำลังเข้าสู่ระบบ...");
         setSuccessMessage("เข้าสู่ระบบสำเร็จ!");
         setTimeout(() => {
@@ -178,8 +181,13 @@ export default function LoginPage() {
                 </div>
                 <div className="flex items-center space-x-2 pt-1 border-t border-slate-200">
                   <button
-                    onClick={() => router.push("/")}
-                    className="flex-1 py-2.5 bg-[#DA2128] active:bg-[#B81B22] text-white font-bold rounded-xl text-center transition-colors text-xs active:scale-[0.99]"
+                    onClick={() => {
+                      if (typeof window !== "undefined") {
+                        sessionStorage.setItem("play_welcome_voice", "true");
+                      }
+                      router.push("/");
+                    }}
+                    className="flex-1 py-2.5 bg-[#DA2128] active:bg-[#B81B22] text-white font-bold rounded-xl text-center transition-colors text-xs active:scale-[0.99] cursor-pointer"
                   >
                     เข้าสู่หน้าหลัก
                   </button>

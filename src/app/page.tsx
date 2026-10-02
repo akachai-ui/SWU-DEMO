@@ -179,6 +179,58 @@ export default function RealPortalPage() {
     }
   };
 
+  // Play Warm Welcome Voice on Login
+  const playWelcomeVoice = (name?: string) => {
+    playNotificationChime();
+
+    const userDisplayName = name ? `คุณ ${name}` : "";
+    const welcomeText = `ยินดีต้อนรับ${userDisplayName} เข้าสู่ระบบบริหารคลังพัสดุ มศว ค่ะ`;
+
+    if (typeof window === "undefined") return;
+
+    let hasFallbackRun = false;
+    const runFallback = () => {
+      if (hasFallbackRun) return;
+      hasFallbackRun = true;
+      speakWithSynthesis(welcomeText);
+    };
+
+    try {
+      const audioUrl = `/api/tts?text=${encodeURIComponent(welcomeText)}&t=${Date.now()}`;
+      const audio = new Audio(audioUrl);
+      audio.volume = 1.0;
+
+      audio.onerror = (e) => {
+        console.warn("Welcome TTS audio error:", e);
+        runFallback();
+      };
+
+      const playPromise = audio.play();
+      if (playPromise !== undefined) {
+        playPromise.catch((err) => {
+          console.warn("Welcome TTS audio play prevented or failed:", err);
+          runFallback();
+        });
+      }
+    } catch (e) {
+      runFallback();
+    }
+  };
+
+  // Trigger Welcome Voice when user arrives from login
+  useEffect(() => {
+    if (!user || typeof window === "undefined") return;
+
+    const shouldPlay = sessionStorage.getItem("play_welcome_voice");
+    if (shouldPlay === "true") {
+      sessionStorage.removeItem("play_welcome_voice");
+      const timer = setTimeout(() => {
+        playWelcomeVoice(user.name);
+      }, 700);
+      return () => clearTimeout(timer);
+    }
+  }, [user]);
+
   // Realtime subscription to requisitions to update pending badges & fire pop-ups
   useEffect(() => {
     const unsubscribe = subscribeToRequisitions(
