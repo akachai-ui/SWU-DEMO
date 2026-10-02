@@ -39,33 +39,35 @@ export default function RealPortalPage() {
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             
             {/* Top Row: Brand Identity (Left) & User Profile + Tools (Right) */}
-            <div className="flex items-center justify-between py-3.5 sm:py-4 gap-4 border-b border-slate-100/90">
+            <div className="flex items-center justify-between py-2.5 sm:py-3.5 gap-2 sm:gap-4 border-b border-slate-100/90 min-w-0">
               
-              {/* Brand & Identity - Fixed & Never Truncated */}
-              <div className="flex items-center space-x-3.5 sm:space-x-4 shrink-0">
+              {/* Brand & Identity */}
+              <div className="flex items-center space-x-2.5 sm:space-x-4 min-w-0 flex-1">
                 <div className="shrink-0 flex items-center">
                   <SWULogo size="md" className="hidden sm:block" />
                   <SWULogo size="sm" className="sm:hidden" />
                 </div>
-                <div className="border-l border-slate-200 pl-3.5 sm:pl-4 shrink-0 space-y-0.5">
-                  <div className="flex items-center space-x-2">
-                    <h1 className="font-black text-base sm:text-lg md:text-xl text-slate-900 tracking-tight leading-tight whitespace-nowrap">
-                      ระบบบริหารคลังพัสดุและครุภัณฑ์
+                <div className="border-l border-slate-200 pl-2.5 sm:pl-4 min-w-0 flex-1 space-y-0.5">
+                  <div className="flex items-center space-x-1.5">
+                    <h1 className="font-black text-sm sm:text-lg md:text-xl text-slate-900 tracking-tight leading-tight truncate">
+                      <span className="sm:hidden">ระบบคลังพัสดุ & ครุภัณฑ์</span>
+                      <span className="hidden sm:inline">ระบบบริหารคลังพัสดุและครุภัณฑ์</span>
                     </h1>
-                    <span className="hidden sm:inline-flex text-[10px] bg-red-50 text-[#DA2128] border border-red-200/80 px-2 py-0.5 rounded-full font-bold leading-none">
+                    <span className="hidden sm:inline-flex text-[10px] bg-red-50 text-[#DA2128] border border-red-200/80 px-2 py-0.5 rounded-full font-bold leading-none shrink-0">
                       มศว
                     </span>
                   </div>
-                  <p className="text-xs text-slate-500 font-medium leading-normal whitespace-nowrap">
-                    ส่วนพัฒนากายภาพ มหาวิทยาลัยศรีนครินทรวิโรฒ
+                  <p className="text-[11px] sm:text-xs text-slate-500 font-medium leading-tight truncate">
+                    <span className="sm:hidden">ส่วนพัฒนากายภาพ มศว</span>
+                    <span className="hidden sm:inline">ส่วนพัฒนากายภาพ มหาวิทยาลัยศรีนครินทรวิโรฒ</span>
                   </p>
                 </div>
               </div>
 
               {/* Right: User Profile Capsule & Navigation Tools */}
-              <div className="flex items-center space-x-2.5 sm:space-x-3 shrink-0">
+              <div className="flex items-center space-x-1.5 sm:space-x-3 shrink-0">
                 {user && (
-                  <div className="flex items-center space-x-2 bg-slate-50 border border-slate-200/80 hover:border-slate-300 pl-1.5 pr-2.5 py-1 rounded-full transition-all shadow-xs">
+                  <div className="flex items-center space-x-1.5 sm:space-x-2 bg-slate-50 border border-slate-200/80 hover:border-slate-300 p-1 sm:pl-1.5 sm:pr-2.5 sm:py-1 rounded-full transition-all shadow-xs">
                     {user.avatarUrl ? (
                       /* eslint-disable-next-line @next/next/no-img-element */
                       <img
@@ -87,11 +89,11 @@ export default function RealPortalPage() {
                       {user.name ? user.name.slice(0, 2).toUpperCase() : "SW"}
                     </div>
 
-                    <div className="flex items-center space-x-1.5 px-0.5">
+                    <div className="hidden md:flex items-center space-x-1.5 px-0.5">
                       <span className="text-xs font-bold text-slate-800 whitespace-nowrap max-w-[120px] truncate leading-tight" title={user.name}>
                         {user.name}
                       </span>
-                      <span className="hidden sm:inline-block text-[9px] font-bold px-1.5 py-0.5 rounded-full bg-slate-200 text-slate-700 leading-none">
+                      <span className="hidden lg:inline-block text-[9px] font-bold px-1.5 py-0.5 rounded-full bg-slate-200 text-slate-700 leading-none">
                         {user.role === "super_admin" ? "Admin" : user.role === "technician" ? "ช่าง" : "Staff"}
                       </span>
                     </div>
@@ -108,10 +110,10 @@ export default function RealPortalPage() {
 
                 <Link
                   href="/dev"
-                  className="hidden sm:inline-flex items-center space-x-1.5 text-xs font-bold text-slate-700 hover:text-[#DA2128] bg-slate-100 hover:bg-red-50 border border-slate-200 hover:border-red-200 px-3.5 py-1.5 rounded-full transition-all shadow-xs shrink-0"
+                  className="hidden sm:inline-flex items-center space-x-1.5 text-xs font-bold text-slate-700 hover:text-[#DA2128] bg-slate-100 hover:bg-red-50 border border-slate-200 hover:border-red-200 px-3 py-1.5 rounded-full transition-all shadow-xs shrink-0"
                 >
                   <BookOpen className="w-3.5 h-3.5 text-[#DA2128]" />
-                  <span>พิมพ์เขียว (/dev)</span>
+                  <span>คู่มือ</span>
                 </Link>
               </div>
 
@@ -199,79 +201,79 @@ export default function RealPortalPage() {
         </main>
 
         {/* Native Smartphone App Bottom Navigation Bar (1-Thumb Navigation) */}
-        <nav className="sm:hidden fixed bottom-0 left-0 right-0 z-50 bg-white/95 backdrop-blur-xl border-t border-slate-200/90 shadow-[0_-4px_25px_rgba(0,0,0,0.08)] pb-[max(env(safe-area-inset-bottom),8px)] pt-2 print:hidden">
-          <div className="grid grid-flow-col auto-cols-fr items-center px-1">
+        <nav className="sm:hidden fixed bottom-0 left-0 right-0 z-50 bg-white/95 backdrop-blur-xl border-t border-slate-200/90 shadow-[0_-4px_25px_rgba(0,0,0,0.08)] pb-[max(env(safe-area-inset-bottom),8px)] pt-1.5 px-2 print:hidden">
+          <div className="flex items-center justify-around max-w-lg mx-auto">
             <button
               onClick={() => setActiveMainTab("shop")}
-              className={`flex flex-col items-center justify-center py-1 px-1 rounded-xl transition-all active:scale-90 ${
+              className={`flex flex-col items-center justify-center py-1 px-2 rounded-2xl transition-all active:scale-95 flex-1 ${
                 activeMainTab === "shop"
                   ? "text-[#DA2128] font-black"
-                  : "text-slate-500 hover:text-slate-800 font-medium"
+                  : "text-slate-400 hover:text-slate-700 font-medium"
               }`}
             >
-              <div className={`p-1 rounded-xl transition-all ${activeMainTab === "shop" ? "bg-red-50" : ""}`}>
+              <div className={`p-1.5 rounded-xl transition-all ${activeMainTab === "shop" ? "bg-red-50 text-[#DA2128] scale-105" : ""}`}>
                 <ShoppingBag className="w-5 h-5" />
               </div>
-              <span className="text-[10px] mt-0.5 leading-tight">ร้านเบิก</span>
+              <span className="text-[10px] mt-0.5 leading-tight font-bold">ร้านเบิก</span>
             </button>
 
             <button
               onClick={() => setActiveMainTab("my_requests")}
-              className={`flex flex-col items-center justify-center py-1 px-1 rounded-xl transition-all active:scale-90 ${
+              className={`flex flex-col items-center justify-center py-1 px-2 rounded-2xl transition-all active:scale-95 flex-1 ${
                 activeMainTab === "my_requests"
                   ? "text-[#DA2128] font-black"
-                  : "text-slate-500 hover:text-slate-800 font-medium"
+                  : "text-slate-400 hover:text-slate-700 font-medium"
               }`}
             >
-              <div className={`p-1 rounded-xl transition-all ${activeMainTab === "my_requests" ? "bg-red-50" : ""}`}>
+              <div className={`p-1.5 rounded-xl transition-all ${activeMainTab === "my_requests" ? "bg-red-50 text-[#DA2128] scale-105" : ""}`}>
                 <FileText className="w-5 h-5" />
               </div>
-              <span className="text-[10px] mt-0.5 leading-tight">ประวัติฉัน</span>
+              <span className="text-[10px] mt-0.5 leading-tight font-bold">ประวัติฉัน</span>
             </button>
 
             {canApprove && (
               <button
                 onClick={() => setActiveMainTab("approvals")}
-                className={`flex flex-col items-center justify-center py-1 px-1 rounded-xl transition-all active:scale-90 ${
+                className={`flex flex-col items-center justify-center py-1 px-2 rounded-2xl transition-all active:scale-95 flex-1 ${
                   activeMainTab === "approvals"
                     ? "text-[#DA2128] font-black"
-                    : "text-slate-500 hover:text-slate-800 font-medium"
+                    : "text-slate-400 hover:text-slate-700 font-medium"
                 }`}
               >
-                <div className={`p-1 rounded-xl transition-all ${activeMainTab === "approvals" ? "bg-red-50" : ""}`}>
+                <div className={`p-1.5 rounded-xl transition-all ${activeMainTab === "approvals" ? "bg-red-50 text-[#DA2128] scale-105" : ""}`}>
                   <ShieldCheck className="w-5 h-5" />
                 </div>
-                <span className="text-[10px] mt-0.5 leading-tight">อนุมัติ</span>
+                <span className="text-[10px] mt-0.5 leading-tight font-bold">อนุมัติ</span>
               </button>
             )}
 
             <button
               onClick={() => setActiveMainTab("assets")}
-              className={`flex flex-col items-center justify-center py-1 px-1 rounded-xl transition-all active:scale-90 ${
+              className={`flex flex-col items-center justify-center py-1 px-2 rounded-2xl transition-all active:scale-95 flex-1 ${
                 activeMainTab === "assets"
                   ? "text-[#DA2128] font-black"
-                  : "text-slate-500 hover:text-slate-800 font-medium"
+                  : "text-slate-400 hover:text-slate-700 font-medium"
               }`}
             >
-              <div className={`p-1 rounded-xl transition-all ${activeMainTab === "assets" ? "bg-red-50" : ""}`}>
+              <div className={`p-1.5 rounded-xl transition-all ${activeMainTab === "assets" ? "bg-red-50 text-[#DA2128] scale-105" : ""}`}>
                 <FileSpreadsheet className="w-5 h-5" />
               </div>
-              <span className="text-[10px] mt-0.5 leading-tight">ครุภัณฑ์</span>
+              <span className="text-[10px] mt-0.5 leading-tight font-bold">ครุภัณฑ์</span>
             </button>
 
             {canManageUsers && (
               <button
                 onClick={() => setActiveMainTab("users")}
-                className={`flex flex-col items-center justify-center py-1 px-1 rounded-xl transition-all active:scale-90 ${
+                className={`flex flex-col items-center justify-center py-1 px-2 rounded-2xl transition-all active:scale-95 flex-1 ${
                   activeMainTab === "users"
                     ? "text-[#DA2128] font-black"
-                    : "text-slate-500 hover:text-slate-800 font-medium"
+                    : "text-slate-400 hover:text-slate-700 font-medium"
                 }`}
               >
-                <div className={`p-1 rounded-xl transition-all ${activeMainTab === "users" ? "bg-red-50" : ""}`}>
+                <div className={`p-1.5 rounded-xl transition-all ${activeMainTab === "users" ? "bg-red-50 text-[#DA2128] scale-105" : ""}`}>
                   <Users className="w-5 h-5" />
                 </div>
-                <span className="text-[10px] mt-0.5 leading-tight">สิทธิ์ผู้ใช้</span>
+                <span className="text-[10px] mt-0.5 leading-tight font-bold">สิทธิ์ผู้ใช้</span>
               </button>
             )}
           </div>
