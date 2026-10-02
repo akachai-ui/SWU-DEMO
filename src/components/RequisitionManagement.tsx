@@ -276,41 +276,41 @@ export default function RequisitionManagement({
       )}
 
       {/* Main Header & Tab Navigation */}
-      <div className="bg-white rounded-2xl p-5 sm:p-6 border border-slate-200 shadow-xs space-y-5">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-          <div className="space-y-1">
+      <div className="bg-white rounded-2xl p-4 sm:p-6 border border-slate-200 shadow-xs space-y-4 sm:space-y-5">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4">
+          <div className="space-y-0.5">
             <div className="flex items-center space-x-2.5">
-              <span className="p-2.5 rounded-xl bg-red-50 text-[#DA2128]">
-                <FileText className="w-6 h-6" />
+              <span className="p-2 sm:p-2.5 rounded-xl bg-red-50 text-[#DA2128] shrink-0">
+                <FileText className="w-5 h-5 sm:w-6 sm:h-6" />
               </span>
-              <div>
-                <h1 className="text-xl sm:text-2xl font-black text-slate-900 tracking-tight">
+              <div className="min-w-0">
+                <h1 className="text-base sm:text-2xl font-black text-slate-900 tracking-tight truncate">
                   ระบบติดตามและลงนามใบขอเบิกพัสดุดิจิทัล
                 </h1>
-                <p className="text-xs text-slate-500 font-medium">
-                  ส่วนพัฒนากายภาพ มหาวิทยาลัยศรีนครินทรวิโรฒ (Paperless 100% E-Requisition)
+                <p className="text-[11px] sm:text-xs text-slate-500 font-medium truncate">
+                  ส่วนพัฒนากายภาพ มศว • Paperless 100% E-Requisition
                 </p>
               </div>
             </div>
           </div>
 
           {/* Sub Tab Switcher: My Requests vs Approver Hub */}
-          <div className="flex items-center space-x-1.5 bg-slate-100 p-1 rounded-xl border border-slate-200 text-xs font-bold">
+          <div className="grid grid-cols-2 sm:flex items-center gap-1 bg-slate-100 p-1 rounded-2xl border border-slate-200 text-xs font-bold w-full sm:w-auto">
             <button
               onClick={() => {
                 setActiveSubTab("my_requests");
                 setStatusFilter("ทั้งหมด");
               }}
-              className={`flex items-center space-x-2 px-3.5 py-2 rounded-lg transition-all cursor-pointer ${
+              className={`flex items-center justify-center space-x-1.5 py-2 px-3 rounded-xl transition-all cursor-pointer ${
                 activeSubTab === "my_requests"
-                  ? "bg-white text-[#DA2128] shadow-xs"
+                  ? "bg-white text-[#DA2128] shadow-xs font-black"
                   : "text-slate-600 hover:text-slate-900"
               }`}
             >
-              <User className="w-3.5 h-3.5" />
-              <span>ประวัติการเบิกของฉัน</span>
+              <User className="w-3.5 h-3.5 shrink-0" />
+              <span className="truncate">ประวัติการเบิก</span>
               {myPendingCount > 0 && (
-                <span className="w-5 h-5 rounded-full bg-amber-500 text-white text-[10px] flex items-center justify-center font-black">
+                <span className="min-w-[18px] h-[18px] px-1 rounded-full bg-amber-500 text-white text-[10px] flex items-center justify-center font-black shrink-0">
                   {myPendingCount}
                 </span>
               )}
@@ -322,16 +322,16 @@ export default function RequisitionManagement({
                   setActiveSubTab("approvals");
                   setStatusFilter("ทั้งหมด");
                 }}
-                className={`flex items-center space-x-2 px-3.5 py-2 rounded-lg transition-all cursor-pointer ${
+                className={`flex items-center justify-center space-x-1.5 py-2 px-3 rounded-xl transition-all cursor-pointer ${
                   activeSubTab === "approvals"
-                    ? "bg-white text-[#DA2128] shadow-xs"
+                    ? "bg-white text-[#DA2128] shadow-xs font-black"
                     : "text-slate-600 hover:text-slate-900"
                 }`}
               >
-                <ShieldCheck className="w-3.5 h-3.5" />
-                <span>ศูนย์อนุมัติและจ่ายพัสดุ</span>
+                <ShieldCheck className="w-3.5 h-3.5 shrink-0" />
+                <span className="truncate">ศูนย์อนุมัติ</span>
                 {pendingCount > 0 && (
-                  <span className="w-5 h-5 rounded-full bg-[#DA2128] text-white text-[10px] flex items-center justify-center font-black animate-pulse">
+                  <span className="min-w-[18px] h-[18px] px-1 rounded-full bg-[#DA2128] text-white text-[10px] flex items-center justify-center font-black animate-pulse shrink-0">
                     {pendingCount}
                   </span>
                 )}
@@ -341,29 +341,29 @@ export default function RequisitionManagement({
         </div>
 
         {/* Filter & Search Bar */}
-        <div className="grid grid-cols-1 sm:grid-cols-12 gap-3 pt-2 border-t border-slate-100">
+        <div className="grid grid-cols-1 sm:grid-cols-12 gap-2.5 sm:gap-3 pt-2 border-t border-slate-100">
           {/* Search */}
           <div className="sm:col-span-7 relative">
             <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
             <input
               type="text"
-              placeholder={activeSubTab === "my_requests" ? "ค้นหาเลขที่ใบเบิก, ชื่อวัสดุ..." : "ค้นหาเลขที่ใบเบิก, ชื่อผู้ขอเบิก, ส่วนงาน, รายการพัสดุ..."}
+              placeholder={activeSubTab === "my_requests" ? "ค้นหาเลขที่ใบเบิก, ชื่อวัสดุ..." : "ค้นหาเลขที่ใบเบิก, ชื่อผู้ขอ, รายการพัสดุ..."}
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full pl-10 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs sm:text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none focus:border-[#DA2128]"
+              className="w-full pl-10 pr-4 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs sm:text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none focus:border-[#DA2128] focus:bg-white"
             />
           </div>
 
-        {/* Status Filter Buttons */}
-          <div className="sm:col-span-5 flex items-center space-x-1 overflow-x-auto pb-1 sm:pb-0 scrollbar-none text-xs font-semibold">
+          {/* Status Filter Buttons */}
+          <div className="sm:col-span-5 flex items-center space-x-1.5 overflow-x-auto pb-1 sm:pb-0 scrollbar-none text-xs font-semibold">
             {["ทั้งหมด", "รออนุมัติ", "อนุมัติแล้ว", "จ่ายพัสดุแล้ว", "ปฏิเสธ"].map((st) => (
               <button
                 key={st}
                 onClick={() => setStatusFilter(st)}
-                className={`px-3 py-2 rounded-xl transition-all whitespace-nowrap cursor-pointer flex items-center space-x-1.5 ${
+                className={`px-3 py-1.5 rounded-full transition-all whitespace-nowrap cursor-pointer flex items-center space-x-1 shrink-0 ${
                   statusFilter === st
                     ? "bg-slate-900 text-white shadow-xs font-bold"
-                    : "bg-slate-50 text-slate-600 hover:bg-slate-100 border border-slate-200"
+                    : "bg-slate-100 text-slate-600 hover:bg-slate-200 border border-slate-200/80"
                 }`}
               >
                 <span>{st}</span>
@@ -380,7 +380,7 @@ export default function RequisitionManagement({
 
       {/* Urgent Pending Approval Notification Banner for Approvers */}
       {activeSubTab === "approvals" && pendingCount > 0 && (
-        <div className="p-4 bg-gradient-to-r from-amber-50 via-red-50/50 to-orange-50 border border-amber-200 rounded-2xl flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 shadow-xs animate-fadeIn">
+        <div className="p-3.5 sm:p-4 bg-gradient-to-r from-amber-50 via-red-50/50 to-orange-50 border border-amber-200 rounded-2xl flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 shadow-xs animate-fadeIn">
           <div className="flex items-center space-x-3">
             <div className="w-9 h-9 rounded-xl bg-amber-500 text-white flex items-center justify-center text-base shrink-0 shadow-xs animate-pulse">
               🔔
@@ -400,7 +400,7 @@ export default function RequisitionManagement({
           {statusFilter !== "รออนุมัติ" && (
             <button
               onClick={() => setStatusFilter("รออนุมัติ")}
-              className="px-3.5 py-2 bg-[#DA2128] hover:bg-[#B81B22] text-white text-xs font-bold rounded-xl shadow-xs transition-all flex items-center space-x-1.5 shrink-0 active:scale-95 cursor-pointer"
+              className="w-full sm:w-auto px-3.5 py-2 bg-[#DA2128] hover:bg-[#B81B22] text-white text-xs font-bold rounded-xl shadow-xs transition-all flex items-center justify-center space-x-1.5 shrink-0 active:scale-95 cursor-pointer"
             >
               <span>กรองเฉพาะรายการรออนุมัติ ({pendingCount})</span>
             </button>
@@ -431,26 +431,26 @@ export default function RequisitionManagement({
           {displayedOrders.map((order) => (
             <div
               key={order.id || order.reqNo}
-              className={`bg-white border rounded-2xl p-4 sm:p-5 transition-all shadow-xs space-y-3 ${
+              className={`bg-white border rounded-2xl p-3.5 sm:p-5 transition-all shadow-xs space-y-3 ${
                 order.status === "รออนุมัติ"
                   ? "border-amber-300 ring-1 ring-amber-200/50 hover:border-amber-400"
                   : "border-slate-200 hover:border-slate-300"
               }`}
             >
               {/* Row 1: Header (ReqNo, Status, Signature Progress, Date) */}
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-slate-100 pb-3">
-                <div className="flex flex-wrap items-center gap-2">
-                  <span className="font-mono text-xs sm:text-sm font-black text-[#DA2128] bg-red-50 border border-red-200/80 px-2.5 py-1 rounded-lg">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-slate-100 pb-2.5">
+                <div className="flex flex-wrap items-center gap-1.5">
+                  <span className="font-mono text-xs font-black text-[#DA2128] bg-red-50 border border-red-200/80 px-2 py-0.5 rounded-lg">
                     {order.reqNo}
                   </span>
                   {renderStatusBadge(order.status)}
                   {renderSignatureProgressBadge(order)}
                 </div>
 
-                <div className="flex items-center space-x-3 text-xs text-slate-400 font-medium">
+                <div className="flex items-center space-x-2 text-[11px] sm:text-xs text-slate-400 font-medium">
                   {order.createdAt && (
                     <span className="flex items-center space-x-1">
-                      <Calendar className="w-3.5 h-3.5" />
+                      <Calendar className="w-3 h-3 text-slate-400" />
                       <span>
                         {order.createdAt.seconds
                           ? new Date(order.createdAt.seconds * 1000).toLocaleDateString("th-TH", {
@@ -468,64 +468,64 @@ export default function RequisitionManagement({
               </div>
 
               {/* Row 2: Requester Info & Purpose */}
-              <div className="grid grid-cols-1 sm:grid-cols-12 gap-3 text-xs">
-                <div className="sm:col-span-4 space-y-1">
+              <div className="grid grid-cols-1 sm:grid-cols-12 gap-2.5 text-xs">
+                <div className="sm:col-span-4 space-y-0.5">
                   <div className="flex items-center space-x-1.5 text-slate-900 font-bold">
-                    <User className="w-3.5 h-3.5 text-slate-400" />
-                    <span>{order.requesterName}</span>
+                    <User className="w-3.5 h-3.5 text-slate-400 shrink-0" />
+                    <span className="truncate">{order.requesterName}</span>
                   </div>
-                  <div className="flex items-center space-x-1.5 text-slate-500">
-                    <Building className="w-3.5 h-3.5 text-slate-400" />
+                  <div className="flex items-center space-x-1.5 text-slate-500 text-[11px]">
+                    <Building className="w-3.5 h-3.5 text-slate-400 shrink-0" />
                     <span className="truncate">{order.department}</span>
                   </div>
                 </div>
 
-                <div className="sm:col-span-5 space-y-1">
-                  <p className="text-slate-500 font-medium">วัตถุประสงค์การใช้งาน:</p>
-                  <p className="text-slate-800 line-clamp-2">{order.purpose || "-"}</p>
+                <div className="sm:col-span-5 space-y-0.5">
+                  <span className="text-slate-400 text-[11px] font-medium">วัตถุประสงค์:</span>
+                  <p className="text-slate-800 line-clamp-1 font-medium">{order.purpose || "เพื่อใช้ในการปฏิบัติงาน"}</p>
                 </div>
 
-                <div className="sm:col-span-3 text-left sm:text-right space-y-1">
-                  <p className="text-slate-500 font-medium">ยอดรวม {order.totalItems} ชิ้น ({order.items.length} รายการ)</p>
-                  <p className="text-sm font-black text-[#DA2128]">
+                <div className="sm:col-span-3 flex sm:flex-col justify-between sm:items-end items-center bg-slate-50 sm:bg-transparent p-2 sm:p-0 rounded-xl">
+                  <span className="text-slate-500 text-[11px] font-medium">ยอดรวม {order.totalItems} ชิ้น ({order.items.length} รายการ)</span>
+                  <span className="text-sm font-black text-[#DA2128]">
                     ฿{(order.totalAmount || 0).toLocaleString()} บาท
-                  </p>
+                  </span>
                 </div>
               </div>
 
               {/* Row 3: Items Mini-Previews & Action Buttons */}
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pt-3 border-t border-slate-100">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 pt-2.5 border-t border-slate-100">
                 {/* Items preview pills */}
-                <div className="flex items-center space-x-2 overflow-x-auto pb-1 sm:pb-0">
+                <div className="flex items-center space-x-1.5 overflow-x-auto pb-1 sm:pb-0 scrollbar-none">
                   {order.items.slice(0, 3).map((item, idx) => (
                     <div
                       key={idx}
-                      className="flex items-center space-x-1.5 bg-slate-50 border border-slate-200 px-2.5 py-1 rounded-xl text-[11px] text-slate-700 whitespace-nowrap"
+                      className="flex items-center space-x-1.5 bg-slate-50 border border-slate-200 px-2 py-0.5 rounded-lg text-[11px] text-slate-700 whitespace-nowrap shrink-0"
                     >
                       {item.imageUrl && (
                         /* eslint-disable-next-line @next/next/no-img-element */
-                        <img src={item.imageUrl} alt="" className="w-4 h-4 rounded-md object-cover" />
+                        <img src={item.imageUrl} alt="" className="w-3.5 h-3.5 rounded object-cover" />
                       )}
-                      <span className="font-medium truncate max-w-[120px]">{item.name}</span>
+                      <span className="font-medium truncate max-w-[110px]">{item.name}</span>
                       <span className="font-bold text-[#DA2128]">x{item.quantity}</span>
                     </div>
                   ))}
                   {order.items.length > 3 && (
-                    <span className="text-[10px] text-slate-400 font-bold px-1">
+                    <span className="text-[10px] text-slate-400 font-bold px-1 shrink-0">
                       +{order.items.length - 3} รายการ
                     </span>
                   )}
                 </div>
 
                 {/* Actions */}
-                <div className="flex items-center space-x-2 shrink-0">
+                <div className="flex flex-wrap sm:flex-nowrap items-center gap-2 shrink-0">
                   {/* Master Digital Voucher & Signature Button */}
                   <button
                     onClick={() => {
                       setSelectedOrder(order);
                       setIsDigitalDocModalOpen(true);
                     }}
-                    className="px-3.5 py-1.5 rounded-xl bg-slate-900 hover:bg-black text-white text-xs font-bold flex items-center space-x-1.5 transition-colors cursor-pointer shadow-xs"
+                    className="w-full sm:w-auto px-3.5 py-2 rounded-xl bg-slate-900 hover:bg-black text-white text-xs font-bold flex items-center justify-center space-x-1.5 transition-colors cursor-pointer shadow-xs active:scale-95"
                   >
                     <PenTool className="w-3.5 h-3.5 text-amber-400" />
                     <span>เปิดใบขอเบิกและลงนามดิจิทัล</span>
@@ -533,11 +533,11 @@ export default function RequisitionManagement({
 
                   {/* Quick Approver Actions */}
                   {canApprove && activeSubTab === "approvals" && order.status === "รออนุมัติ" && (
-                    <>
+                    <div className="flex items-center space-x-1.5 w-full sm:w-auto">
                       <button
                         onClick={() => handleQuickApprove(order)}
                         disabled={isProcessing}
-                        className="px-3.5 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 active:bg-emerald-800 text-white text-xs font-bold flex items-center space-x-1 shadow-xs transition-colors cursor-pointer"
+                        className="flex-1 sm:flex-initial px-3.5 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 active:bg-emerald-800 text-white text-xs font-bold flex items-center justify-center space-x-1 shadow-xs transition-colors cursor-pointer"
                         title="ลงนามอนุมัติดิจิทัลทันที"
                       >
                         <Check className="w-3.5 h-3.5" />
@@ -547,19 +547,19 @@ export default function RequisitionManagement({
                       <button
                         onClick={() => handleOpenRejectModal(order)}
                         disabled={isProcessing}
-                        className="px-3 py-1.5 rounded-xl bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 text-xs font-bold flex items-center space-x-1 transition-colors cursor-pointer"
+                        className="flex-1 sm:flex-initial px-3.5 py-2 rounded-xl bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 text-xs font-bold flex items-center justify-center space-x-1 transition-colors cursor-pointer"
                       >
                         <X className="w-3.5 h-3.5" />
                         <span>ปฏิเสธ</span>
                       </button>
-                    </>
+                    </div>
                   )}
 
                   {canApprove && activeSubTab === "approvals" && order.status === "อนุมัติแล้ว" && (
                     <button
                       onClick={() => handleQuickDispense(order)}
                       disabled={isProcessing}
-                      className="px-3.5 py-1.5 rounded-xl bg-[#DA2128] hover:bg-[#B81B22] text-white text-xs font-bold flex items-center space-x-1 shadow-xs transition-colors cursor-pointer"
+                      className="w-full sm:w-auto px-3.5 py-2 rounded-xl bg-[#DA2128] hover:bg-[#B81B22] text-white text-xs font-bold flex items-center justify-center space-x-1 shadow-xs transition-colors cursor-pointer"
                     >
                       <PackageCheck className="w-3.5 h-3.5" />
                       <span>ลงนามจ่ายพัสดุ</span>
