@@ -292,7 +292,7 @@ export default function RealPortalPage() {
 
   return (
     <ProtectedRoute>
-      <div className="min-h-dvh bg-white text-slate-800 flex flex-col justify-between selection:bg-[#DA2128] selection:text-white font-sans relative">
+      <div className="min-h-dvh bg-transparent text-slate-800 flex flex-col justify-between selection:bg-[#DA2128] selection:text-white font-sans relative">
         {/* Top Accent Gradient Bar */}
         <div className="h-1.5 w-full bg-gradient-to-r from-[#DA2128] via-[#FF3B44] to-[#DA2128] sticky top-0 z-50"></div>
 

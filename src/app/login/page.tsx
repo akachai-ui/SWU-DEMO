@@ -82,7 +82,7 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-dvh bg-white text-slate-800 flex flex-col justify-between selection:bg-[#DA2128] selection:text-white font-sans relative">
+    <div className="min-h-dvh bg-transparent text-slate-800 flex flex-col justify-between selection:bg-[#DA2128] selection:text-white font-sans relative">
       {/* Top Accent Line */}
       <div className="h-1.5 w-full bg-gradient-to-r from-[#DA2128] via-[#FF3B44] to-[#DA2128] relative z-20"></div>
 
