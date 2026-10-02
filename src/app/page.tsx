@@ -111,37 +111,68 @@ export default function RealPortalPage() {
     }
   };
 
-  // Play Thai Speech Voice + Chime
+  // Fallback Web Speech API
+  const speakWithSynthesis = (text: string) => {
+    if (typeof window === "undefined" || !("speechSynthesis" in window)) return;
+    try {
+      window.speechSynthesis.cancel();
+      window.speechSynthesis.resume();
+
+      const utterance = new SpeechSynthesisUtterance(text);
+      utterance.lang = "th-TH";
+      utterance.rate = 1.0;
+      utterance.pitch = 1.0;
+      utterance.volume = 1.0;
+
+      const allVoices = window.speechSynthesis.getVoices();
+      const thaiVoice = allVoices.find((v) => v.lang === "th-TH" || v.lang.replace("_", "-").toLowerCase().startsWith("th"));
+      if (thaiVoice) {
+        utterance.voice = thaiVoice;
+      }
+
+      utterance.onerror = (e) => {
+        console.warn("Speech synthesis utterance error:", e);
+      };
+
+      window.speechSynthesis.speak(utterance);
+    } catch (err) {
+      console.warn("Speech synthesis error:", err);
+    }
+  };
+
+  // Play Natural Thai Voice Alert + Chime
   const playVoiceAndChimeAlert = (order?: Partial<RequisitionOrder>) => {
     playNotificationChime();
 
-    if (typeof window !== "undefined" && "speechSynthesis" in window) {
-      try {
-        window.speechSynthesis.resume();
+    const requester = order?.requesterName ? `จากคุณ ${order.requesterName}` : "";
+    const messageText = `มีคำขอเบิกพัสดุใหม่ ${requester} รอการอนุมัติค่ะ`;
 
-        const requester = order?.requesterName ? `จากคุณ ${order.requesterName}` : "";
-        const messageText = `มีคำขอเบิกพัสดุใหม่ ${requester} รอการอนุมัติค่ะ`;
-        const utterance = new SpeechSynthesisUtterance(messageText);
-        utterance.lang = "th-TH";
-        utterance.rate = 1.0;
-        utterance.pitch = 1.0;
-        utterance.volume = 1.0;
+    if (typeof window === "undefined") return;
 
-        const allVoices = window.speechSynthesis.getVoices();
-        const thaiVoice = allVoices.find((v) => v.lang === "th-TH" || v.lang.replace("_", "-").toLowerCase().startsWith("th"));
-        if (thaiVoice) {
-          utterance.voice = thaiVoice;
-        }
+    let hasFallbackRun = false;
+    const runFallback = () => {
+      if (hasFallbackRun) return;
+      hasFallbackRun = true;
+      speakWithSynthesis(messageText);
+    };
 
-        utterance.onerror = (e) => {
-          console.warn("Speech synthesis utterance error:", e);
-        };
+    try {
+      const audioUrl = `https://translate.google.com/translate_tts?ie=UTF-8&q=${encodeURIComponent(messageText)}&tl=th&client=tw-ob`;
+      const audio = new Audio(audioUrl);
+      audio.volume = 1.0;
 
-        window.speechSynthesis.resume();
-        window.speechSynthesis.speak(utterance);
-      } catch (err) {
-        console.warn("Speech synthesis error:", err);
+      audio.onerror = () => {
+        runFallback();
+      };
+
+      const playPromise = audio.play();
+      if (playPromise !== undefined) {
+        playPromise.catch(() => {
+          runFallback();
+        });
       }
+    } catch (e) {
+      runFallback();
     }
   };
 
