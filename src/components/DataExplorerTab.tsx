@@ -92,7 +92,7 @@ export default function DataExplorerTab() {
       key: "ALL",
       name: "ภาพรวมทั้งส่วนพัฒนากายภาพ",
       count: stats.totalCount || 12396,
-      valMillion: (stats.totalValuation / 1000000) || 3064.08,
+      valMillion: Number(((stats.totalValuation || 3064083172.71) / 1000000).toFixed(1)),
       icon: "🏢",
       fileSource: "assets_swu_67.csv (ฐานข้อมูลรวมทั้งสิ้น 12,396 รายการ)"
     },
@@ -100,7 +100,7 @@ export default function DataExplorerTab() {
       key: "ENV",
       name: "งานกายภาพและสิ่งแวดล้อม",
       count: stats.divisions.find(d => d.key === "ENV")?.count || 8205,
-      valMillion: stats.divisions.find(d => d.key === "ENV")?.valMillion || 520.4,
+      valMillion: Number((stats.divisions.find(d => d.key === "ENV")?.valMillion || 520.4).toFixed(1)),
       icon: "🌿",
       fileSource: "assets_physical_env_67.csv"
     },
@@ -108,7 +108,7 @@ export default function DataExplorerTab() {
       key: "MAINT",
       name: "งานพัฒนาและบำรุงรักษา",
       count: stats.divisions.find(d => d.key === "MAINT")?.count || 3380,
-      valMillion: stats.divisions.find(d => d.key === "MAINT")?.valMillion || 642.3,
+      valMillion: Number((stats.divisions.find(d => d.key === "MAINT")?.valMillion || 642.3).toFixed(1)),
       icon: "🔧",
       fileSource: "assets_dev_maintenance_67.csv"
     },
@@ -116,7 +116,7 @@ export default function DataExplorerTab() {
       key: "CENTRAL",
       name: "ทรัพย์สินส่วนกลาง & ที่ดิน-อาคาร",
       count: stats.divisions.find(d => d.key === "CENTRAL")?.count || 811,
-      valMillion: stats.divisions.find(d => d.key === "CENTRAL")?.valMillion || 1901.38,
+      valMillion: Number((stats.divisions.find(d => d.key === "CENTRAL")?.valMillion || 1901.38).toFixed(1)),
       icon: "🏛️",
       fileSource: "ที่ดิน อาคาร และสิ่งปลูกสร้างหลักส่วนกลาง"
     }
@@ -128,7 +128,7 @@ export default function DataExplorerTab() {
       key: "ALL",
       name: "ทุกหมวดครุภัณฑ์",
       count: stats.totalCount || 12396,
-      valMillion: (stats.totalValuation / 1000000) || 3064.08,
+      valMillion: Number(((stats.totalValuation || 3064083172.71) / 1000000).toFixed(1)),
       icon: <Layers className="w-4 h-4" />,
       matchCategories: []
     },
@@ -136,7 +136,7 @@ export default function DataExplorerTab() {
       key: "BUILDINGS",
       name: "ที่ดิน อาคาร & สิ่งก่อสร้าง",
       count: 42,
-      valMillion: 2848.82,
+      valMillion: 2848.8,
       icon: <Building className="w-4 h-4 text-[#FF4D55]" />,
       matchCategories: ["อาคารและสิ่งปลูกสร้าง", "ที่ดิน", "สิ่งก่อสร้าง"]
     },
@@ -506,14 +506,14 @@ export default function DataExplorerTab() {
                     : "glass-pill text-slate-700 hover:bg-white/90 border-slate-200/80"
                 }`}
               >
-                <div className="flex items-center justify-between">
-                  <span className={isSelected ? "text-white" : "text-[#DA2128]"}>{grp.icon}</span>
-                  <span className={`text-[10px] font-bold ${isSelected ? "text-white" : "text-slate-500"}`}>
-                    ฿{grp.valMillion}M
+                <div className="flex items-center justify-between gap-1 min-w-0">
+                  <span className={`shrink-0 ${isSelected ? "text-white" : "text-[#DA2128]"}`}>{grp.icon}</span>
+                  <span className={`text-[10px] font-bold truncate ${isSelected ? "text-white" : "text-slate-500"}`}>
+                    ฿{typeof grp.valMillion === "number" ? grp.valMillion.toLocaleString(undefined, { maximumFractionDigits: 1 }) : grp.valMillion}M
                   </span>
                 </div>
-                <p className="text-xs font-bold line-clamp-1">{grp.name}</p>
-                <p className={`text-[10px] ${isSelected ? "text-red-100" : "text-slate-400"}`}>
+                <p className="text-xs font-bold truncate">{grp.name}</p>
+                <p className={`text-[10px] truncate ${isSelected ? "text-red-100" : "text-slate-400"}`}>
                   {grp.count.toLocaleString()} รายการ
                 </p>
               </button>
