@@ -157,17 +157,19 @@ export default function RealPortalPage() {
     };
 
     try {
-      const audioUrl = `https://translate.google.com/translate_tts?ie=UTF-8&q=${encodeURIComponent(messageText)}&tl=th&client=tw-ob`;
+      const audioUrl = `/api/tts?text=${encodeURIComponent(messageText)}&t=${Date.now()}`;
       const audio = new Audio(audioUrl);
       audio.volume = 1.0;
 
-      audio.onerror = () => {
+      audio.onerror = (e) => {
+        console.warn("TTS audio error:", e);
         runFallback();
       };
 
       const playPromise = audio.play();
       if (playPromise !== undefined) {
-        playPromise.catch(() => {
+        playPromise.catch((err) => {
+          console.warn("TTS audio play prevented or failed:", err);
           runFallback();
         });
       }
