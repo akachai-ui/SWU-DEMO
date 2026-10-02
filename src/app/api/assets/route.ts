@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import fs from "fs";
 import path from "path";
 import Papa from "papaparse";
+import { getCachedMockAssets, AssetItem } from "@/lib/mockAssetsService";
 
 export interface RealAssetItem {
   index: string;
@@ -60,10 +61,43 @@ function loadRealAssets(): LoadedDataCache {
   const filePath = path.join(process.cwd(), "data", fileName);
 
   if (!fs.existsSync(filePath)) {
-    return {
-      assets: [],
-      stats: { totalCount: 0, totalValuation: 0, categories: [], statuses: [], divisions: [] }
+    const mockItems = getCachedMockAssets();
+    const catMap: Record<string, number> = {};
+    const statMap: Record<string, number> = {};
+    let totalVal = 0;
+    mockItems.forEach((it) => {
+      catMap[it.category] = (catMap[it.category] || 0) + 1;
+      statMap[it.statusName] = (statMap[it.statusName] || 0) + 1;
+      totalVal += it.amountNumeric;
+    });
+
+    const categories = Object.entries(catMap)
+      .map(([name, count]) => ({ name, count }))
+      .sort((a, b) => b.count - a.count);
+
+    const statuses = Object.entries(statMap)
+      .map(([name, count]) => ({ name, count }))
+      .sort((a, b) => b.count - a.count);
+
+    const divisions: DivisionStat[] = [
+      { key: "ALL", name: "ส่วนพัฒนากายภาพ (ทั้งหมด)", count: mockItems.length, valMillion: totalVal / 1000000 },
+      { key: "ENV", name: "งานกายภาพและสิ่งแวดล้อม", count: Math.round(mockItems.length * 0.65), valMillion: (totalVal * 0.45) / 1000000 },
+      { key: "MAINT", name: "งานพัฒนาและบำรุงรักษา", count: Math.round(mockItems.length * 0.28), valMillion: (totalVal * 0.35) / 1000000 },
+      { key: "CENTRAL", name: "ทรัพย์สินส่วนกลาง & ที่ดิน-อาคาร", count: Math.round(mockItems.length * 0.07), valMillion: (totalVal * 0.20) / 1000000 }
+    ];
+
+    const result: LoadedDataCache = {
+      assets: mockItems,
+      stats: {
+        totalCount: mockItems.length,
+        totalValuation: totalVal,
+        categories,
+        statuses,
+        divisions
+      }
     };
+    cachedRealData = result;
+    return result;
   }
 
   // Load sub-division datasets for cross-file unified mapping

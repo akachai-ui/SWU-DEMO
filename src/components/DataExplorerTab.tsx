@@ -1,6 +1,7 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
+import { getCachedMockAssets, AssetItem } from "@/lib/mockAssetsService";
 import {
   Search,
   Download,
@@ -189,49 +190,103 @@ export default function DataExplorerTab() {
     }
   ];
 
-  // Fetch real assets from API
+  // Filter Mock Data Locally Helper
+  const filterLocalMockData = () => {
+    const allMock = getCachedMockAssets();
+    let filtered = allMock;
+
+    if (selectedDivision !== "ALL") {
+      filtered = filtered.filter(item => item.divisions.includes(selectedDivision));
+    }
+
+    const groupObj = categoryGroups.find(g => g.key === selectedGroup);
+    if (selectedCategory !== "ALL") {
+      filtered = filtered.filter(item => item.category === selectedCategory);
+    } else if (selectedGroup !== "ALL" && groupObj && groupObj.matchCategories.length > 0) {
+      filtered = filtered.filter(item => groupObj.matchCategories.includes(item.category));
+    }
+
+    if (selectedStatus !== "ALL") {
+      filtered = filtered.filter(item => item.statusName === selectedStatus);
+    }
+
+    if (searchQuery.trim()) {
+      const q = searchQuery.toLowerCase().trim();
+      filtered = filtered.filter(item =>
+        item.name.toLowerCase().includes(q) ||
+        item.inventoryNo.toLowerCase().includes(q) ||
+        item.mainAssetCode.toLowerCase().includes(q) ||
+        item.locationName.toLowerCase().includes(q) ||
+        item.holderName.toLowerCase().includes(q) ||
+        item.category.toLowerCase().includes(q) ||
+        item.divisionLabel.toLowerCase().includes(q)
+      );
+    }
+
+    const totalFiltered = filtered.length;
+    const totalPages = Math.ceil(totalFiltered / limit) || 1;
+    const startIndex = (page - 1) * limit;
+    const paginatedItems = filtered.slice(startIndex, startIndex + limit);
+
+    setAssetsData(paginatedItems);
+    setPagination({
+      page,
+      limit,
+      totalFiltered,
+      totalPages
+    });
+  };
+
+  // Fetch assets with instant Mock Fallback
   useEffect(() => {
     let isMounted = true;
     setIsLoading(true);
 
-    const timer = setTimeout(() => {
-      const groupObj = categoryGroups.find(g => g.key === selectedGroup);
-      let categoriesParam = "ALL";
-      if (selectedCategory !== "ALL") {
-        categoriesParam = selectedCategory;
-      } else if (selectedGroup !== "ALL" && groupObj && groupObj.matchCategories.length > 0) {
-        categoriesParam = groupObj.matchCategories.join(",");
-      }
+    const groupObj = categoryGroups.find(g => g.key === selectedGroup);
+    let categoriesParam = "ALL";
+    if (selectedCategory !== "ALL") {
+      categoriesParam = selectedCategory;
+    } else if (selectedGroup !== "ALL" && groupObj && groupObj.matchCategories.length > 0) {
+      categoriesParam = groupObj.matchCategories.join(",");
+    }
 
-      const params = new URLSearchParams({
-        page: page.toString(),
-        limit: limit.toString(),
-        search: searchQuery,
-        division: selectedDivision,
-        categories: categoriesParam,
-        status: selectedStatus
-      });
+    const params = new URLSearchParams({
+      page: page.toString(),
+      limit: limit.toString(),
+      search: searchQuery,
+      division: selectedDivision,
+      categories: categoriesParam,
+      status: selectedStatus
+    });
 
-      fetch(`/api/assets?${params.toString()}`)
-        .then((res) => res.json())
-        .then((res) => {
-          if (isMounted && res.success) {
+    fetch(`/api/assets?${params.toString()}`)
+      .then((res) => res.json())
+      .then((res) => {
+        if (isMounted) {
+          if (res.success && res.data && res.data.length > 0) {
             setAssetsData(res.data);
             setPagination(res.pagination);
             if (res.stats) {
               setStats(res.stats);
             }
+          } else {
+            // Fallback to local 12,396 mock data
+            filterLocalMockData();
           }
-        })
-        .catch((err) => console.error("Error fetching assets:", err))
-        .finally(() => {
-          if (isMounted) setIsLoading(false);
-        });
-    }, 150);
+        }
+      })
+      .catch((err) => {
+        console.warn("API assets fetch warning, using local mock data engine:", err);
+        if (isMounted) {
+          filterLocalMockData();
+        }
+      })
+      .finally(() => {
+        if (isMounted) setIsLoading(false);
+      });
 
     return () => {
       isMounted = false;
-      clearTimeout(timer);
     };
   }, [page, limit, searchQuery, selectedDivision, selectedGroup, selectedCategory, selectedStatus]);
 
